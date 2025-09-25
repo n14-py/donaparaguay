@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dona Paraguay - Plataforma de Crowdfunding para Causas Solidarias</title>
+    <meta name="description" content="Encuentra y apoya causas benéficas en Paraguay. Dona a campañas de salud, educación, animales y proyectos comunitarios. Tu ayuda hace la diferencia.">
+    <link rel="icon" href="/img/logo_dona_paraguay.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="hero-section">
+        <h1>Tu Donación, Su Esperanza</h1>
+        <p>Encuentra y apoya causas que transforman vidas en todo Paraguay.</p>
+        <div class="search-filter-container">
+    <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <form action="/campaigns" method="GET">
+            <input type="text" name="q" id="search-input" class="form-control" placeholder="Buscar una campaña..." value="<%= query.q || '' %>">
+        </form>
+    </div>
+    <button id="filter-toggle-btn" class="btn btn-secondary">
+        <i class="fas fa-filter"></i>
+        Filtros
+    </button>
+</div>
+
+<div class="filter-bar" id="filter-bar">
+    <form action="/campaigns" method="GET" id="filter-form">
+         <div class="filter-group">
+            <label for="category">Categoría</label>
+            <select name="category" id="category" class="form-control">
+                <option value="">Todas</option>
+                <% CATEGORIES.forEach(cat => { %>
+                    <option value="<%= cat %>" <%= (query.category === cat) ? 'selected' : '' %>><%= cat %></option>
+                <% }); %>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="location">Ubicación</label>
+            <select name="location" id="location" class="form-control">
+                <option value="">Todas</option>
+                <% CITIES.forEach(city => { %>
+                    <option value="<%= city %>" <%= (query.location === city) ? 'selected' : '' %>><%= city %></option>
+                <% }); %>
+            </select>
+        </div>
+         <a href="/campaigns" class="btn btn-secondary">Limpiar Filtros</a>
+    </form>
+</div>
+
+    <div class="post-grid">
+        <% if (results && results.length > 0) { %>
+            <% results.forEach(campaign => { %>
+                <%- include('partials/campaign-card.html', { campaign: campaign }) %>
+            <% }); %>
+        <% } else { %>
+            <div class="no-results-card">
+                <h3>No se encontraron campañas</h3>
+                <p>Prueba con otros filtros de búsqueda o explora todas las causas.</p>
+            </div>
+        <% } %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+        <nav class="pagination-container">
+            <ul class="pagination">
+                <% const urlParams = new URLSearchParams(query); %>
+                <% if (currentPage > 1) { %>
+                    <% urlParams.set('page', currentPage - 1); %>
+                    <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Anterior</a></li>
+                <% } %>
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <% urlParams.set('page', i); %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><%= i %></a></li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <% urlParams.set('page', currentPage + 1); %>
+                    <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Siguiente</a></li>
+                <% } %>
+            </ul>
+        </nav>
+    <% } %>
+</main>
+
+<% if (currentUser && currentUser.isVerified) { %>
+    <a href="/new-campaign" class="site-fab" title="Crear Campaña"><i class="fas fa-plus"></i></a>
+<% } else if (currentUser) { %>
+    <a href="/verify-account" class="site-fab" title="Verifica tu cuenta para crear una campaña"><i class="fas fa-plus"></i></a>
+<% } %>
+
+<%- include('partials/sponsors.html') %>
+
+<%- include('partials/footer.html') %>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ESTE ES EL NUEVO CÓDIGO PARA LOS FILTROS
+    const filterToggleButton = document.getElementById('filter-toggle-btn');
+    const filterBar = document.getElementById('filter-bar');
+
+    if (filterToggleButton && filterBar) {
+        filterToggleButton.addEventListener('click', () => {
+            filterBar.classList.toggle('active');
+        });
+    }
+
+    // Este es el código que ya tenías, lo mantenemos
+    const filterForm = document.getElementById('filter-form');
+    if(filterForm) {
+        filterForm.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                filterForm.submit();
+            });
+        });
+    }
+});
+</script>
+
+</body>
+</html>

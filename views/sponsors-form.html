@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conviértete en Patrocinador - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="form-container" style="max-width: 700px;">
+        <h2><i class="fas fa-hands-helping"></i> Conviértete en Patrocinador Pionero</h2>
+        <p>Únete al grupo exclusivo de empresas pioneras que impulsan el cambio en Paraguay desde el inicio. Tu logo aparecerá en nuestra página principal y en cada campaña.</p>
+        <hr>
+
+        <% if (locals.success) { %><div class="alert alert-success"><%= success %></div><% } %>
+        <% if (locals.error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+        <% if (slotsAvailable) { %>
+            <div class="alert alert-success" style="text-align: center;">
+                <strong>¡Quedan <%= availableSlots %> de <%= totalSlots %> espacios para pioneros!</strong>
+            </div>
+
+            <form action="/sponsors/apply" method="POST" enctype="multipart/form-data" id="sponsor-form">
+                <div class="form-group">
+                    <label for="companyName">Nombre de la Empresa</label>
+                    <input type="text" id="companyName" name="companyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyWebsite">Sitio Web (URL)</label>
+                    <input type="url" id="companyWebsite" name="companyWebsite" class="form-control" required placeholder="https://www.tuempresa.com">
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Email de Contacto</label>
+                    <input type="email" id="contactEmail" name="contactEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyLogo">Logo de la Empresa (PNG transparente preferiblemente)</label>
+                    <input type="file" id="companyLogo" name="companyLogo" class="form-control" accept="image/png, image/jpeg" required>
+                </div>
+                <hr>
+
+                <div class="alert alert-info" style="text-align: left; font-size: 0.95rem;">
+                    <h4 style="text-align: center; margin-bottom: 1rem;">Una Oportunidad Única</h4>
+                    <p><strong>Transparencia: ¿Para qué usamos tu aporte?</strong><br>
+                    Tu patrocinio es vital para que Dona Paraguay siga funcionando y ayudando. Los fondos se invierten directamente en:</p>
+                    <ul style="padding-left: 20px; margin-top: 0.5rem; margin-bottom: 1rem;">
+                        <li><strong>Costos de Servidor y Mantenimiento:</strong> Para que la web esté siempre online, rápida y segura.</li>
+                        <li><strong>Equipo Administrativo:</strong> Para pagar al personal que revisa y aprueba cada donación y solicitud.</li>
+                        <li><strong>Mejoras en la Plataforma:</strong> Para seguir desarrollando nuevas herramientas para todos.</li>
+                    </ul>
+                    <p><strong>Una Tarifa de Lanzamiento Exclusiva</strong><br>
+                    El precio actual es una tarifa especial de lanzamiento. Este costo podría aumentar en el futuro para nuevos patrocinadores. Al elegir el plan anual, no solo obtienes un descuento, sino que <strong>congelas este precio especial</strong> durante todo el año.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sponsorshipMonths">Selecciona la duración del patrocinio</label>
+                    <select id="sponsorshipMonths" name="sponsorshipMonths" class="form-control">
+                        <option value="1">1 Mes - <%= new Intl.NumberFormat('es-PY').format(200000) %> Gs.</option>
+                        <option value="3">3 Meses - <%= new Intl.NumberFormat('es-PY').format(200000 * 3) %> Gs.</option>
+                        <option value="12">1 Año (¡Congela el precio y obtén 2 meses de regalo!) - <%= new Intl.NumberFormat('es-PY').format(200000 * 10) %> Gs.</option>
+                    </select>
+                </div>
+
+                <div class="alert alert-info">
+                    <h4><i class="fas fa-info-circle"></i> Siguientes Pasos</h4>
+                    <p>1. Realiza una transferencia por el monto total de <strong id="total-amount-info">200.000 Gs.</strong> a los siguientes datos:</p>
+                    <p><strong>[Aquí pones tus datos de transferencia: Banco, N° de Cuenta, Titular, CI, etc.]</strong></p>
+                    <p>2. Sube una captura o foto del comprobante de pago en el campo de abajo.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="paymentProof">Sube tu Comprobante de Pago</label>
+                    <input type="file" id="paymentProof" name="paymentProof" class="form-control" accept="image/png, image/jpeg, image/jpg" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1rem;">Hecho, Enviar Solicitud de Patrocinio</button>
+            </form>
+        <% } else { %>
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>¡Todos los espacios para pioneros han sido ocupados!</h4>
+                <p>Agradecemos enormemente el interés. Por el momento, hemos alcanzado el límite de patrocinadores. Puedes contactarnos por correo para ser considerado en futuras aperturas de espacios.</p>
+                <a href="mailto:soporte.donaparaguay@gmail.com?subject=Interesado en Futuros Espacios de Patrocinio" class="btn btn-secondary mt-3">Contactar por Correo</a>
+            </div>
+        <% } %>
+    </div>
+</main>
+<%- include('partials/footer.html') %>
+
+<script>
+    // El script solo se ejecuta si el formulario existe
+    const sponsorshipMonthsSelect = document.getElementById('sponsorshipMonths');
+    if (sponsorshipMonthsSelect) {
+        sponsorshipMonthsSelect.addEventListener('change', (e) => {
+            const months = parseInt(e.target.value);
+            const pricePerMonth = 200000;
+            let total = months * pricePerMonth;
+            if (months === 12) {
+                total = pricePerMonth * 10; // Descuento
+            }
+            const formattedTotal = new Intl.NumberFormat('es-PY').format(total) + ' Gs.';
+            document.getElementById('total-amount-info').textContent = formattedTotal;
+        });
+    }
+</script>
+</body>
+</html>

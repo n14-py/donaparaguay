@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Elige un Método de Recuperación</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="auth-container">
+        <h2>¿Cómo quieres recuperar tu cuenta?</h2>
+        <p>Hemos encontrado una cuenta asociada a <strong><%= email %></strong>. Elige un método para continuar.</p>
+        <hr>
+        <form action="/send-recovery-code" method="POST" style="margin-bottom: 1rem;">
+            <button type="submit" class="btn btn-primary btn-block">Enviar un código a mi correo</button>
+        </form>
+        <form action="/reset-with-questions" method="GET"> <button type="submit" class="btn btn-secondary btn-block" <%= !hasSecurityQuestions ? 'disabled' : '' %>>
+                Usar mis preguntas de seguridad
+            </button>
+            <% if (!hasSecurityQuestions) { %>
+                <small class="form-text text-muted">No has configurado tus preguntas de seguridad.</small>
+            <% } %>
+        </form>
+    </div>
+</main>
+<%- include('partials/footer.html') %>
+</body>
+</html>

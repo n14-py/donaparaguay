@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<% if (locals.userProfile) { %>
+<main class="container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <img src="<%= userProfile.profilePic %>" alt="Foto de perfil de <%= userProfile.username %>">
+        </div>
+        <div class="profile-info">
+            <h1>
+                <%= userProfile.username %>
+                <% if (userProfile.isVerified) { %>
+                    <i class="fas fa-check-circle verification-badge" title="Organizador Verificado"></i>
+                <% } %>
+            </h1>
+
+            <div class="profile-stats">
+                <span><strong><%= campaigns.length %></strong> Campañas</span>
+                <span><strong><%= userProfile.followers.length %></strong> Seguidores</span>
+                <span><strong><%= userProfile.following.length %></strong> Siguiendo</span>
+            </div>
+            
+            <% if (userProfile.bio) { %>
+                <p class="profile-bio"><%- userProfile.bio %></p>
+            <% } %>
+
+            <div class="profile-actions">
+                <a href="/settings/profile" class="btn btn-secondary">Editar Perfil</a>
+                <% if (userProfile.isVerified) { %>
+                    <a href="/new-campaign" class="btn btn-primary">Crear Campaña</a>
+                <% } else { %>
+                     <a href="/verify-account" class="btn btn-primary">Verificarme para crear Campaña</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-tabs">
+        <a href="#" class="tab-link active" data-tab="campaigns"><i class="fas fa-bullhorn"></i> MIS CAMPAÑAS</a>
+        <a href="#" class="tab-link" data-tab="donations"><i class="fas fa-heart"></i> MIS DONACIONES</a>
+        <a href="#" class="tab-link" data-tab="badges"><i class="fas fa-trophy"></i> INSIGNIAS</a>
+    </div>
+
+    <div id="campaigns-content" class="tab-content active">
+        <div class="post-grid">
+            <% if (campaigns && campaigns.length > 0) { %>
+                <% campaigns.forEach(campaign => { %>
+                    <%- include('partials/campaign-card.html', { campaign: campaign }) %>
+                <% }); %>
+            <% } else { %>
+                <div class="no-results-card">
+                    <h3>Aún no has creado ninguna campaña</h3>
+                    <p>¡Anímate a crear tu primera campaña y empieza a recaudar fondos para tu causa!</p>
+                    <a href="/new-campaign" class="btn btn-primary">Crear mi primera campaña</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+    <div id="donations-content" class="tab-content" style="display: none;">
+         <% if (userDonations && userDonations.length > 0) { %>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Campaña</th>
+                            <th>Monto Donado</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% userDonations.forEach(donation => { %>
+                            <tr>
+                                <td><%= formatDate(donation.createdAt) %></td>
+                                <td>
+                                    <% if (donation.campaignId) { %>
+                                        <a href="/campaign/<%= donation.campaignId._id %>" style="font-weight: bold;"><%= donation.campaignId.title %></a>
+                                    <% } else { %>
+                                        <span class="text-muted">Campaña eliminada</span>
+                                    <% } %>
+                                </td>
+                                <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.campaignAmount) %> Gs.</strong></td>
+                                <td><span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="no-results-card">
+                <h3>Aún no has realizado ninguna donación</h3>
+                <p>Explora las campañas y encuentra una causa para apoyar.</p>
+                <a href="/campaigns" class="btn btn-primary">Ver Campañas</a>
+            </div>
+        <% } %>
+    </div>
+
+    <div id="badges-content" class="tab-content" style="display: none;">
+        <div class="badges-list-container">
+            <% if (userProfile.badges && userProfile.badges.length > 0) { %>
+                <% userProfile.badges.forEach(badge => { %>
+                    <div class="badge-list-item">
+                        <div class="badge-list-icon">
+                            <i class="fas <%= badge.icon %>"></i>
+                        </div>
+                        <div class="badge-list-info">
+                            <h4><%= badge.name %></h4>
+                            <p><%= badge.description %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-results-card">
+                    <h3>Aún no has ganado ninguna insignia</h3>
+                    <p>Tu próxima donación podría desbloquear tu primer logro. ¡Anímate!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+<% } %>
+
+<%- include('partials/footer.html') %>
+
+<script>
+// Script para manejar las pestañas
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = tab.getAttribute('data-tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            
+            const activeContent = document.getElementById(targetId + '-content');
+            if (activeContent) {
+                activeContent.style.display = 'block'; // Usamos block para todos
+                activeContent.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>

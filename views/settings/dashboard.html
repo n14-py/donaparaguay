@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Organizador - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('../partials/header.html') %>
+
+<main class="container">
+    <div class="settings-layout">
+        <aside class="settings-sidebar">
+            <nav>
+                <a href="/settings/dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Panel</a>
+                <a href="/settings/profile"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+                <a href="/settings/payouts"><i class="fas fa-hand-holding-usd"></i> Retiros</a>
+                <a href="/settings/security"><i class="fas fa-shield-alt"></i> Seguridad</a>
+            </nav>
+        </aside>
+
+        <section class="settings-content">
+            <div class="dashboard-header">
+                <h2>Panel de Organizador</h2>
+                <p>Gestiona tus campañas y revisa tus estadísticas de un vistazo.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card main-balance">
+                    <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-info">
+                        <h4>Total Recaudado</h4>
+                        <p class="stat-value"><%= new Intl.NumberFormat('es-PY').format(totalRaised || 0) %> Gs.</p>
+                        <span class="stat-description">Suma de todas tus campañas</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                     <div class="stat-icon"><i class="fas fa-bullhorn"></i></div>
+                    <div class="stat-info">
+                        <h4>Campañas Activas</h4>
+                        <p class="stat-value"><%= campaigns.filter(c => c.status === 'approved').length %></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                     <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                    <div class="stat-info">
+                        <h4>Visitas Totales</h4>
+                        <p class="stat-value"><%= new Intl.NumberFormat('es-PY').format(totalViews || 0) %></p>
+                    </div>
+                </div>
+                 <div class="stat-card">
+                     <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <h4>Donantes Únicos</h4>
+                        <p class="stat-value"><%= uniqueDonorsCount %></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="campaign-management-list">
+                <div class="list-header">
+                    <h3>Mis Campañas</h3>
+                    <a href="/new-campaign" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Nueva Campaña</a>
+                </div>
+                
+                <% if (campaigns && campaigns.length > 0) { %>
+                    <div class="campaign-list-cards">
+                        <% campaigns.forEach(campaign => { %>
+                            <div class="campaign-manage-card">
+                                <div class="campaign-card-info">
+                                    <a href="/campaign/<%= campaign._id %>" class="campaign-title"><%= campaign.title %></a>
+                                    <div class="campaign-card-meta">
+                                        <span class="badge status-<%= campaign.status %>"><%= campaign.status %></span>
+                                        <span><i class="fas fa-users"></i> <%= campaign.donorsCount || 0 %> Donantes</span>
+                                        <span><i class="fas fa-heart"></i> <%= campaign.likes.length %> Me gusta</span>
+                                    </div>
+                                </div>
+                                <div class="campaign-card-progress">
+                                    <small><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> / <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %></small>
+                                    <% const progress = campaign.goalAmount > 0 ? (campaign.amountRaised / campaign.goalAmount) * 100 : 0; %>
+                                    <div class="progress-bar-container small"><div class="progress-bar" style="width: <%= Math.min(progress, 100) %>%"></div></div>
+                                </div>
+                                <div class="campaign-card-actions">
+                                    <a href="/campaign/<%= campaign._id %>/edit" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i></a>
+                                    <a href="/campaign/<%= campaign._id %>" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i></a>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="no-results-card" style="margin-top: 1rem;">
+                        <h4>Aún no has creado ninguna campaña.</h4>
+                        <p>¡Anímate a crear tu primera campaña y empieza a recaudar fondos para tu causa!</p>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+    </div>
+</main>
+<%- include('../partials/footer.html') %>
+</body>
+</html>

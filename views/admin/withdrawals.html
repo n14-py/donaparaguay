@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retiros - Panel de Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<div class="d-flex">
+    <div class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">DonaPY ADMIN</div>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link active"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <h1 class="h3 mb-2 text-gray-800">Gestión de Retiros</h1>
+            <p class="mb-4">Aprueba o rechaza las solicitudes de pago. Al rechazar, los fondos se devuelven a la campaña.</p>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Solicitudes de Retiro</h6></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Organizador</th>
+                                    <th>Campaña</th>
+                                    <th>Monto (Gs.)</th>
+                                    <th>Método</th>
+                                    <th>Detalles de Pago</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (withdrawals && withdrawals.length > 0) { %>
+                                    <% withdrawals.forEach(w => { %>
+                                        <tr>
+                                            <td><a href="/admin/user/<%= w.userId._id %>"><%= w.userId.username %></a></td>
+                                            <td><a href="/campaign/<%= w.campaignId._id %>" target="_blank"><%= w.campaignId.title %></a></td>
+                                            <td><strong><%= new Intl.NumberFormat('es-PY').format(w.amount) %></strong></td>
+                                            <td><%= w.method %></td>
+                                            <td>
+                                                <ul class="list-unstyled mb-0 small">
+                                                    <li><strong>Nombre:</strong> <%= w.details.fullName %></li>
+                                                    <li><strong>CI:</strong> <%= w.details.ci %></li>
+                                                    <% if (w.method === 'transferencia') { %>
+                                                        <li><strong>Banco:</strong> <%= w.details.bankName %></li>
+                                                        <li><strong>Cuenta:</strong> <%= w.details.accountNumber %></li>
+                                                    <% } else { %>
+                                                        <li><strong>Teléfono:</strong> <%= w.details.phone %></li>
+                                                    <% } %>
+                                                </ul>
+                                            </td>
+                                            <td><%= formatDate(w.createdAt) %></td>
+                                            <td><span class="badge bg-<%= w.status === 'Pendiente' ? 'warning text-dark' : (w.status === 'Procesado' ? 'success' : 'danger') %>"><%= w.status %></span></td>
+                                            <td>
+                                                <% if (w.status === 'Pendiente') { %>
+                                                    <div class="d-flex gap-1">
+                                                        <form action="/admin/withdrawal/<%= w._id %>/update" method="POST"><input type="hidden" name="status" value="Procesado"><button type="submit" class="btn btn-sm btn-success" title="Marcar como Procesado"><i class="fas fa-check"></i></button></form>
+                                                        <form action="/admin/withdrawal/<%= w._id %>/update" method="POST"><input type="hidden" name="status" value="Rechazado"><button type="submit" class="btn btn-sm btn-danger" title="Rechazar"><i class="fas fa-times"></i></button></form>
+                                                    </div>
+                                                <% } else { %><span>--</span><% } %>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr><td colspan="8" class="text-center">No hay solicitudes de retiro.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

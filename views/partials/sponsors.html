@@ -1,0 +1,33 @@
+<section class="sponsors-section-v2">
+    <div class="container">
+        <div class="sponsors-header">
+            <h2 class="sponsors-title-v2">Quienes Impulsan Nuestra Causa</h2>
+            <p class="sponsors-subtitle-v2">
+                Nuestro más profundo agradecimiento a estos aliados que, con su valioso aporte, hacen posible que esta plataforma siga conectando y ayudando a miles de paraguayos.
+            </p>
+        </div>
+        
+        <div class="sponsors-scroll-container">
+            <div class="sponsors-grid-v2">
+                <% if (typeof activeSponsors !== 'undefined' && activeSponsors.length > 0) { %>
+                    <% activeSponsors.forEach(sponsor => { %>
+                        <div class="sponsor-card">
+                            <a href="<%= sponsor.companyWebsite %>" target="_blank" rel="noopener noreferrer" title="<%= sponsor.companyName %>">
+                                <img src="<%= sponsor.companyLogo.replace('/upload/', '/upload/h_90,c_limit,q_auto,f_auto/') %>" alt="Logo <%= sponsor.companyName %>">
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-sponsors-message">
+                        <h4>¡Conviértete en el primer aliado de nuestra causa!</h4>
+                        <p>Tu apoyo puede ser el impulso que necesitamos.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="sponsors-cta">
+             <a href="/sponsors/apply" class="btn btn-primary">Suma tu Apoyo Aquí</a>
+        </div>
+    </div>
+</section>

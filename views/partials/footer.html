@@ -1,0 +1,57 @@
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-section about">
+            <h3 class="footer-title">
+                <i class="fas fa-hands-helping"></i> Dona Paraguay
+            </h3>
+            <p>Conectando corazones generosos con causas que importan en todo Paraguay. Juntos, hacemos la diferencia.</p>
+        </div>
+
+        <div class="footer-section links">
+            <h4 class="footer-title">Navegación</h4>
+            <ul>
+                <li><a href="/campaigns">Ver Campañas</a></li>
+                <li><a href="/faq">Preguntas Frecuentes</a></li>
+                <li><a href="/terms">Términos y Condiciones</a></li>
+                <li><a href="/privacy">Política de Privacidad</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section contact">
+            <h4 class="footer-title">Contacto</h4>
+            <p>¿Tienes preguntas? Estamos aquí para ayudarte.</p>
+            <a href="mailto:soporte.donaparaguay@gmail.com" class="btn btn-secondary">Enviar un Correo</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; <%= new Date().getFullYear() %> Dona Paraguay | Una plataforma para ayudar.
+    </div>
+</footer>
+
+<div id="confirmationModal" class="modal-background" style="display: none;">
+    <div class="modal-content">
+        <button class="close-button" id="modalCloseBtn">&times;</button>
+        <h3 id="modalTitle">Confirmar Acción</h3>
+        <p id="modalMessage">¿Estás seguro?</p>
+        <div id="modal-additional-content"></div>
+        <div class="modal-actions">
+            <button id="modalCancelBtn" class="btn btn-secondary">Cancelar</button>
+            <button id="modalConfirmBtn" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="shareModal" class="modal-background" style="display: none;">
+    <div class="modal-content">
+        <button class="close-button" id="shareModalCloseBtn">&times;</button>
+        <h3 id="shareModalTitle">Compartir esta causa</h3>
+        <p>¡Gracias por ayudar a difundir la palabra!</p>
+        <div class="share-options">
+            <a id="share-whatsapp" href="#" target="_blank" class="btn btn-share-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+            <a id="share-facebook" href="#" target="_blank" class="btn btn-share-facebook"><i class="fab fa-facebook"></i> Facebook</a>
+            <a id="share-twitter" href="#" target="_blank" class="btn btn-share-twitter"><i class="fab fa-twitter"></i> Twitter</a>
+            <button id="copy-link-btn" class="btn btn-secondary"><i class="fas fa-copy"></i> Copiar Enlace</button>
+        </div>
+    </div>
+</div>

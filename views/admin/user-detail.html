@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Usuario - Panel de Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+<div class="d-flex">
+    <div class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                DonaPY ADMIN
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link active"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Detalles de: <strong><%= user.username %></strong></h1>
+                <a href="/admin/users" class="btn btn-sm btn-secondary"><i class="fas fa-arrow-left fa-sm"></i> Volver a la lista</a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-body text-center">
+                            <img src="<%= user.profilePic %>" class="rounded-circle img-fluid mb-3" alt="Avatar" style="width: 150px; height: 150px; object-fit: cover;">
+                            <h5 class="card-title"><%= user.username %></h5>
+                            <p class="card-text text-muted"><%= user.email %></p>
+                            <hr>
+                            <p class="card-text">
+                                <% if(user.isBanned) { %><span class="badge bg-danger">Baneado</span><% } else { %><span class="badge bg-success">Activo</span><% } %>
+                                <% if(user.isVerified) { %><span class="badge bg-primary">Verificado</span><% } else { %><span class="badge bg-secondary">No Verificado</span><% } %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Acciones</h6></div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <form action="/admin/user/<%= user._id %>/toggle-ban" method="POST" onsubmit="return confirm('¿Seguro?');">
+                                    <button type="submit" class="btn <%= user.isBanned ? 'btn-success' : 'btn-danger' %> w-100"><i class="fas <%= user.isBanned ? 'fa-check' : 'fa-gavel' %> fa-sm"></i> <%= user.isBanned ? 'Quitar Baneo' : 'Banear' %></button>
+                                </form>
+                                <form action="/admin/user/<%= user._id %>/toggle-verify" method="POST">
+                                    <button type="submit" class="btn <%= user.isVerified ? 'btn-warning text-dark' : 'btn-primary' %> w-100"><i class="fas <%= user.isVerified ? 'fa-times' : 'fa-check-circle' %> fa-sm"></i> <%= user.isVerified ? 'Quitar Verificación' : 'Forzar Verificación' %></button>
+                                </form>
+                                <% if (verification) { %>
+                                    <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#verificationModal"><i class="fas fa-id-card fa-sm"></i> Ver Documentos</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header p-0 border-bottom-0">
+                            <ul class="nav nav-tabs" id="userTabs" role="tablist">
+                                <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#campaigns" type="button">Campañas Creadas</button></li>
+                                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#donations" type="button">Donaciones Realizadas</button></li>
+                                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#withdrawals" type="button">Retiros</button></li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="userTabsContent">
+                                <div class="tab-pane fade show active" id="campaigns" role="tabpanel">
+                                    <ul class="list-group">
+                                        <% if(campaigns && campaigns.length > 0) { %>
+                                            <% campaigns.forEach(c => { %>
+                                                <li class="list-group-item"><a href="/campaign/<%= c._id %>" target="_blank"><%= c.title %></a> - <span class="badge bg-info"><%= c.status %></span></li>
+                                            <% }); %>
+                                        <% } else { %><p class="text-center p-3">Este usuario no ha creado campañas.</p><% } %>
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="donations" role="tabpanel">
+                                     <ul class="list-group">
+                                        <% if(donationsMade && donationsMade.length > 0) { %>
+                                            <% donationsMade.forEach(d => { %>
+                                                <li class="list-group-item">Donó <%= new Intl.NumberFormat('es-PY').format(d.amount) %> Gs. a <a href="/campaign/<%= d.campaignId._id %>" target="_blank"><%= d.campaignId.title %></a> (<span class="badge bg-secondary"><%= d.status %></span>)</li>
+                                            <% }); %>
+                                        <% } else { %><p class="text-center p-3">Este usuario no ha realizado donaciones.</p><% } %>
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="withdrawals" role="tabpanel">
+                                     <ul class="list-group">
+                                        <% if(withdrawals && withdrawals.length > 0) { %>
+                                            <% withdrawals.forEach(w => { %>
+                                                <li class="list-group-item">Solicitó <%= new Intl.NumberFormat('es-PY').format(w.amount) %> Gs. - <span class="badge bg-secondary"><%= w.status %></span></li>
+                                            <% }); %>
+                                        <% } else { %><p class="text-center p-3">Este usuario no ha solicitado retiros.</p><% } %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<% if (verification) { %>
+<div class="modal fade" id="verificationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Documentos de <%= user.username %></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 text-center"><h6>Frente de Cédula</h6><a href="<%= verification.frontIdPhoto %>" target="_blank"><img src="<%= verification.frontIdPhoto %>" class="img-fluid rounded"></a></div>
+                    <div class="col-md-6 text-center"><h6>Reverso de Cédula</h6><a href="<%= verification.backIdPhoto %>" target="_blank"><img src="<%= verification.backIdPhoto %>" class="img-fluid rounded"></a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

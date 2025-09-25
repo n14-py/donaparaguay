@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <meta name="description" content="<%= pageDescription %>">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= baseUrl %>/campaign/<%= campaign._id %>">
+    <meta property="og:title" content="<%= campaign.title %>">
+    <meta property="og:description" content="<%= pageDescription %>">
+    <meta property="og:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= baseUrl %>/campaign/<%= campaign._id %>">
+    <meta property="twitter:title" content="<%= campaign.title %>">
+    <meta property="twitter:description" content="<%= pageDescription %>">
+    <meta property="twitter:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <% if (locals.campaign && campaign.userId) { %>
+        <div class="anuncio-container">
+            <div class="anuncio-main-content">
+                <% if (campaign.files && campaign.files.length > 0) { %>
+                    <div class="image-slider-container">
+                        <% campaign.files.forEach((file, index) => { %>
+                            <div class="slide <%= index === 0 ? 'active' : '' %>">
+                                <% if (file.includes('.mp4') || file.includes('.mov')) { %>
+                                    <video src="<%= file %>" controls style="width: 100%; border-radius: var(--border-radius);"></video>
+                                <% } else { %>
+                                    <img src="<%= file %>" alt="Imagen de la campaña <%= index + 1 %>">
+                                <% } %>
+                            </div>
+                        <% }); %>
+                        <% if (campaign.files.length > 1) { %>
+                            <a class="slider-control prev">&#10094;</a>
+                            <a class="slider-control next">&#10095;</a>
+                        <% } %>
+                    </div>
+                <% } %>
+                
+                <div class="campaign-story">
+                     <h3>Nuestra Historia</h3>
+                     <%- campaign.description %>
+                </div>
+            </div>
+
+            <div class="anuncio-sidebar">
+                <div class="anuncio-info-card">
+                    <span class="badge category-badge"><%= campaign.category %></span>
+                    <h1><%= campaign.title %></h1>
+                    
+                    <div class="organizer-info">
+                        <a href="/user/<%= campaign.userId.username %>">
+                            <img src="<%= campaign.userId.profilePic %>" alt="Avatar de <%= campaign.userId.username %>" class="avatar-lg">
+                        </a>
+                        <div>
+                            <span>Organizado por</span>
+                            <h4><a href="/user/<%= campaign.userId.username %>"><%= campaign.userId.username %></a>
+                            <% if (campaign.userId.isVerified) { %>
+                                <i class="fas fa-check-circle verification-badge" title="Organizador Verificado"></i>
+                            <% } %>
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="donation-summary">
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: <%= Math.min((campaign.amountRaised / campaign.goalAmount) * 100, 100) %>%"></div></div>
+                        <div class="donation-stats">
+                            <span class="amount-raised"><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</span>
+                            <span class="goal-amount">recaudados de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.</span>
+                        </div>
+                    </div>
+                    
+                    <% if (campaign.status === 'completed') { %>
+                        <div class="alert alert-success"><i class="fas fa-check-circle"></i> ¡Meta alcanzada! Gracias a todos por su apoyo.</div>
+                    <% } else { %>
+                        <a href="/campaign/<%= campaign._id %>/donate" class="btn btn-primary btn-block btn-donate"><i class="fas fa-heart"></i> Donar Ahora</a>
+                    <% } %>
+
+                    <div class="campaign-actions">
+                        <button id="open-share-modal-btn" class="btn btn-secondary">
+                            <i class="fas fa-share-alt"></i> Compartir
+                        </button>
+                        <button id="like-button" class="btn <%= userHasLiked ? 'btn-danger' : 'btn-secondary' %>">
+                            <i class="fas fa-heart"></i> <span id="like-count"><%= campaign.likes.length %></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="campaign-tabs-container">
+            <div class="campaign-tabs">
+                <a href="#" class="tab-link active" data-tab="donations">Donantes <span class="badge"><%= totalDonations %></span></a>
+                <a href="#" class="tab-link" data-tab="updates">Actualizaciones <span class="badge"><%= totalUpdates %></span></a>
+                <a href="#" class="tab-link" data-tab="comments">Comentarios <span class="badge"><%= totalComments %></span></a>
+            </div>
+
+            <div id="donations-content" class="tab-content active">
+                <div class="donations-list" id="donations-list-container">
+                    <% donations.forEach(donation => { %>
+                        <div class="donation-item">
+                            <img src="<%= donation.userId.profilePic %>" alt="Avatar" class="donation-avatar">
+                            <div class="donation-content">
+                                <div><strong><a href="/user/<%= donation.userId.username %>"><%= donation.userId.username %></a></strong> donó <strong><%= new Intl.NumberFormat('es-PY').format(donation.campaignAmount) %> Gs.</strong></div>
+                                <% if (donation.comment && donation.comment.trim() !== '') { %><p class="donation-comment">"<%= donation.comment %>"</p><% } %>
+                                <small class="donation-time"><%= formatDate(donation.createdAt) %></small>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+                <% if (totalDonations > donations.length) { %>
+                    <button id="load-more-donations" class="btn btn-secondary btn-block">Cargar más donaciones</button>
+                <% } %>
+            </div>
+
+            <div id="updates-content" class="tab-content" style="display: none;">
+                 <% if (isOwner) { %>
+                    <form action="/campaign/<%= campaign._id %>/update" method="POST" class="update-form"><h4>Publicar una actualización</h4><textarea name="content" rows="4" class="form-control" placeholder="Comparte el progreso de tu campaña..." required></textarea><button type="submit" class="btn btn-primary">Publicar</button></form>
+                <% } %>
+                <div class="updates-list" id="updates-list-container">
+                    <% updates.forEach(update => { %><div class="update-item"><p><%- update.content %></p><small><%= formatDate(update.createdAt) %></small></div><% }); %>
+                </div>
+                <% if (totalUpdates > updates.length) { %><button id="load-more-updates" class="btn btn-secondary btn-block">Cargar más actualizaciones</button><% } %>
+            </div>
+
+            <div id="comments-content" class="tab-content" style="display: none;">
+                <% if (currentUser) { %>
+                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="comment-form"><h4>Deja un comentario</h4><textarea name="text" rows="3" class="form-control" placeholder="Escribe un mensaje de apoyo..." required></textarea><button type="submit" class="btn btn-primary">Comentar</button></form>
+                <% } else { %><p><a href="/login">Inicia sesión</a> para dejar un comentario.</p><% } %>
+                <div class="comments-list" id="comments-list-container">
+                    <% comments.forEach(comment => { %><div class="comment-item"><img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar"><div class="comment-content"><strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong><p><%- comment.text %></p><small><%= formatDate(comment.createdAt) %></small></div></div><% }); %>
+                </div>
+                <% if (totalComments > comments.length) { %><button id="load-more-comments" class="btn btn-secondary btn-block">Cargar más comentarios</button><% } %>
+            </div>
+        </div>
+
+        <% if (recommendedCampaigns && recommendedCampaigns.length > 0) { %>
+            <div class="recommended-section">
+                <hr>
+                <h2 style="text-align: center; margin-bottom: 2rem;">También te podría interesar</h2>
+                <div class="post-grid">
+                    <% recommendedCampaigns.forEach(recCampaign => { %>
+                        <%- include('partials/campaign-card.html', { campaign: recCampaign }) %>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
+
+    <% } else { %>
+        <div class="error-container"><h2>Campaña no encontrada</h2><p>La campaña que buscas no existe o ha sido eliminada.</p><a href="/campaigns" class="btn btn-primary">Volver al inicio</a></div>
+    <% } %>
+</main>
+
+<%- include('partials/sponsors.html') %>
+<%- include('partials/footer.html') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- LÓGICA DE PAGINACIÓN ---
+    const campaignId = '<%= campaign._id %>';
+    let commentPage = 1;
+    let donationPage = 1;
+    let updatePage = 1;
+
+    async function loadMore(type, page, containerId, buttonId) {
+        try {
+            const response = await fetch(`/api/campaign/${campaignId}/${type}?page=${page}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            const container = document.getElementById(containerId);
+            
+            // Función para formatear fechas como en el backend
+            const formatDate = (dateString) => {
+                const d = new Date(dateString);
+                const now = new Date();
+                const diffSeconds = Math.round((now - d) / 1000);
+                if (diffSeconds < 60) return 'Justo ahora';
+                const diffMinutes = Math.round(diffSeconds / 60);
+                if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
+                const diffHours = Math.round(diffMinutes / 60);
+                if (diffHours < 24) return `Hace ${diffHours} h`;
+                return d.toLocaleDateString('es-PY');
+            };
+
+            data.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                if (type === 'comments') {
+                    itemElement.classList.add('comment-item');
+                    itemElement.innerHTML = `<img src="${item.userId.profilePic}" alt="avatar" class="comment-avatar"><div class="comment-content"><strong><a href="/user/${item.userId.username}">${item.userId.username}</a></strong><p>${item.text}</p><small>${formatDate(item.createdAt)}</small></div>`;
+                } else if (type === 'donations') {
+                     itemElement.classList.add('donation-item');
+                     itemElement.innerHTML = `<img src="${item.userId.profilePic}" alt="Avatar" class="donation-avatar"><div class="donation-content"><div><strong><a href="/user/${item.userId.username}">${item.userId.username}</a></strong> donó <strong>${new Intl.NumberFormat('es-PY').format(item.campaignAmount)} Gs.</strong></div>${item.comment ? `<p class="donation-comment">"${item.comment}"</p>` : ''}<small class="donation-time">${formatDate(item.createdAt)}</small></div>`;
+                } else if (type === 'updates') {
+                    itemElement.classList.add('update-item');
+                    itemElement.innerHTML = `<p>${item.content}</p><small>${formatDate(item.createdAt)}</small>`;
+                }
+                container.appendChild(itemElement);
+            });
+
+            if (!data.hasMore) {
+                document.getElementById(buttonId).style.display = 'none';
+            }
+        } catch (error) {
+            console.error(`Error al cargar más ${type}:`, error);
+        }
+    }
+    
+    document.getElementById('load-more-comments')?.addEventListener('click', () => { commentPage++; loadMore('comments', commentPage, 'comments-list-container', 'load-more-comments'); });
+    document.getElementById('load-more-donations')?.addEventListener('click', () => { donationPage++; loadMore('donations', donationPage, 'donations-list-container', 'load-more-donations'); });
+    document.getElementById('load-more-updates')?.addEventListener('click', () => { updatePage++; loadMore('updates', updatePage, 'updates-list-container', 'load-more-updates'); });
+
+
+    // --- LÓGICA DE INTERFAZ (SLIDER, TABS, LIKE, ETC.) ---
+    const slider = document.querySelector('.image-slider-container');
+    if (slider) {
+        let currentSlideIndex = 0;
+        const slides = slider.querySelectorAll('.slide');
+        if (slides.length > 1) {
+            const showSlide = i => slides.forEach((s, idx) => s.style.display = i === idx ? 'block' : 'none');
+            slider.querySelector('.prev').addEventListener('click', () => { currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length; showSlide(currentSlideIndex); });
+            slider.querySelector('.next').addEventListener('click', () => { currentSlideIndex = (currentSlideIndex + 1) % slides.length; showSlide(currentSlideIndex); });
+            showSlide(0);
+        }
+    }
+
+    document.getElementById('like-button')?.addEventListener('click', async () => {
+        <% if (currentUser) { %>
+            const response = await fetch(`/campaign/${campaignId}/like`, { method: 'POST' });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('like-count').textContent = data.likes;
+                document.getElementById('like-button').classList.toggle('btn-danger', data.liked);
+                document.getElementById('like-button').classList.toggle('btn-secondary', !data.liked);
+            }
+        <% } else { %>
+            window.location.href = '/login';
+        <% } %>
+    });
+    
+    const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.addEventListener('click', e => {
+        e.preventDefault();
+        const target = tab.getAttribute('data-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        tabContents.forEach(c => c.style.display = c.id === `${target}-content` ? 'block' : 'none');
+    }));
+
+    // Modal de compartir (sin cambios)
+    const shareModal = document.getElementById('shareModal');
+    const openShareBtn = document.getElementById('open-share-modal-btn');
+    const closeShareBtn = document.getElementById('shareModalCloseBtn');
+    if (openShareBtn) {
+        openShareBtn.addEventListener('click', () => {
+            // ... (código del modal de compartir)
+            shareModal.style.display = 'flex';
+        });
+    }
+    if(closeShareBtn) closeShareBtn.addEventListener('click', () => shareModal.style.display = 'none');
+});
+</script>
+
+</body>
+</html>

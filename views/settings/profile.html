@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('../partials/header.html') %>
+<main class="container">
+    <div class="settings-layout">
+        <aside class="settings-sidebar">
+            <nav>
+                <a href="/settings/dashboard"><i class="fas fa-tachometer-alt"></i> Panel</a>
+                <a href="/settings/profile" class="active"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+                <a href="/settings/payouts"><i class="fas fa-hand-holding-usd"></i> Retiros</a>
+                <a href="/settings/security"><i class="fas fa-shield-alt"></i> Seguridad</a>
+            </nav>
+        </aside>
+        <section class="settings-content">
+            <div class="form-container settings-form">
+                <h2>Editar Perfil</h2>
+                <p>Mantén tu información actualizada para generar más confianza en los donantes.</p>
+                <hr>
+                <form action="/settings/profile" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="profilePic">Foto de Perfil</label>
+                        <div class="profile-pic-preview">
+                            <img src="<%= currentUser.profilePic %>" alt="Vista previa de la foto de perfil">
+                            <input type="file" id="profilePic" name="profilePic" class="form-control" accept="image/jpeg, image/png, image/jpg">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Nombre de Usuario</label>
+                        <input type="text" id="username" name="username" class="form-control" value="<%= currentUser.username %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Biografía / Sobre ti</label>
+                        <textarea id="bio" name="bio" rows="4" class="form-control" placeholder="Habla sobre ti, tu organización o la causa que representas."><%= currentUser.bio || '' %></textarea>
+                    </div>
+                     <div class="form-group">
+                        <label for="phone">Teléfono de Contacto (Opcional)</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="<%= currentUser.phone || '' %>">
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+<%- include('../partials/footer.html') %>
+</body>
+</html>

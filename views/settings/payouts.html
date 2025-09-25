@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retiros - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('../partials/header.html') %>
+<main class="container">
+    <div class="settings-layout">
+        <aside class="settings-sidebar">
+            <nav>
+                <a href="/settings/dashboard"><i class="fas fa-tachometer-alt"></i> Panel</a>
+                <a href="/settings/profile"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+                <a href="/settings/payouts" class="active"><i class="fas fa-hand-holding-usd"></i> Retiros</a>
+                <a href="/settings/security"><i class="fas fa-shield-alt"></i> Seguridad</a>
+            </nav>
+        </aside>
+        <section class="settings-content">
+            <div class="payouts-page">
+                <div class="form-container settings-form">
+                    <h2>Solicitar Retiro de Fondos</h2>
+                    <p>Las solicitudes se procesan en 3 a 5 días hábiles. Se aplica una comisión del 10% para mantener la plataforma.</p>
+                    <hr>
+                    <form action="/settings/payouts" method="POST">
+                        <div class="form-group">
+                            <label for="campaignId">Selecciona la Campaña</label>
+                            <select id="campaignId" name="campaignId" class="form-control" required>
+                                <option value="">-- Elige una campaña --</option>
+                                <% campaigns.forEach(c => { %>
+                                    <% if (c.amountRaised >= 30000) { %>
+                                        <option value="<%= c._id %>" data-raised="<%= c.amountRaised %>">
+                                            <%= c.title %> (Disponible: <%= new Intl.NumberFormat('es-PY').format(c.amountRaised) %> Gs.)
+                                        </option>
+                                    <% } %>
+                                <% }); %>
+                            </select>
+                            <small class="form-text text-muted">Solo se muestran campañas con más de 30.000 Gs. recaudados.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Monto a retirar (en Guaraníes)</label>
+                            <input type="number" id="amount" name="amount" class="form-control" placeholder="Mínimo: 30.000 Gs." required min="30000">
+                        </div>
+
+                        <div id="fee-breakdown" class="fee-breakdown-box" style="display: none;">
+                            <div class="fee-row"><span>Monto solicitado:</span> <strong id="requested-amount">0 Gs.</strong></div>
+                            <div class="fee-row"><span>Comisión de plataforma (10%):</span> <strong id="platform-fee">- 0 Gs.</strong></div>
+                            <hr style="margin: 0.5rem 0;">
+                            <div class="fee-row total"><span>Total a recibir:</span> <strong id="net-amount">0 Gs.</strong></div>
+                        </div>
+
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label for="method">Método de Retiro</label>
+                            <select id="method" name="method" class="form-control" required>
+                                <option value="transferencia">Transferencia Bancaria</option>
+                                <option value="giro">Giro</option>
+                            </select>
+                        </div>
+                        
+                        <div id="transferencia-fields">
+                            <div class="form-group"><label>Nombre Completo (Titular)</label><input type="text" name="fullName" class="form-control"></div>
+                            <div class="form-group"><label>Cédula de Identidad</label><input type="text" name="ci" class="form-control"></div>
+                            <div class="form-group"><label>Nombre del Banco</label><input type="text" name="bankName" class="form-control"></div>
+                            <div class="form-group"><label>Número de Cuenta</label><input type="text" name="accountNumber" class="form-control"></div>
+                        </div>
+
+                        <div id="giro-fields" style="display: none;">
+                            <div class="form-group"><label>Nombre Completo</label><input type="text" name="giroFullName" class="form-control"></div>
+                            <div class="form-group"><label>Cédula de Identidad</label><input type="text" name="giroCi" class="form-control"></div>
+                            <div class="form-group"><label>Número de Teléfono</label><input type="text" name="phone" class="form-control"></div>
+                        </div>
+                        <hr>
+                        <button type="submit" class="btn btn-primary btn-block">Confirmar y Enviar Solicitud</button>
+                    </form>
+                </div>
+
+                <div class="final-withdrawals-list">
+                    <h3>Historial de Retiros</h3>
+                    <% if (withdrawals && withdrawals.length > 0) { %>
+                        <% withdrawals.forEach(w => { %>
+                            <div class="withdrawal-card">
+                                <div class="withdrawal-card-header">
+                                    <div class="withdrawal-status"><span class="badge status-<%= w.status.toLowerCase() %>"><%= w.status %></span></div>
+                                    <div class="withdrawal-amount"><%= new Intl.NumberFormat('es-PY').format(w.amount) %> Gs.</div>
+                                </div>
+                                <div class="withdrawal-card-body">
+                                    <div class="withdrawal-detail-row"><span>Método:</span><strong><%= w.method %></strong></div>
+                                    <div class="withdrawal-detail-row"><span>Fecha:</span><strong><%= formatDate(w.createdAt) %></strong></div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="no-transactions-placeholder">Aún no has solicitado ningún retiro.</p>
+                    <% } %>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+<%- include('../partials/footer.html') %>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const formatter = new Intl.NumberFormat('es-PY');
+    const campaignSelect = document.getElementById('campaignId');
+    const amountInput = document.getElementById('amount');
+    
+    // Elementos del desglose
+    const feeBox = document.getElementById('fee-breakdown');
+    const requestedAmountEl = document.getElementById('requested-amount');
+    const platformFeeEl = document.getElementById('platform-fee');
+    const netAmountEl = document.getElementById('net-amount');
+
+    function calculateFees() {
+        const amount = parseInt(amountInput.value) || 0;
+        if (amount >= 30000) {
+            const fee = amount * 0.10;
+            const net = amount - fee;
+            
+            requestedAmountEl.textContent = formatter.format(amount) + ' Gs.';
+            platformFeeEl.textContent = '- ' + formatter.format(fee) + ' Gs.';
+            netAmountEl.textContent = formatter.format(net) + ' Gs.';
+            feeBox.style.display = 'block';
+        } else {
+            feeBox.style.display = 'none';
+        }
+    }
+
+    amountInput.addEventListener('input', calculateFees);
+
+    campaignSelect.addEventListener('change', () => {
+        const selectedOption = campaignSelect.options[campaignSelect.selectedIndex];
+        const maxAmount = selectedOption.dataset.raised;
+        if (maxAmount) {
+            amountInput.max = maxAmount;
+            amountInput.placeholder = `Máx: ${formatter.format(maxAmount)} Gs.`;
+        }
+    });
+    
+    // Lógica para mostrar/ocultar campos de método de pago
+    const methodSelect = document.getElementById('method');
+    const transferenciaFields = document.getElementById('transferencia-fields');
+    const giroFields = document.getElementById('giro-fields');
+    
+    function togglePayoutFields() {
+        const isTransferencia = methodSelect.value === 'transferencia';
+        transferenciaFields.style.display = isTransferencia ? 'block' : 'none';
+        giroFields.style.display = isTransferencia ? 'none' : 'block';
+        transferenciaFields.querySelectorAll('input').forEach(input => input.required = isTransferencia);
+        giroFields.querySelectorAll('input').forEach(input => input.required = !isTransferencia);
+    }
+    
+    methodSelect.addEventListener('change', togglePayoutFields);
+    togglePayoutFields();
+});
+</script>
+</body>
+</html>

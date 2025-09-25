@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Donaciones - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-heart"></i> Mis Donaciones</h1>
+        <p>Aquí puedes ver un historial de todas las causas que has apoyado. ¡Gracias por tu generosidad!</p>
+    </div>
+
+    <div class="list-container">
+        <% if (donations && donations.length > 0) { %>
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Campaña</th>
+                            <th>Monto Donado</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% donations.forEach(donation => { %>
+                            <tr>
+                                <td><%= formatDate(donation.createdAt) %></td>
+                                <td>
+                                    <% if (donation.campaignId) { %>
+                                        <a href="/campaign/<%= donation.campaignId._id %>" style="font-weight: bold;"><%= donation.campaignId.title %></a>
+                                    <% } else { %>
+                                        <span class="text-muted">Campaña eliminada</span>
+                                    <% } %>
+                                </td>
+                                <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.</strong></td>
+                                <td><span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="no-results-card">
+                <h3>Aún no has realizado ninguna donación</h3>
+                <p>Explora las campañas y encuentra una causa para apoyar.</p>
+                <a href="/campaigns" class="btn btn-primary">Ver Campañas</a>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<%- include('partials/footer.html') %>
+</body>
+</html>

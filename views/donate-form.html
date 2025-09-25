@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donar a: <%= campaign.title %> - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="form-container auth-form">
+        <h2>Vas a donar a:</h2>
+        <h3 style="color: var(--primary-color);"><%= campaign.title %></h3>
+        <p>Organizado por <strong><%= campaign.userId.username %></strong></p>
+        <hr>
+
+        <div id="step-1-amount">
+            <div class="form-group">
+                <label for="amount-slider" style="font-size: 1.2rem; text-align: center; margin-bottom: 1.5rem;"><strong>Desliza para elegir el monto</strong></label>
+                <div id="amount-display" class="donation-amount-display">50.000 Gs.</div>
+                <input type="range" id="amount-slider" class="form-control-range" min="5000" max="1000000" step="1000" value="50000">
+                <div class="donation-presets">
+                    <button type="button" class="btn btn-secondary amount-btn" data-amount="20000">20.000</button>
+                    <button type="button" class="btn btn-secondary amount-btn" data-amount="50000">50.000</button>
+                    <button type="button" class="btn btn-secondary amount-btn" data-amount="100000">100.000</button>
+                </div>
+            </div>
+            <button id="confirm-amount-btn" class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.2rem;">Continuar</button>
+        </div>
+
+        <div id="step-2-transfer" style="display: none;">
+            <form action="/campaign/<%= campaign._id %>/donate" method="POST" enctype="multipart/form-data">
+                <div class="alert alert-info">
+                    <h4><i class="fas fa-info-circle"></i> Tu próximo paso</h4>
+                    <p>Vas a transferir un <strong>total de <span id="total-amount-display" style="font-size: 1.2em;"></span> Gs.</strong></p>
+                    <div id="donation-breakdown" style="font-size: 0.9em; color: #555;"></div>
+                    <hr>
+                    <p><strong>Datos para la transferencia/giro:</strong><br>
+                    [Aquí irían los datos del organizador o de la plataforma. Por ejemplo: Banco Itaú, Cta N° 123456, a nombre de Fulano de Tal, C.I. 1.234.567]</p>
+                </div>
+
+                <input type="hidden" id="amount" name="amount" value="">
+                <input type="hidden" id="campaignAmount" name="campaignAmount" value="">
+                <input type="hidden" id="platformTip" name="platformTip" value="0">
+
+                <div class="form-group">
+                    <label for="proof-input"><strong>Sube tu comprobante de pago</strong></label>
+                    <input type="file" name="proof" id="proof-input" class="file-input-hidden" required accept="image/*">
+                    <label for="proof-input" class="btn btn-secondary file-input-label"><i class="fas fa-upload"></i> Seleccionar archivo...</label>
+                    <span id="file-name-display" class="file-name-display"></span>
+                </div>
+
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label for="comment">Mensaje de apoyo (opcional)</label>
+                    <textarea id="comment" name="comment" rows="3" class="form-control" placeholder="Ej: ¡Mucha fuerza! Estamos con ustedes."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">Hecho, enviar mi donación</button>
+                <button type="button" id="back-to-amount" class="btn btn-link" style="display: block; margin: 1rem auto;">Cambiar monto</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div id="platform-support-modal" class="modal-background" style="display: none;">
+    <div class="modal-content">
+        <button class="close-button" id="modalCloseBtn">&times;</button>
+        <div style="text-align: center;">
+            <i class="fas fa-hands-helping fa-2x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
+            <h3>Un último paso...</h3>
+        </div>
+        <p>¡Gracias por querer donar <strong id="campaign-amount-modal-display"></strong> a esta causa!</p>
+        <p>Para ti como donante, usar la plataforma es 100% gratis. Si lo deseas, puedes añadir una pequeña propina voluntaria para que <strong>DonaParaguay.com siga con vida</strong>.</p>
+        <div class="transparency-details">
+            <strong>¿Para qué la usamos?</strong> Para pagar los costos de servidores, bases de datos, almacenamiento de imágenes y el equipo administrativo que revisa cada donación. ¡Tu propina nos ayuda a seguir ayudando!
+        </div>
+        <div class="donation-presets" style="margin-top: 1.5rem;">
+             <button class="btn btn-secondary tip-btn" data-tip="1000">1.000 Gs.</button>
+             <button class="btn btn-secondary tip-btn" data-tip="3000">3.000 Gs.</button>
+             <button class="btn btn-secondary tip-btn" data-tip="5000">5.000 Gs.</button>
+        </div>
+        <div class="modal-actions" style="margin-top: 1.5rem;">
+            <button id="skip-tip-btn" class="btn btn-secondary">Omitir</button>
+            <button id="add-tip-btn" class="btn btn-primary" disabled>Añadir 0 Gs. y Continuar</button>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer.html') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const step1 = document.getElementById('step-1-amount');
+    const step2 = document.getElementById('step-2-transfer');
+    const slider = document.getElementById('amount-slider');
+    const amountDisplay = document.getElementById('amount-display');
+    const confirmBtn = document.getElementById('confirm-amount-btn');
+    const backBtn = document.getElementById('back-to-amount');
+    
+    const totalAmountInput = document.getElementById('amount');
+    const campaignAmountInput = document.getElementById('campaignAmount');
+    const platformTipInput = document.getElementById('platformTip');
+
+    const totalAmountDisplay = document.getElementById('total-amount-display');
+    const donationBreakdown = document.getElementById('donation-breakdown');
+
+    const modal = document.getElementById('platform-support-modal');
+    const closeBtn = document.getElementById('modalCloseBtn');
+    const skipBtn = document.getElementById('skip-tip-btn');
+    const addTipBtn = document.getElementById('add-tip-btn');
+    const tipButtons = document.querySelectorAll('.tip-btn');
+    const campaignAmountModalDisplay = document.getElementById('campaign-amount-modal-display');
+    
+    let selectedTip = 0;
+    const formatter = new Intl.NumberFormat('es-PY');
+
+    function updateDisplay(value) {
+        amountDisplay.textContent = formatter.format(value) + ' Gs.';
+    }
+    slider.addEventListener('input', () => updateDisplay(slider.value));
+    document.querySelectorAll('.amount-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            slider.value = button.getAttribute('data-amount');
+            updateDisplay(slider.value);
+        });
+    });
+
+    function showStep2(campaignAmount, tipAmount) {
+        const totalAmount = campaignAmount + tipAmount;
+        
+        totalAmountDisplay.textContent = formatter.format(totalAmount);
+        if (tipAmount > 0) {
+            donationBreakdown.innerHTML = `(${formatter.format(campaignAmount)} Gs. para la campaña + ${formatter.format(tipAmount)} Gs. para la plataforma)`;
+        } else {
+            donationBreakdown.innerHTML = `(${formatter.format(campaignAmount)} Gs. para la campaña)`;
+        }
+
+        totalAmountInput.value = totalAmount;
+        campaignAmountInput.value = campaignAmount;
+        platformTipInput.value = tipAmount;
+        
+        step1.style.display = 'none';
+        modal.style.display = 'none';
+        step2.style.display = 'block';
+    }
+
+    confirmBtn.addEventListener('click', () => {
+        const amount = parseInt(slider.value);
+        if (isNaN(amount) || amount < 5000) {
+            alert('Por favor, selecciona un monto de 5.000 Gs. o más.');
+            return;
+        }
+        campaignAmountModalDisplay.textContent = formatter.format(amount) + " Gs.";
+        modal.style.display = 'flex';
+    });
+
+    tipButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedTip = parseInt(btn.dataset.tip);
+            tipButtons.forEach(b => b.classList.remove('active-amount'));
+            btn.classList.add('active-amount');
+            addTipBtn.textContent = `Añadir ${formatter.format(selectedTip)} Gs. y Continuar`;
+            addTipBtn.disabled = false;
+        });
+    });
+    
+    addTipBtn.addEventListener('click', () => showStep2(parseInt(slider.value), selectedTip));
+    closeBtn.addEventListener('click', () => showStep2(parseInt(slider.value), 0));
+    skipBtn.addEventListener('click', () => showStep2(parseInt(slider.value), 0));
+    
+    backBtn.addEventListener('click', () => {
+        step1.style.display = 'block';
+        step2.style.display = 'none';
+        selectedTip = 0;
+        tipButtons.forEach(b => b.classList.remove('active-amount'));
+        addTipBtn.textContent = 'Añadir 0 Gs. y Continuar';
+        addTipBtn.disabled = true;
+    });
+
+    document.getElementById('proof-input').addEventListener('change', (e) => {
+        const display = document.getElementById('file-name-display');
+        display.textContent = e.target.files.length > 0 ? e.target.files[0].name : '';
+    });
+});
+</script>
+
+</body>
+</html>

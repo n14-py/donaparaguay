@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Campaña - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="form-container auth-form">
+        <h2>Crear Nueva Campaña</h2>
+        <p>Describe tu causa, establece una meta y sube imágenes o videos para inspirar a los donantes.</p>
+        <hr>
+
+        <form action="/new-campaign" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Título de la Campaña</label>
+                <input type="text" id="title" name="title" class="form-control" required placeholder="Ej: Ayuda para el tratamiento de [Nombre]">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descripción / Historia</label>
+                <textarea id="description" name="description" rows="6" class="form-control" required placeholder="Cuenta la historia detrás de tu causa. Sé claro y transparente."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="goalAmount">Meta de Recaudación (en Guaraníes)</label>
+                <input type="number" id="goalAmount" name="goalAmount" class="form-control" required placeholder="Ej: 5000000" min="100000">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Categoría</label>
+                <select id="category" name="category" class="form-control" required>
+                    <% CATEGORIES.forEach(cat => { %>
+                        <option value="<%= cat %>"><%= cat %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Ubicación de la Causa</label>
+                <select id="location" name="location" class="form-control" required>
+                    <% CITIES.forEach(city => { %>
+                        <option value="<%= city %>" <%= currentUser.location === city ? 'selected' : '' %>><%= city %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="files">Imágenes o Video de Portada</label>
+                <input type="file" id="files" name="files" class="file-input-hidden" multiple required accept="image/*,video/*">
+                <label for="files" class="btn btn-secondary file-input-label">
+                    <i class="fas fa-upload"></i> Seleccionar archivos...
+                </label>
+                <small class="form-text text-muted">Puedes subir varias fotos o un video. El primer archivo será la portada.</small>
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-primary btn-block">Enviar para Aprobación</button>
+        </form>
+    </div>
+</main>
+
+<%- include('partials/footer.html') %>
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de <%= userProfile.username %> - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<% if (locals.userProfile) { %>
+<main class="container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <img src="<%= userProfile.profilePic %>" alt="Foto de perfil de <%= userProfile.username %>">
+        </div>
+        <div class="profile-info">
+            <h1>
+                <%= userProfile.username %>
+                <% if (userProfile.isVerified) { %>
+                    <i class="fas fa-check-circle verification-badge" title="Organizador Verificado"></i>
+                <% } %>
+            </h1>
+
+            <div class="profile-stats">
+                <span><strong><%= campaigns.length %></strong> Campañas</span>
+                <span><strong id="followers-count"><%= userProfile.followers.length %></strong> Seguidores</span>
+                <span><strong><%= userProfile.following.length %></strong> Siguiendo</span>
+            </div>
+
+            <% if (userProfile.bio) { %>
+                <p class="profile-bio"><%- userProfile.bio %></p>
+            <% } %>
+            
+            <div class="profile-actions">
+                <% if (currentUser && !currentUser._id.equals(userProfile._id)) { %>
+                    <button id="follow-button" class="btn <%= isFollowing ? 'btn-secondary' : 'btn-primary' %>">
+                        <i class="fas fa-user-plus"></i> <span id="follow-button-text"><%= isFollowing ? 'Siguiendo' : 'Seguir' %></span>
+                    </button>
+                <% } %>
+                 <a href="/report?type=user&id=<%= userProfile._id %>" class="btn btn-secondary">Reportar Usuario</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-tabs">
+        <a href="#" class="tab-link active" data-tab="campaigns"><i class="fas fa-bullhorn"></i> CAMPAÑAS CREADAS</a>
+        <% if (userProfile.privacySettings.showDonations || (currentUser && currentUser._id.equals(userProfile._id))) { %>
+            <a href="#" class="tab-link" data-tab="donations"><i class="fas fa-heart"></i> DONACIONES REALIZADAS</a>
+        <% } %>
+        <a href="#" class="tab-link" data-tab="badges"><i class="fas fa-trophy"></i> INSIGNIAS</a>
+    </div>
+
+    <div id="campaigns-content" class="tab-content active">
+        <div class="post-grid">
+            <% if (campaigns && campaigns.length > 0) { %>
+                <% campaigns.forEach(campaign => { %>
+                    <%- include('partials/campaign-card.html', { campaign: campaign }) %>
+                <% }); %>
+            <% } else { %>
+                <div class="no-results-card">
+                    <h3>Este usuario aún no ha creado ninguna campaña pública.</h3>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <% if (userProfile.privacySettings.showDonations || (currentUser && currentUser._id.equals(userProfile._id))) { %>
+        <div id="donations-content" class="tab-content" style="display: none;">
+            <div class="table-responsive">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Campaña Apoyada</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% userDonations.forEach(donation => { %>
+                        <tr>
+                            <td><%= formatDate(donation.createdAt) %></td>
+                            <td>
+                                <% if (donation.campaignId) { %>
+                                    <a href="/campaign/<%= donation.campaignId._id %>"><%= donation.campaignId.title %></a>
+                                <% } else { %>
+                                    <span>Campaña eliminada</span>
+                                <% } %>
+                            </td>
+                            <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.</strong></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <% } %>
+
+    <div id="badges-content" class="tab-content" style="display: none;">
+        <div class="badges-list-container">
+            <% if (userProfile.badges && userProfile.badges.length > 0) { %>
+                <% userProfile.badges.forEach(badge => { %>
+                    <div class="badge-list-item">
+                        <div class="badge-list-icon">
+                            <i class="fas <%= badge.icon %>"></i>
+                        </div>
+                        <div class="badge-list-info">
+                            <h4><%= badge.name %></h4>
+                            <p><%= badge.description %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="no-results-card">
+                    <h3>Este usuario aún no ha ganado insignias.</h3>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+<% } %>
+
+<%- include('partials/footer.html') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Lógica para el botón de Seguir
+    const followButton = document.getElementById('follow-button');
+    if(followButton) {
+        followButton.addEventListener('click', async () => {
+            <% if (currentUser) { %>
+                const userId = '<%= userProfile._id %>';
+                const response = await fetch(`/user/${userId}/follow`, { method: 'POST' });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('followers-count').textContent = data.followers;
+                    const followButtonText = document.getElementById('follow-button-text');
+                    if (data.following) {
+                        followButtonText.textContent = 'Siguiendo';
+                        followButton.classList.remove('btn-primary');
+                        followButton.classList.add('btn-secondary');
+                    } else {
+                        followButtonText.textContent = 'Seguir';
+                        followButton.classList.remove('btn-secondary');
+                        followButton.classList.add('btn-primary');
+                    }
+                }
+             <% } else { %>
+                window.location.href = '/login';
+             <% } %>
+        });
+    }
+
+    // Lógica para las pestañas
+    const tabs = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = tab.getAttribute('data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            const activeContent = document.getElementById(targetId + '-content');
+            if (activeContent) {
+                activeContent.style.display = 'block';
+                activeContent.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>

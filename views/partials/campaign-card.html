@@ -1,0 +1,52 @@
+<% if (campaign && campaign.userId) { %>
+<div class="campaign-card">
+    <a href="/campaign/<%= campaign._id %>" class="card-image-link">
+        <% 
+            let thumbnailUrl = '/img/placeholder.png'; // Imagen por defecto
+            if (campaign.files && campaign.files.length > 0) {
+                thumbnailUrl = campaign.files[0];
+                if (thumbnailUrl.includes('.mp4') || thumbnailUrl.includes('.mov')) {
+                    thumbnailUrl = thumbnailUrl.replace(/\.(mp4|mov|avi)$/i, '.jpg');
+                }
+            }
+            const thumbnailTransforms = 'w_400,h_220,c_fill,g_auto,q_auto,f_auto';
+            thumbnailUrl = thumbnailUrl.replace('/upload/', `/upload/${thumbnailTransforms}/`);
+        %>
+        <img 
+            src="<%= thumbnailUrl %>" 
+            alt="Campaña: <%= campaign.title %>" 
+            class="campaign-card-image"
+            loading="lazy">
+        <span class="campaign-card-category"><%= campaign.category %></span>
+    </a>
+
+    <div class="card-content">
+        <h3 class="card-title">
+            <a href="/campaign/<%= campaign._id %>"><%= campaign.title %></a>
+        </h3>
+        
+        <div class="card-organizer">
+            <img src="<%= campaign.userId.profilePic %>" alt="Organizador" class="organizer-avatar">
+            <span>Por <a href="/user/<%= campaign.userId.username %>" class="organizer-link"><%= campaign.userId.username %></a></span>
+            <% if (campaign.userId.isVerified) { %>
+                <i class="fas fa-check-circle verification-badge" title="Organizador Verificado"></i>
+            <% } %>
+        </div>
+
+        <div class="progress-stats">
+            <div class="progress-bar-container">
+                <% const progress = campaign.goalAmount > 0 ? (campaign.amountRaised / campaign.goalAmount) * 100 : 0; %>
+                <div class="progress-bar" style="width: <%= Math.min(progress, 100) %>%"></div>
+            </div>
+            <div class="stats-text">
+                <span class="amount-raised"><strong><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong></span>
+                <span class="card-likes"><i class="fas fa-heart"></i> <%= campaign.likes.length %></span>
+            </div>
+        </div>
+
+        <a href="/campaign/<%= campaign._id %>/donate" class="btn btn-primary btn-block">
+            <i class="fas fa-heart"></i> Donar Ahora
+        </a>
+    </div>
+</div>
+<% } %>

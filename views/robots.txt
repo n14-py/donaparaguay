@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /settings/
+Disallow: /chat/
+Disallow: /my-videos
+Disallow: /my-likes
+Disallow: /notifications
+Disallow: /add-funds
+Disallow: /admin/
+
+Sitemap: https://donaparaguay.com/sitemap.xml

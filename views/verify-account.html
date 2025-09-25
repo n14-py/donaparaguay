@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Identidad - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="form-container auth-form">
+        <h2>Verificación de Identidad del Organizador</h2>
+        
+        <% if (locals.status === 'pending') { %>
+            <div class="alert alert-info text-center">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <h4>Tu solicitud está en revisión</h4>
+                <p>Recibimos tus documentos y los revisaremos en las próximas 24 horas hábiles.</p>
+            </div>
+        <% } else { %>
+            <% if (locals.status === 'rejected') { %>
+                <div class="alert alert-danger">
+                    <h4>Tu verificación fue rechazada</h4>
+                    <p><strong>Motivo:</strong> <%= locals.reason || 'No se especificó un motivo.' %></p>
+                    <p>Por favor, asegúrate de que las fotos sean claras y vuelve a intentarlo.</p>
+                </div>
+            <% } %>
+
+            <div class="verification-benefits" style="background-color: var(--surface-light-color); padding: 1.5rem; border-radius: var(--border-radius-soft); margin-bottom: 2rem;">
+                <h4 style="text-align: center; color: var(--primary-color);">¡Obtén la insignia de Organizador Verificado!</h4>
+                <p style="text-align: center; font-size: 0.9rem; margin-top: 1rem;">Verificar tu perfil genera confianza en los donantes y es un requisito para poder crear campañas y recaudar fondos en nuestra plataforma.</p>
+                <ul style="font-size: 0.9rem; padding-left: 20px; margin-top: 1rem;">
+                    <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Aumenta la <strong>confianza y seguridad</strong> de los donantes.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Reduce el riesgo de <strong>fraudes y perfiles falsos</strong>.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Habilita la creación de <strong>campañas de recaudación</strong>.</li>
+                </ul>
+            </div>
+
+           <form action="/verify-account" method="POST" enctype="multipart/form-data" id="verification-form">
+    <div class="form-group">
+        <label><i class="fas fa-id-card"></i> 1. Sube el frente de tu Cédula de Identidad</label>
+        <input type="file" name="frontIdPhoto" class="form-control" accept="image/*" required>
+    </div>
+
+    <div class="form-group">
+        <label><i class="fas fa-id-card-alt"></i> 2. Sube el reverso de tu Cédula de Identidad</label>
+        <input type="file" name="backIdPhoto" class="form-control" accept="image/*" required>
+    </div>
+
+    <div class="alert alert-info" style="font-size: 0.9rem;">
+        <i class="fas fa-shield-alt"></i> <strong>Tu privacidad es importante.</strong> Al verificarte, aceptas nuestros términos sobre la retención segura de tus documentos para validar tu identidad.
+    </div>
+    <button type="submit" id="submit-btn" class="btn btn-primary btn-block">Enviar para Verificación</button>
+</form>
+        <% } %>
+    </div>
+</main>
+
+<%- include('partials/footer.html') %>
+
+</body>
+</html>

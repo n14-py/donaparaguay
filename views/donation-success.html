@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Gracias por tu donación! - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="form-container text-center" style="max-width: 600px; margin: 4rem auto;">
+        <i class="fas fa-heart fa-3x" style="color: var(--primary-color); margin-bottom: 1.5rem;"></i>
+        <h2>¡Tu donación ha sido registrada!</h2>
+        <p>Muchas gracias por tu generosidad. Hemos recibido tu comprobante y lo estamos revisando.</p>
+        <p>Una vez que nuestro equipo apruebe la donación, el monto se sumará a la campaña <strong>"<%= campaign.title %>"</strong>.</p>
+        <hr>
+        <div style="margin-top: 2rem;">
+            <a href="/campaign/<%= campaign._id %>" class="btn btn-secondary">Volver a la Campaña</a>
+            <a href="/campaigns" class="btn btn-primary">Explorar otras Causas</a>
+        </div>
+    </div>
+</main>
+<%- include('partials/footer.html') %>
+</body>
+</html>

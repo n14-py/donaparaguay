@@ -1,0 +1,71 @@
+<header class="main-header">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <a href="/campaigns">
+                <i class="fas fa-hands-helping"></i>
+                Dona Paraguay
+            </a>
+        </div>
+
+        <nav class="navbar-nav">
+             <a href="/campaigns">Campañas</a>
+             <a href="/faq">¿Cómo funciona?</a>
+        </nav>
+
+        <div class="navbar-actions">
+            <% if (currentUser) { %>
+                <div class="user-menu">
+                    <button class="user-avatar-button" id="user-avatar-toggle">
+                        <img src="<%= currentUser.profilePic %>" alt="Avatar de <%= currentUser.username %>" class="user-avatar">
+                        <span><%= currentUser.username %></span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown-menu">
+                        <a href="/profile"><i class="fas fa-user fa-fw"></i> Mi Perfil</a>
+                        <a href="/my-donations"><i class="fas fa-heart fa-fw"></i> Mis Donaciones</a>
+                        <a href="/settings/dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> Panel de Organizador</a>
+                        <% if (currentUser.role === 'Admin') { %>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/dashboard"><i class="fas fa-user-shield fa-fw"></i> Panel de Admin</a>
+                        <% } %>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-logout"><i class="fas fa-sign-out-alt fa-fw"></i> Cerrar Sesión</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/login" class="btn btn-secondary">Iniciar Sesión</a>
+                <a href="/register" class="btn btn-primary">Registrarse</a>
+            <% } %>
+        </div>
+         <div class="mobile-menu-icon" id="mobile-menu-open">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+</header>
+
+<div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+<nav class="mobile-nav-panel" id="mobile-nav">
+   </nav>
+
+<script>
+    // Este pequeño script es importante para el nuevo menú desplegable
+    document.addEventListener('DOMContentLoaded', () => {
+        const userAvatarButton = document.getElementById('user-avatar-toggle');
+        const userDropdown = document.getElementById('user-dropdown-menu');
+
+        if (userAvatarButton && userDropdown) {
+            userAvatarButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                userDropdown.classList.toggle('active');
+            });
+        }
+        
+        document.addEventListener('click', (event) => {
+            if (userDropdown && userDropdown.classList.contains('active')) {
+                if (!userDropdown.contains(event.target) && !userAvatarButton.contains(event.target)) {
+                    userDropdown.classList.remove('active');
+                }
+            }
+        });
+    });
+</script>

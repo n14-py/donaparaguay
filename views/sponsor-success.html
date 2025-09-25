@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Solicitud Recibida! - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="form-container text-center" style="max-width: 600px; margin: 4rem auto;">
+        <i class="fas fa-check-circle fa-3x" style="color: var(--success-color); margin-bottom: 1.5rem;"></i>
+        <h2>¡Hemos recibido tu solicitud!</h2>
+        <p>Muchas gracias por tu interés en apoyar a Dona Paraguay. Hemos recibido tu comprobante y lo estamos revisando.</p>
+        <p>Una vez que nuestro equipo apruebe el pago, tu logo aparecerá en los espacios designados y comenzará el período de patrocinio.</p>
+        <hr>
+        <div style="margin-top: 2rem;">
+            <a href="/campaigns" class="btn btn-primary">Volver al Inicio</a>
+        </div>
+    </div>
+</main>
+<%- include('partials/footer.html') %>
+</body>
+</html>

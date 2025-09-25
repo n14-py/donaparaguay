@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguridad de la Cuenta - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('../partials/header.html') %>
+<main class="container">
+    <div class="settings-layout">
+        <aside class="settings-sidebar">
+            <nav>
+                <a href="/settings/dashboard"><i class="fas fa-tachometer-alt"></i> Panel</a>
+                <a href="/settings/profile"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+                <a href="/settings/payouts"><i class="fas fa-hand-holding-usd"></i> Retiros</a>
+                <a href="/settings/security" class="active"><i class="fas fa-shield-alt"></i> Seguridad</a>
+            </nav>
+        </aside>
+        <section class="settings-content">
+            <div class="form-container settings-form">
+                <h2><i class="fas fa-shield-alt"></i> Configuración de Seguridad</h2>
+                <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+                <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+                <% if (hasPassword) { %>
+                    <p>Establece tus preguntas de seguridad para poder recuperar tu cuenta si olvidas tu contraseña.</p>
+                    <hr>
+
+<p>Establece tus preguntas de seguridad para poder recuperar tu cuenta si olvidas tu contraseña.</p>
+<hr>
+
+<form action="/settings/privacy" method="POST" style="margin-bottom: 2rem;">
+    <h4><i class="fas fa-eye-slash"></i> Privacidad del Perfil</h4>
+    <p>Controla qué información se muestra públicamente en tu perfil.</p>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="showDonations" id="showDonationsCheck" <%= (currentUser.privacySettings && currentUser.privacySettings.showDonations) ? 'checked' : '' %>>
+      <label class="form-check-label" for="showDonationsCheck">
+        Mostrar mi historial de donaciones en mi perfil público.
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Guardar Privacidad</button>
+</form>
+<hr>
+
+<form action="/settings/security" method="POST">
+    <% const questions = ["¿Cuál es el nombre de tu primera mascota?", "¿En qué ciudad naciste?", "¿Cuál es tu comida favorita?", "¿Cuál era el nombre de tu escuela primaria?"]; %>
+    <div class="form-group">
+        <label for="question1">Pregunta 1</label>
+        <select name="question1" id="question1" class="form-control" required>
+            <% questions.forEach(q => { %><option value="<%= q %>" <%= (currentUser.securityQuestions && currentUser.securityQuestions[0] && currentUser.securityQuestions[0].question === q) ? 'selected' : '' %>><%= q %></option><% }); %>
+        </select>
+        <input type="text" name="answer1" class="form-control" placeholder="Tu respuesta secreta 1" required style="margin-top: 0.5rem;">
+    </div>
+    <div class="form-group">
+        <label for="question2">Pregunta 2</label>
+        <select name="question2" id="question2" class="form-control" required>
+            <% questions.forEach(q => { %><option value="<%= q %>" <%= (currentUser.securityQuestions && currentUser.securityQuestions[1] && currentUser.securityQuestions[1].question === q) ? 'selected' : '' %>><%= q %></option><% }); %>
+        </select>
+        <input type="text" name="answer2" class="form-control" placeholder="Tu respuesta secreta 2" required style="margin-top: 0.5rem;">
+    </div>
+    <hr>
+    <div class="form-group">
+        <label for="password">Confirma con tu contraseña actual</label>
+        <input type="password" name="password" id="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Guardar Preguntas</button>
+</form>
+                <% } else { %>
+                    <p>Registraste tu cuenta con Google. Para mayor seguridad, necesitas crear una contraseña local.</p>
+                    <hr>
+                    <form action="/settings/create-password" method="POST">
+                        <div class="form-group"><label for="newPassword">Crea tu Contraseña</label><input type="password" id="newPassword" name="newPassword" class="form-control" required></div>
+                        <div class="form-group"><label for="confirmPassword">Confirma tu Contraseña</label><input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required></div>
+                        <button type="submit" class="btn btn-primary btn-block">Crear Contraseña</button>
+                    </form>
+                <% } %>
+                
+                <% if (hasPassword) { %>
+                <div class="danger-zone" style="margin-top: 3rem; border-top: 2px solid var(--danger-color); padding-top: 1.5rem;">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Zona de Peligro</h3>
+                    <p>Esta acción es irreversible y eliminará todos tus datos de forma permanente.</p>
+                    <form action="/settings/delete-account" method="POST" id="delete-account-form">
+                        <div class="form-group">
+                            <label for="delete-password">Paso 1: Introduce tu contraseña</label>
+                            <input type="password" id="delete-password" name="password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="verificationCode">Paso 2: Código de Verificación</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="text" id="verificationCode" name="verificationCode" class="form-control" required placeholder="Código de 6 dígitos">
+                                <button type="button" id="send-code-btn" class="btn btn-secondary">Enviar Código</button>
+                            </div>
+                            <small class="form-text text-muted" id="code-status"></small>
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-block">Eliminar mi cuenta permanentemente</button>
+                    </form>
+                </div>
+                <% } %>
+            </div>
+        </section>
+    </div>
+</main>
+<%- include('../partials/footer.html') %>
+<script>
+document.getElementById('send-code-btn').addEventListener('click', async (e) => {
+    const btn = e.target;
+    const statusEl = document.getElementById('code-status');
+    btn.disabled = true;
+    statusEl.textContent = 'Enviando código...';
+    try {
+        const response = await fetch('/settings/send-deletion-code', { method: 'POST' });
+        if (response.ok) {
+            statusEl.textContent = '¡Código enviado a tu correo! Válido por 5 minutos.';
+            statusEl.style.color = 'var(--success-color)';
+        } else {
+            statusEl.textContent = 'Error al enviar el código.';
+            statusEl.style.color = 'var(--danger-color)';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        statusEl.textContent = 'Error de red.';
+        statusEl.style.color = 'var(--danger-color)';
+        btn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>
