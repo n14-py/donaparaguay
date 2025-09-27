@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Campaña - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="form-container auth-form">
+        <h2><i class="fas fa-edit"></i> Editar Campaña</h2>
+        <p>Realiza los ajustes necesarios y guarda los cambios para que se reflejen en la página pública de tu campaña.</p>
+        <hr>
+
+        <form action="/campaign/<%= campaign._id %>/edit" method="POST">
+            <div class="form-group">
+                <label for="title">Título de la Campaña</label>
+                <input type="text" id="title" name="title" class="form-control" required value="<%= campaign.title %>">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Descripción / Historia</label>
+                <textarea id="description" name="description" rows="8" class="form-control" required placeholder="Cuenta la historia detrás de tu causa. Sé claro y transparente."><%= campaign.description %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="goalAmount">Meta de Recaudación (en Guaraníes)</label>
+                <input type="number" id="goalAmount" name="goalAmount" class="form-control" required value="<%= campaign.goalAmount %>" min="100000">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Categoría</label>
+                <select id="category" name="category" class="form-control" required>
+                    <% CATEGORIES.forEach(cat => { %>
+                        <option value="<%= cat %>" <%= campaign.category === cat ? 'selected' : '' %>><%= cat %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Ubicación de la Causa</label>
+                <select id="location" name="location" class="form-control" required>
+                    <% CITIES.forEach(city => { %>
+                        <option value="<%= city %>" <%= campaign.location === city ? 'selected' : '' %>><%= city %></option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                <i class="fas fa-info-circle"></i> Nota: La edición de imágenes y videos no está disponible en esta sección para mantener la consistencia de la campaña. Si necesitas hacer un cambio drástico, contacta a soporte.
+            </p>
+
+            <hr>
+            <div class="form-group-actions">
+                <a href="/campaign/<%= campaign._id %>" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+    .form-group-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .form-group-actions .btn {
+        flex-grow: 1;
+    }
+</style>
+
+<%- include('partials/footer.html') %>
+
+</body>
+</html>

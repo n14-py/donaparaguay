@@ -13,48 +13,57 @@
 
 <main class="container">
     <div class="page-header">
-        <h1><i class="fas fa-heart"></i> Mis Donaciones</h1>
+        <h1><i class="fas fa-heart" style="color: var(--primary-color);"></i> Mis Donaciones</h1>
         <p>Aquí puedes ver un historial de todas las causas que has apoyado. ¡Gracias por tu generosidad!</p>
     </div>
 
-    <div class="list-container">
-        <% if (donations && donations.length > 0) { %>
-            <div class="table-responsive">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Campaña</th>
-                            <th>Monto Donado</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% donations.forEach(donation => { %>
-                            <tr>
-                                <td><%= formatDate(donation.createdAt) %></td>
-                                <td>
-                                    <% if (donation.campaignId) { %>
-                                        <a href="/campaign/<%= donation.campaignId._id %>" style="font-weight: bold;"><%= donation.campaignId.title %></a>
-                                    <% } else { %>
-                                        <span class="text-muted">Campaña eliminada</span>
-                                    <% } %>
-                                </td>
-                                <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.</strong></td>
-                                <td><span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span></td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
+    <% if (donations && donations.length > 0) { %>
+        <% 
+            const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0);
+            const totalCampaignsSupported = new Set(donations.map(d => d.campaignId ? d.campaignId.toString() : null)).size;
+        %>
+        <div class="donations-summary-card">
+            <div class="summary-item">
+                <span class="summary-value"><%= new Intl.NumberFormat('es-PY').format(totalDonated) %> Gs.</span>
+                <span class="summary-label">Total Donado</span>
             </div>
-        <% } else { %>
-            <div class="no-results-card">
-                <h3>Aún no has realizado ninguna donación</h3>
-                <p>Explora las campañas y encuentra una causa para apoyar.</p>
-                <a href="/campaigns" class="btn btn-primary">Ver Campañas</a>
+            <div class="summary-item">
+                <span class="summary-value"><%= donations.length %></span>
+                <span class="summary-label">Donaciones Realizadas</span>
             </div>
-        <% } %>
-    </div>
+            <div class="summary-item">
+                <span class="summary-value"><%= totalCampaignsSupported %></span>
+                <span class="summary-label">Causas Apoyadas</span>
+            </div>
+        </div>
+
+        <div class="donations-list-container">
+            <% donations.forEach(donation => { %>
+                <div class="donation-history-card">
+                    <div class="card-main-info">
+                        <% if (donation.campaignId) { %>
+                            <a href="/campaign/<%= donation.campaignId._id %>" class="campaign-title"><%= donation.campaignId.title %></a>
+                        <% } else { %>
+                            <span class="campaign-title text-muted">Campaña eliminada</span>
+                        <% } %>
+                        <div class="donation-amount">
+                            <%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.
+                        </div>
+                    </div>
+                    <div class="card-meta-info">
+                        <span><i class="fas fa-calendar-alt"></i> <%= formatDate(donation.createdAt) %></span>
+                        <span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="no-results-card" style="margin-top: 2rem;">
+            <h3>Aún no has realizado ninguna donación</h3>
+            <p>Explora las campañas y encuentra una causa para apoyar.</p>
+            <a href="/campaigns" class="btn btn-primary" style="margin-top: 1rem;">Ver Campañas</a>
+        </div>
+    <% } %>
 </main>
 
 <%- include('partials/footer.html') %>

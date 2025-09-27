@@ -27,8 +27,8 @@
 
             <div class="profile-stats">
                 <span><strong><%= campaigns.length %></strong> Campañas</span>
+                <span><strong><%= new Intl.NumberFormat('es-PY').format(totalDonated) %> Gs.</strong> Total Donado</span>
                 <span><strong><%= userProfile.followers.length %></strong> Seguidores</span>
-                <span><strong><%= userProfile.following.length %></strong> Siguiendo</span>
             </div>
             
             <% if (userProfile.bio) { %>

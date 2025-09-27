@@ -18,11 +18,12 @@
                     <button class="user-avatar-button" id="user-avatar-toggle">
                         <img src="<%= currentUser.profilePic %>" alt="Avatar de <%= currentUser.username %>" class="user-avatar">
                         <span><%= currentUser.username %></span>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8em;"></i>
                     </button>
                     <div class="user-dropdown" id="user-dropdown-menu">
-                        <a href="/profile"><i class="fas fa-user fa-fw"></i> Mi Perfil</a>
-                        <a href="/my-donations"><i class="fas fa-heart fa-fw"></i> Mis Donaciones</a>
+    <a href="/profile"><i class="fas fa-user fa-fw"></i> Mi Perfil</a>
+    <a href="/notifications"><i class="fas fa-bell fa-fw"></i> Notificaciones <span class="badge" id="notification-count"><%= unreadNotifications > 0 ? unreadNotifications : '' %></span></a>
+    <a href="/my-donations"><i class="fas fa-heart fa-fw"></i> Mis Donaciones</a>
                         <a href="/settings/dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> Panel de Organizador</a>
                         <% if (currentUser.role === 'Admin') { %>
                             <div class="dropdown-divider"></div>
@@ -37,35 +38,62 @@
                 <a href="/register" class="btn btn-primary">Registrarse</a>
             <% } %>
         </div>
-         <div class="mobile-menu-icon" id="mobile-menu-open">
+
+        <div class="mobile-menu-icon" id="mobile-menu-open">
             <i class="fas fa-bars"></i>
         </div>
     </div>
 </header>
 
 <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
-<nav class="mobile-nav-panel" id="mobile-nav">
-   </nav>
+<nav class="mobile-nav-panel" id="mobile-nav-panel"></nav>
 
 <script>
-    // Este pequeño script es importante para el nuevo menú desplegable
-    document.addEventListener('DOMContentLoaded', () => {
-        const userAvatarButton = document.getElementById('user-avatar-toggle');
-        const userDropdown = document.getElementById('user-dropdown-menu');
-
-        if (userAvatarButton && userDropdown) {
-            userAvatarButton.addEventListener('click', (event) => {
-                event.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
+document.addEventListener('DOMContentLoaded', () => {
+    const userAvatarButton = document.getElementById('user-avatar-toggle');
+    const userDropdown = document.getElementById('user-dropdown-menu');
+    if (userAvatarButton) {
+        userAvatarButton.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('active'); });
+    }
+    document.addEventListener('click', (e) => {
+        if (userDropdown && userDropdown.classList.contains('active') && !userAvatarButton.contains(e.target)) {
+            userDropdown.classList.remove('active');
         }
-        
-        document.addEventListener('click', (event) => {
-            if (userDropdown && userDropdown.classList.contains('active')) {
-                if (!userDropdown.contains(event.target) && !userAvatarButton.contains(event.target)) {
-                    userDropdown.classList.remove('active');
-                }
-            }
-        });
     });
+
+    const mobileMenuOpenBtn = document.getElementById('mobile-menu-open');
+    const mobileNavPanel = document.getElementById('mobile-nav-panel');
+    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+
+    const setupMobileMenu = () => {
+        mobileNavPanel.innerHTML = '';
+        const desktopNav = document.querySelector('.main-header .navbar-nav');
+        if (desktopNav) mobileNavPanel.appendChild(desktopNav.cloneNode(true));
+        const divider = document.createElement('div');
+        divider.className = 'dropdown-divider';
+        mobileNavPanel.appendChild(divider);
+
+        <% if (currentUser) { %>
+            const userDropdownLinks = document.querySelector('.main-header .user-dropdown');
+            if (userDropdownLinks) {
+                const linksContainer = document.createElement('div');
+                linksContainer.className = 'user-dropdown-links';
+                userDropdownLinks.querySelectorAll('a, .dropdown-divider').forEach(el => {
+                    linksContainer.appendChild(el.cloneNode(true));
+                });
+                mobileNavPanel.appendChild(linksContainer);
+            }
+        <% } else { %>
+            const desktopActions = document.querySelector('.main-header .navbar-actions');
+            if (desktopActions) mobileNavPanel.appendChild(desktopActions.cloneNode(true));
+        <% } %>
+    };
+
+    const toggleMobileMenu = (e) => { e.stopPropagation(); mobileNavPanel.classList.toggle('active'); mobileNavOverlay.classList.toggle('active'); };
+    if (mobileMenuOpenBtn) {
+        mobileMenuOpenBtn.addEventListener('click', toggleMobileMenu);
+        mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+        setupMobileMenu();
+    }
+});
 </script>

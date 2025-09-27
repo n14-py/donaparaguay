@@ -1,0 +1,31 @@
+<!-- Contenido para: donaparaguay/views/partials/comment-partial.html -->
+<div class="comment-item" id="comment-<%= comment._id %>">
+    <% if (comment.userId) { %>
+        <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
+        <div class="comment-content">
+            <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
+    <% } else { %>
+        <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
+        <div class="comment-content">
+            <strong>[Usuario Eliminado]</strong>
+    <% } %>
+        <p class="comment-text"><%- comment.text %></p>
+        <small><%= formatDate(comment.createdAt) %></small>
+
+        <% if(locals.currentUser && comment.userId) { %>
+            <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
+        <% } %>
+
+        <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
+            <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
+                <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
+                <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
+                <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+            </form>
+        </div>
+
+        <div class="comment-replies">
+            <%# Las respuestas se añadirán aquí dinámicamente %>
+        </div>
+    </div>
+</div>

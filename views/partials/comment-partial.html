@@ -1,0 +1,29 @@
+<% function renderComment(comment) { %>
+    <div class="comment-item" id="comment-<%= comment._id %>">
+        <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
+        <div class="comment-content">
+            <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
+            <p><%- comment.text %></p>
+            <small><%= formatDate(comment.createdAt) %></small>
+            <% if(locals.currentUser) { %>
+            <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
+            <% } %>
+            <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
+                <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-prepend-target="#comment-<%= comment._id %> .comment-replies">
+                    <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
+                    <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
+                    <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+                </form>
+            </div>
+            <div class="comment-replies">
+            <% if (comment.replies && comment.replies.length > 0) { %>
+                <% comment.replies.forEach(reply => { %>
+                    <%- renderComment(reply) %>
+                <% }) %>
+            <% } %>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- renderComment(comment) %>

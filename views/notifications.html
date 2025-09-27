@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Notificaciones - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Estilos específicos para la página de notificaciones */
+        .notification-list {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .notification-item:hover {
+            background-color: var(--primary-color-light);
+        }
+        .notification-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+        .notification-content {
+            flex-grow: 1;
+        }
+        .notification-message {
+            margin: 0;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+        .notification-message a {
+            font-weight: 600;
+            color: var(--primary-color-dark);
+        }
+        .notification-time {
+            font-size: 0.85rem;
+            color: var(--text-muted-color);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-bell" style="color: var(--primary-color);"></i> Notificaciones</h1>
+        <p>Aquí encontrarás las últimas actualizaciones sobre tus campañas y donaciones.</p>
+    </div>
+
+    <div class="notification-list">
+        <% if (notifications && notifications.length > 0) { %>
+            <% notifications.forEach(notification => { %>
+                <a href="<%= notification.campaignId ? '/campaign/' + notification.campaignId._id : '#' %>" class="notification-item">
+                    <div class="notification-icon">
+                        <% if (notification.type === 'donation') { %>
+                            <i class="fas fa-heart"></i>
+                        <% } else if (notification.type === 'comment') { %>
+                            <i class="fas fa-comment"></i>
+                        <% } else { %>
+                            <i class="fas fa-info-circle"></i>
+                        <% } %>
+                    </div>
+                    <div class="notification-content">
+                        <p class="notification-message">
+                            <% if (notification.actorId) { %>
+                                <strong><%= notification.actorId.username %></strong>
+                            <% } %>
+                            <%= notification.message %>
+                        </p>
+                        <div class="notification-time"><%= formatDate(notification.createdAt) %></div>
+                    </div>
+                </a>
+            <% }); %>
+        <% } else { %>
+            <div class="no-results-card" style="box-shadow: none; padding: 4rem 2rem;">
+                <h3>No tienes notificaciones nuevas</h3>
+                <p>Las actualizaciones sobre tus donaciones y campañas aparecerán aquí.</p>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<%- include('partials/footer.html') %>
+</body>
+</html>

@@ -1,33 +1,51 @@
 <section class="sponsors-section-v2">
-    <div class="container">
-        <div class="sponsors-header">
-            <h2 class="sponsors-title-v2">Quienes Impulsan Nuestra Causa</h2>
-            <p class="sponsors-subtitle-v2">
-                Nuestro más profundo agradecimiento a estos aliados que, con su valioso aporte, hacen posible que esta plataforma siga conectando y ayudando a miles de paraguayos.
-            </p>
-        </div>
-        
-        <div class="sponsors-scroll-container">
-            <div class="sponsors-grid-v2">
-                <% if (typeof activeSponsors !== 'undefined' && activeSponsors.length > 0) { %>
-                    <% activeSponsors.forEach(sponsor => { %>
-                        <div class="sponsor-card">
-                            <a href="<%= sponsor.companyWebsite %>" target="_blank" rel="noopener noreferrer" title="<%= sponsor.companyName %>">
-                                <img src="<%= sponsor.companyLogo.replace('/upload/', '/upload/h_90,c_limit,q_auto,f_auto/') %>" alt="Logo <%= sponsor.companyName %>">
-                            </a>
-                        </div>
-                    <% }); %>
-                <% } else { %>
-                    <div class="no-sponsors-message">
-                        <h4>¡Conviértete en el primer aliado de nuestra causa!</h4>
-                        <p>Tu apoyo puede ser el impulso que necesitamos.</p>
-                    </div>
-                <% } %>
-            </div>
+    <div class="sponsors-header">
+        <h2 class="sponsors-title-v2">Quienes Impulsan Nuestra Causa</h2>
+        <p class="sponsors-subtitle-v2">
+            Nuestro más profundo agradecimiento a estos aliados que, con su valioso aporte, hacen posible que esta plataforma siga conectando y ayudando a miles de paraguayos.
+        </p>
+    </div>
+    
+    <div class="sponsors-scroll-container" id="sponsors-container">
         </div>
 
-        <div class="sponsors-cta">
-             <a href="/sponsors/apply" class="btn btn-primary">Suma tu Apoyo Aquí</a>
-        </div>
+    <div class="sponsors-cta">
+         <a href="/sponsors/apply" class="btn btn-primary">Suma tu Apoyo Aquí</a>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sponsorsData = <%- JSON.stringify(typeof activeSponsors !== 'undefined' ? activeSponsors : []) %>;
+    const container = document.getElementById('sponsors-container');
+
+    if (sponsorsData.length > 0) {
+        // Crear el contenido original
+        let content = '';
+        sponsorsData.forEach(sponsor => {
+            content += `
+                <div class="sponsor-card">
+                    <a href="${sponsor.companyWebsite}" target="_blank" rel="noopener noreferrer" title="${sponsor.companyName}">
+                        <img src="${sponsor.companyLogo.replace('/upload/', '/upload/h_90,c_limit,q_auto,f_auto/')}" alt="Logo ${sponsor.companyName}">
+                    </a>
+                </div>
+            `;
+        });
+        
+        // Duplicar el contenido para el bucle infinito y añadirlo al contenedor
+        container.innerHTML = content + content;
+        
+        // Ajustar la duración de la animación según la cantidad de sponsors
+        const duration = sponsorsData.length * 5; // 5 segundos por sponsor (ajustable)
+        container.style.animation = `scroll ${duration}s linear infinite`;
+
+    } else {
+        container.innerHTML = `
+            <div class="no-sponsors-message">
+                <h4>¡Conviértete en el primer aliado de nuestra causa!</h4>
+                <p>Tu apoyo puede ser el impulso que necesitamos.</p>
+            </div>
+        `;
+    }
+});
+</script>

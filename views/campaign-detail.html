@@ -107,6 +107,7 @@
             <div id="donations-content" class="tab-content active">
                 <div class="donations-list" id="donations-list-container">
                     <% donations.forEach(donation => { %>
+                        <% if (donation.userId) { %>
                         <div class="donation-item">
                             <img src="<%= donation.userId.profilePic %>" alt="Avatar" class="donation-avatar">
                             <div class="donation-content">
@@ -115,6 +116,7 @@
                                 <small class="donation-time"><%= formatDate(donation.createdAt) %></small>
                             </div>
                         </div>
+                        <% } %>
                     <% }); %>
                 </div>
                 <% if (totalDonations > donations.length) { %>
@@ -124,22 +126,100 @@
 
             <div id="updates-content" class="tab-content" style="display: none;">
                  <% if (isOwner) { %>
-                    <form action="/campaign/<%= campaign._id %>/update" method="POST" class="update-form"><h4>Publicar una actualización</h4><textarea name="content" rows="4" class="form-control" placeholder="Comparte el progreso de tu campaña..." required></textarea><button type="submit" class="btn btn-primary">Publicar</button></form>
+                    <form action="/campaign/<%= campaign._id %>/update" method="POST" class="update-form ajax-form" data-prepend-target="#updates-list-container">
+                        <h4>Publicar una actualización</h4>
+                        <textarea name="content" rows="4" class="form-control" placeholder="Comparte el progreso de tu campaña..." required></textarea>
+                        <button type="submit" class="btn btn-primary">Publicar</button>
+                    </form>
                 <% } %>
                 <div class="updates-list" id="updates-list-container">
-                    <% updates.forEach(update => { %><div class="update-item"><p><%- update.content %></p><small><%= formatDate(update.createdAt) %></small></div><% }); %>
+                    <% updates.forEach(update => { %>
+                        <div class="update-item">
+                            <p><%- update.content %></p>
+                            <small><%= formatDate(update.createdAt) %></small>
+                        </div>
+                    <% }); %>
                 </div>
-                <% if (totalUpdates > updates.length) { %><button id="load-more-updates" class="btn btn-secondary btn-block">Cargar más actualizaciones</button><% } %>
+                <% if (totalUpdates > updates.length) { %>
+                    <button id="load-more-updates" class="btn btn-secondary btn-block">Cargar más actualizaciones</button>
+                <% } %>
             </div>
 
             <div id="comments-content" class="tab-content" style="display: none;">
                 <% if (currentUser) { %>
-                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="comment-form"><h4>Deja un comentario</h4><textarea name="text" rows="3" class="form-control" placeholder="Escribe un mensaje de apoyo..." required></textarea><button type="submit" class="btn btn-primary">Comentar</button></form>
-                <% } else { %><p><a href="/login">Inicia sesión</a> para dejar un comentario.</p><% } %>
-                <div class="comments-list" id="comments-list-container">
-                    <% comments.forEach(comment => { %><div class="comment-item"><img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar"><div class="comment-content"><strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong><p><%- comment.text %></p><small><%= formatDate(comment.createdAt) %></small></div></div><% }); %>
+                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="comment-form ajax-form" data-prepend-target="#comments-list-container">
+                        <h4>Deja un comentario</h4>
+                        <textarea name="text" id="main-comment-textarea" rows="3" class="form-control" placeholder="Escribe un mensaje de apoyo..." required></textarea>
+                        <button type="submit" class="btn btn-primary">Comentar</button>
+                    </form>
+                <% } else { %>
+                    <p><a href="/login">Inicia sesión</a> para dejar un comentario.</p>
+                <% } %>
+                
+         <!-- REEMPLAZA LA SECCIÓN DE LA LISTA DE COMENTARIOS CON ESTA: -->
+<div class="comments-list" id="comments-list-container">
+    <% comments.forEach(comment => { %>
+        <div class="comment-item" id="comment-<%= comment._id %>">
+            <% if (comment.userId) { %>
+                <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
+                <div class="comment-content">
+                    <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
+            <% } else { %>
+                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
+                <div class="comment-content">
+                    <strong>[Usuario Eliminado]</strong>
+            <% } %>
+                <p class="comment-text"><%- comment.text %></p>
+                <small><%= formatDate(comment.createdAt) %></small>
+                
+                <% if(currentUser && comment.userId) { %>
+                    <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
+                <% } %>
+            
+                <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
+                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
+                        <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
+                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
+                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+                    </form>
                 </div>
-                <% if (totalComments > comments.length) { %><button id="load-more-comments" class="btn btn-secondary btn-block">Cargar más comentarios</button><% } %>
+            
+                <!-- Aquí se mostrarán todas las respuestas, sin anidamiento extra -->
+                <div class="comment-replies">
+                <% if (comment.replies && comment.replies.length > 0) { %>
+                    <% comment.replies.forEach(reply => { %>
+                        <div class="comment-item is-reply" id="comment-<%= reply._id %>">
+                             <% if (reply.userId) { %>
+                                <img src="<%= reply.userId.profilePic %>" alt="avatar" class="comment-avatar">
+                                <div class="comment-content">
+                                    <strong><a href="/user/<%= reply.userId.username %>"><%= reply.userId.username %></a></strong>
+                            <% } else { %>
+                                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
+                                <div class="comment-content">
+                                    <strong>[Usuario Eliminado]</strong>
+                            <% } %>
+                                <p class="comment-text"><%- reply.text %></p>
+                                <small><%= formatDate(reply.createdAt) %></small>
+                                <% if(currentUser && reply.userId) { %>
+                                    <a href="#" class="reply-btn" data-comment-id="<%= reply._id %>">Responder</a>
+                                <% } %>
+                                <div class="reply-form-container" id="reply-form-<%= reply._id %>" style="display:none;">
+                                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
+                                        <input type="hidden" name="parentCommentId" value="<%= reply._id %>">
+                                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
+                                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+                                    </form>
+                                </div>
+                                 <div class="comment-replies"></div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+</div>
             </div>
         </div>
 
@@ -165,61 +245,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- LÓGICA DE PAGINACIÓN ---
-    const campaignId = '<%= campaign._id %>';
-    let commentPage = 1;
-    let donationPage = 1;
-    let updatePage = 1;
-
-    async function loadMore(type, page, containerId, buttonId) {
-        try {
-            const response = await fetch(`/api/campaign/${campaignId}/${type}?page=${page}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            const container = document.getElementById(containerId);
-            
-            // Función para formatear fechas como en el backend
-            const formatDate = (dateString) => {
-                const d = new Date(dateString);
-                const now = new Date();
-                const diffSeconds = Math.round((now - d) / 1000);
-                if (diffSeconds < 60) return 'Justo ahora';
-                const diffMinutes = Math.round(diffSeconds / 60);
-                if (diffMinutes < 60) return `Hace ${diffMinutes} min`;
-                const diffHours = Math.round(diffMinutes / 60);
-                if (diffHours < 24) return `Hace ${diffHours} h`;
-                return d.toLocaleDateString('es-PY');
-            };
-
-            data.items.forEach(item => {
-                const itemElement = document.createElement('div');
-                if (type === 'comments') {
-                    itemElement.classList.add('comment-item');
-                    itemElement.innerHTML = `<img src="${item.userId.profilePic}" alt="avatar" class="comment-avatar"><div class="comment-content"><strong><a href="/user/${item.userId.username}">${item.userId.username}</a></strong><p>${item.text}</p><small>${formatDate(item.createdAt)}</small></div>`;
-                } else if (type === 'donations') {
-                     itemElement.classList.add('donation-item');
-                     itemElement.innerHTML = `<img src="${item.userId.profilePic}" alt="Avatar" class="donation-avatar"><div class="donation-content"><div><strong><a href="/user/${item.userId.username}">${item.userId.username}</a></strong> donó <strong>${new Intl.NumberFormat('es-PY').format(item.campaignAmount)} Gs.</strong></div>${item.comment ? `<p class="donation-comment">"${item.comment}"</p>` : ''}<small class="donation-time">${formatDate(item.createdAt)}</small></div>`;
-                } else if (type === 'updates') {
-                    itemElement.classList.add('update-item');
-                    itemElement.innerHTML = `<p>${item.content}</p><small>${formatDate(item.createdAt)}</small>`;
-                }
-                container.appendChild(itemElement);
-            });
-
-            if (!data.hasMore) {
-                document.getElementById(buttonId).style.display = 'none';
-            }
-        } catch (error) {
-            console.error(`Error al cargar más ${type}:`, error);
-        }
-    }
-    
-    document.getElementById('load-more-comments')?.addEventListener('click', () => { commentPage++; loadMore('comments', commentPage, 'comments-list-container', 'load-more-comments'); });
-    document.getElementById('load-more-donations')?.addEventListener('click', () => { donationPage++; loadMore('donations', donationPage, 'donations-list-container', 'load-more-donations'); });
-    document.getElementById('load-more-updates')?.addEventListener('click', () => { updatePage++; loadMore('updates', updatePage, 'updates-list-container', 'load-more-updates'); });
-
-
-    // --- LÓGICA DE INTERFAZ (SLIDER, TABS, LIKE, ETC.) ---
+    // --- LÓGICA DE INTERFAZ GENERAL (SLIDER, LIKE, ETC.) ---
     const slider = document.querySelector('.image-slider-container');
     if (slider) {
         let currentSlideIndex = 0;
@@ -232,43 +258,121 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.getElementById('like-button')?.addEventListener('click', async () => {
-        <% if (currentUser) { %>
-            const response = await fetch(`/campaign/${campaignId}/like`, { method: 'POST' });
-            if (response.ok) {
-                const data = await response.json();
-                document.getElementById('like-count').textContent = data.likes;
-                document.getElementById('like-button').classList.toggle('btn-danger', data.liked);
-                document.getElementById('like-button').classList.toggle('btn-secondary', !data.liked);
-            }
-        <% } else { %>
-            window.location.href = '/login';
-        <% } %>
-    });
-    
+    const likeButton = document.getElementById('like-button');
+    if(likeButton) {
+        likeButton.addEventListener('click', async () => {
+            <% if (currentUser) { %>
+                const response = await fetch('/campaign/<%= campaign._id %>/like', { method: 'POST' });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('like-count').textContent = data.likes;
+                    likeButton.classList.toggle('btn-danger', data.liked);
+                    likeButton.classList.toggle('btn-secondary', !data.liked);
+                }
+            <% } else { %>
+                window.location.href = '/login';
+            <% } %>
+        });
+    }
+
+    // --- SCRIPT PARA PESTAÑAS (TABS) ---
     const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.addEventListener('click', e => {
-        e.preventDefault();
-        const target = tab.getAttribute('data-tab');
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        tabContents.forEach(c => c.style.display = c.id === `${target}-content` ? 'block' : 'none');
-    }));
+    tabs.forEach(tab => {
+        tab.addEventListener('click', e => {
+            e.preventDefault(); 
+            const target = tab.getAttribute('data-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            tabContents.forEach(c => {
+                c.style.display = 'none';
+                c.classList.remove('active');
+            });
+            const activeContent = document.getElementById(`${target}-content`);
+            if(activeContent) {
+                activeContent.style.display = 'block';
+                activeContent.classList.add('active');
+            }
+        });
+    });
 
-    // Modal de compartir (sin cambios)
+    // --- SCRIPT CORREGIDO PARA COMENTARIOS (SOLO MANEJA EL BOTÓN DE RESPONDER) ---
+    document.getElementById('comments-content').addEventListener('click', (event) => {
+        const target = event.target;
+
+        if (target.matches('.reply-btn')) {
+            event.preventDefault();
+            const commentId = target.dataset.commentId;
+            const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
+            
+            if (replyFormContainer) {
+                const isVisible = replyFormContainer.style.display === 'block';
+                // Oculta todos los otros formularios de respuesta abiertos
+                document.querySelectorAll('.reply-form-container').forEach(form => form.style.display = 'none');
+                // Muestra u oculta el formulario actual
+                replyFormContainer.style.display = isVisible ? 'none' : 'block';
+                if (!isVisible) {
+                    replyFormContainer.querySelector('textarea').focus();
+                }
+            }
+        }
+    });
+
+    // --- LÓGICA COMPLETA PARA MODAL DE COMPARTIR ---
     const shareModal = document.getElementById('shareModal');
     const openShareBtn = document.getElementById('open-share-modal-btn');
     const closeShareBtn = document.getElementById('shareModalCloseBtn');
-    if (openShareBtn) {
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+
+    if (openShareBtn && shareModal) {
         openShareBtn.addEventListener('click', () => {
-            // ... (código del modal de compartir)
+            const campaignUrl = window.location.href;
+            const campaignTitle = `<%= campaign.title.replace(/'/g, "\\'") %>`;
+            const shareText = `¡Apoya la campaña "${campaignTitle}" en Dona Paraguay!`;
+            const encodedUrl = encodeURIComponent(campaignUrl);
+            const encodedText = encodeURIComponent(shareText);
+            const fullEncodedText = encodeURIComponent(`${shareText} ${campaignUrl}`);
+
+            document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${fullEncodedText}`;
+            document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+            document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
+            
             shareModal.style.display = 'flex';
         });
     }
-    if(closeShareBtn) closeShareBtn.addEventListener('click', () => shareModal.style.display = 'none');
+
+    if(closeShareBtn) {
+        closeShareBtn.addEventListener('click', () => {
+            shareModal.style.display = 'none';
+        });
+    }
+
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', () => {
+            const campaignUrl = window.location.href;
+            navigator.clipboard.writeText(campaignUrl).then(() => {
+                const originalText = copyLinkBtn.innerHTML;
+                copyLinkBtn.innerHTML = '¡Copiado!';
+                copyLinkBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyLinkBtn.innerHTML = originalText;
+                    copyLinkBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar el enlace: ', err);
+                alert('No se pudo copiar el enlace.');
+            });
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target == shareModal) {
+            shareModal.style.display = "none";
+        }
+    });
 });
 </script>
 
 </body>
 </html>
+

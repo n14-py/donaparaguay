@@ -82,18 +82,28 @@
                 <div class="final-withdrawals-list">
                     <h3>Historial de Retiros</h3>
                     <% if (withdrawals && withdrawals.length > 0) { %>
-                        <% withdrawals.forEach(w => { %>
-                            <div class="withdrawal-card">
-                                <div class="withdrawal-card-header">
-                                    <div class="withdrawal-status"><span class="badge status-<%= w.status.toLowerCase() %>"><%= w.status %></span></div>
-                                    <div class="withdrawal-amount"><%= new Intl.NumberFormat('es-PY').format(w.amount) %> Gs.</div>
-                                </div>
-                                <div class="withdrawal-card-body">
-                                    <div class="withdrawal-detail-row"><span>Método:</span><strong><%= w.method %></strong></div>
-                                    <div class="withdrawal-detail-row"><span>Fecha:</span><strong><%= formatDate(w.createdAt) %></strong></div>
-                                </div>
-                            </div>
-                        <% }); %>
+                        <div class="table-responsive">
+                            <table class="dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <% withdrawals.forEach(w => { %>
+                                    <tr>
+                                        <td><strong><%= new Intl.NumberFormat('es-PY').format(w.amount) %> Gs.</strong></td>
+                                        <td><%= w.method %></td>
+                                        <td><%= formatDate(w.createdAt) %></td>
+                                        <td><span class="badge status-<%= w.status.toLowerCase() %>"><%= w.status %></span></td>
+                                    </tr>
+                                <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
                     <% } else { %>
                         <p class="no-transactions-placeholder">Aún no has solicitado ningún retiro.</p>
                     <% } %>

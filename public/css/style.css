@@ -1,6 +1,6 @@
 /* ============================================= */
 /* --- ESTILOS COMPLETOS PARA DONA PARAGUAY --- */
-/* v8.0 - Edición Final y Pulida             */
+/* v11.0 - Carrusel de Sponsors y Ajustes Finales */
 /* ============================================= */
 
 /* --- FUENTE E ICONOS --- */
@@ -9,11 +9,10 @@
 /* ============================================= */
 /* --- VARIABLES Y ESTILOS BASE --- */
 /* ============================================= */
-
 :root {
     --primary-color: #007BFF;
     --primary-color-dark: #0056b3;
-    --primary-color-light: #e6f2ff;
+    --primary-color-light: #f0f8ff; /* Un azul más sutil para el fondo del carrusel */
     --secondary-color: #6c757d;
     --background-color: #f8f9fa;
     --surface-color: #FFFFFF;
@@ -39,29 +38,46 @@ body {
     color: var(--text-color);
     line-height: 1.7;
     font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
-.container { width: 100%; max-width: 1280px; margin: 2.5rem auto; padding: 0 1rem; }
+main.container {
+    flex-grow: 1;
+}
+.container { width: 100%; max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; }
 a { color: var(--primary-color); text-decoration: none; transition: color var(--transition-speed) ease; }
 a:hover { color: var(--primary-color-dark); text-decoration: none; }
 img { max-width: 100%; height: auto; display: block; }
 hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .badge { padding: .3em .6em; font-size: .8rem; font-weight: 600; border-radius: 50px; }
 
+/* --- AJUSTE PARA CENTRAR PÁGINAS DE LOGIN/REGISTRO --- */
+body.auth-page {
+    justify-content: center;
+}
+body.auth-page main.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
 /* ============================================= */
 /* --- HEADER Y NAVEGACIÓN --- */
 /* ============================================= */
-
 .main-header {
     background-color: var(--surface-color);
     border-bottom: 1px solid var(--border-color);
     position: sticky; top: 0; z-index: 1000;
+    flex-shrink: 0;
 }
 .navbar-container { max-width: 1300px; margin: 0 auto; padding: 0 1rem; height: 70px; display: flex; align-items: center; justify-content: space-between; }
-.navbar-brand a { font-size: 1.4rem; font-weight: 700; color: var(--text-color); }
+.navbar-brand a { font-size: 1.4rem; font-weight: 700; color: var(--text-color); padding: 0.5rem; }
 .navbar-brand a i { color: var(--primary-color); margin-right: 0.5rem; }
-.navbar-nav { display: none; gap: 1.5rem; }
-.navbar-nav a { font-weight: 500; color: var(--text-muted-color); padding: 0.5rem 0; border-bottom: 2px solid transparent; }
-.navbar-nav a:hover, .navbar-nav a.active { color: var(--text-color); border-bottom-color: var(--primary-color); }
+.navbar-nav { display: none; gap: 0.5rem; }
+.navbar-nav a { font-weight: 500; color: var(--text-muted-color); padding: 0.75rem 1rem; border-bottom: 2px solid transparent; border-radius: var(--border-radius-soft); }
+.navbar-nav a:hover, .navbar-nav a.active { color: var(--text-color); background-color: var(--background-color); }
 .navbar-actions { display: flex; align-items: center; gap: 0.5rem; }
 .user-menu { position: relative; }
 .user-avatar-button { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 50px; }
@@ -76,17 +92,15 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .user-dropdown.active { display: block; opacity: 1; transform: translateY(0); }
 .user-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 12px 15px; font-size: 0.95rem; }
 .user-dropdown a:hover { background-color: var(--background-color); }
-.mobile-menu-icon { display: block; font-size: 1.8rem; cursor: pointer; color: var(--text-color); }
-
+.mobile-menu-icon { display: none; font-size: 1.8rem; cursor: pointer; color: var(--text-color); }
 
 /* ============================================= */
 /* --- BOTONES Y FORMULARIOS --- */
 /* ============================================= */
-
 .btn {
     padding: 12px 24px; border: 1px solid transparent; border-radius: 50px; cursor: pointer;
     font-weight: 600; font-size: 0.9rem; text-transform: uppercase;
-    transition: all var(--transition-speed) ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    transition: all var(--transition-speed) ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;
 }
 .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .btn-primary { background-color: var(--primary-color); color: white; }
@@ -95,42 +109,66 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .btn-secondary:hover { background-color: var(--border-color); }
 .btn-danger { background-color: var(--danger-color); color: white; }
 .btn-danger:hover { background-color: #b22222; }
+.btn-block { width: 100%; }
 
-.form-container, .auth-container { background-color: var(--surface-color); padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); max-width: 550px; margin: 2rem auto; }
+.form-container, .auth-container {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    max-width: 450px;
+    margin: 1rem auto;
+    width: 100%;
+}
+.auth-container .form-group, .auth-container .social-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 .form-group { margin-bottom: 1.5rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; width: 100%; }
 .form-control { width: 100%; padding: 14px 18px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background-color: #fff; }
 .form-control:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15); }
 
+/* ============================================= */
+/* --- BOTÓN FLOTANTE (+) --- */
+/* ============================================= */
+.site-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: var(--shadow-md);
+    z-index: 999;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.site-fab:hover {
+    transform: scale(1.1);
+    background-color: var(--primary-color-dark);
+}
 
 /* ============================================= */
 /* --- COMPONENTES PULIDOS --- */
 /* ============================================= */
 
-/* Alertas de Error/Éxito */
 .alert {
     padding: 1rem;
     margin-bottom: 1.5rem;
     border-radius: var(--border-radius-soft);
     border: 1px solid transparent;
 }
-.alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-.alert-info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-}
+.alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+.alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+.alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
 
-/* Paginación */
 .pagination-container { margin-top: 3rem; }
 .pagination { display: flex; justify-content: center; list-style: none; padding: 0; }
 .page-item .page-link {
@@ -141,24 +179,15 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
     border-radius: var(--border-radius-soft);
     transition: all 0.2s ease;
 }
-.page-item .page-link:hover {
-    background-color: var(--primary-color-light);
-    border-color: var(--primary-color);
-}
-.page-item.active .page-link {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    font-weight: 700;
-}
-
+.page-item .page-link:hover { background-color: var(--primary-color-light); border-color: var(--primary-color); }
+.page-item.active .page-link { background-color: var(--primary-color); color: white; border-color: var(--primary-color); font-weight: 700; }
 
 /* ============================================= */
 /* --- PÁGINA DE INICIO (INDEX) --- */
 /* ============================================= */
 
-.hero-section { text-align: center; padding: 3rem 1rem 1rem; }
-.hero-section h1 { font-size: 2.5rem; font-weight: 700; }
+.hero-section { text-align: center; padding: 1.5rem 1rem 1rem; }
+.hero-section h1 { font-size: 2.2rem; font-weight: 700; }
 .hero-section p { font-size: 1.1rem; color: var(--text-muted-color); max-width: 600px; margin: 0.5rem auto 0; }
 .search-filter-container {
     background: var(--surface-color); padding: 0.75rem;
@@ -168,10 +197,7 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 }
 .search-input-wrapper { flex-grow: 1; position: relative; }
 .search-input-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted-color); }
-#search-input {
-    width: 100%; height: 50px; padding-left: 45px;
-    border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;
-}
+#search-input { width: 100%; height: 50px; padding-left: 45px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
 #filter-toggle-btn { height: 50px; flex-shrink: 0; }
 .filter-bar {
     background: var(--surface-color); padding: 1.5rem;
@@ -186,7 +212,6 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
     border-radius: var(--border-radius); box-shadow: var(--shadow-sm);
     grid-column: 1 / -1;
 }
-
 
 /* ============================================= */
 /* --- TARJETAS DE CAMPAÑA (CARD) --- */
@@ -220,27 +245,26 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
     padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem;
 }
 
-
 /* ============================================= */
 /* --- PERFILES DE USUARIO --- */
 /* ============================================= */
 
 .profile-header {
-    background: var(--surface-color); padding: 2rem;
+    background: var(--surface-color); padding: 2rem 1.5rem;
     border-radius: var(--border-radius); margin-bottom: 2rem;
     display: flex; flex-direction: column; align-items: center; text-align: center;
     box-shadow: var(--shadow-sm);
 }
-.profile-avatar img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 5px solid var(--surface-color); box-shadow: var(--shadow-md); margin-bottom: 1rem; }
-.profile-info h1 { font-size: 2rem; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
-.profile-stats { display: flex; justify-content: center; gap: 2rem; margin: 1rem 0; font-size: 1rem; color: var(--text-muted-color); }
-.profile-stats span strong { display: block; font-size: 1.5rem; font-weight: 700; color: var(--text-color); }
+.profile-avatar img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 5px solid var(--surface-color); box-shadow: var(--shadow-md); margin-bottom: 1rem; }
+.profile-info h1 { font-size: 1.8rem; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
+.profile-stats { display: flex; justify-content: center; gap: 1.5rem; margin: 1rem 0; font-size: 0.9rem; color: var(--text-muted-color); }
+.profile-stats span strong { display: block; font-size: 1.3rem; font-weight: 700; color: var(--text-color); }
 .profile-bio { color: var(--text-muted-color); max-width: 600px; margin: 1rem auto 1.5rem; }
-.profile-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
-.profile-tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
-.tab-link { padding: 1rem 0.5rem; font-weight: 600; color: var(--text-muted-color); border-bottom: 3px solid transparent; cursor: pointer; }
+.profile-actions { display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; width: 100%; max-width: 250px; }
+.profile-tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; overflow-x: auto; -webkit-overflow-scrolling: touch;}
+.profile-tabs::-webkit-scrollbar { display: none; }
+.tab-link { padding: 1rem 0.5rem; font-weight: 600; color: var(--text-muted-color); border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
 .tab-link.active, .tab-link:hover { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-
 
 /* ============================================= */
 /* --- DETALLE DE CAMPAÑA Y DONACIONES --- */
@@ -248,17 +272,15 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 
 .anuncio-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
 .anuncio-media img, .anuncio-media video { border-radius: var(--border-radius); box-shadow: var(--shadow-sm); }
-.anuncio-info h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; }
+.anuncio-sidebar .anuncio-info-card { background: var(--surface-color); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); }
+.anuncio-info h1 { font-size: 2rem; font-weight: 700; line-height: 1.3; }
 .campaign-meta { display: flex; gap: 1.5rem; color: var(--text-muted-color); font-size: 0.9rem; margin-top: 0.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
 .campaign-meta span i { margin-right: 0.4rem; color: var(--primary-color); }
-.campaign-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
-.campaign-actions .btn { flex-grow: 1; }
-.campaign-actions .btn-primary { flex-grow: 3; }
+.campaign-actions { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1.5rem; }
 .donation-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background-color: var(--surface-color); border-radius: var(--border-radius-soft); margin-bottom: 0.75rem; border: 1px solid var(--border-color); }
 .donation-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
 .donation-comment { margin: 0.25rem 0; font-style: italic; background-color: var(--background-color); padding: 0.75rem; border-radius: var(--border-radius-soft); }
 .donation-time { display: block; font-size: 0.8rem; color: var(--text-muted-color); }
-
 
 /* ============================================= */
 /* --- FORMULARIO DE DONACIÓN INTERACTIVO --- */
@@ -273,19 +295,20 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .amount-btn, .tip-btn { flex-grow: 1; padding: 1rem 0.5rem; font-size: 1rem; }
 .amount-btn.active-amount, .tip-btn.active-amount { background-color: var(--primary-color-dark); color: white; border-color: var(--primary-color-dark); transform: translateY(-2px); }
 
-
 /* ============================================= */
 /* --- PÁGINAS DE AJUSTES (SETTINGS) --- */
 /* ============================================= */
 
 .settings-layout { display: flex; flex-direction: column; gap: 1.5rem; }
-.settings-sidebar nav { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+.settings-sidebar nav { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch;}
+.settings-sidebar nav::-webkit-scrollbar { display: none; }
 .settings-sidebar a { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--border-radius-soft); white-space: nowrap; color: var(--text-muted-color); font-weight: 500; }
 .settings-sidebar a.active, .settings-sidebar a:hover { background-color: var(--primary-color-light); color: var(--primary-color-dark); }
 .settings-content { flex: 1; }
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .dashboard-table { width: 100%; border-collapse: collapse; background: var(--surface-color); border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-sm); }
-.dashboard-table th, .dashboard-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-.badge.status-aprobado, .badge.status-approved { background-color: #d4edda; color: #155724; }
+.dashboard-table th, .dashboard-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+.badge.status-aprobado, .badge.status-approved, .badge.status-procesado { background-color: #d4edda; color: #155724; }
 .badge.status-pendiente, .badge.status-pending { background-color: #fff3cd; color: #856404; }
 .badge.status-rechazado, .badge.status-rejected { background-color: #f8d7da; color: #721c24; }
 .fee-breakdown-box { background-color: var(--primary-color-light); border-left: 4px solid var(--primary-color); border-radius: var(--border-radius-soft); padding: 1rem; margin: 1rem 0; font-size: 0.95rem; }
@@ -300,7 +323,6 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .withdrawal-amount { font-weight: 700; font-size: 1.2rem; }
 .withdrawal-detail-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 0.25rem 0; }
 
-
 /* ============================================= */
 /* --- PÁGINAS ESTÁTICAS (FAQ, TÉRMINOS) --- */
 /* ============================================= */
@@ -311,7 +333,6 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .static-page-container h4 { font-size: 1.2rem; margin-top: 2rem; margin-bottom: 0.5rem; }
 .static-page-container p, .static-page-container li { color: var(--text-muted-color); }
 .static-page-container ul { padding-left: 20px; }
-
 
 /* ============================================= */
 /* --- MODALES Y FOOTER --- */
@@ -324,19 +345,191 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 .modal-actions { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 .transparency-details { font-size: 0.85rem; color: var(--text-muted-color); margin-top: 0.75rem; background: var(--background-color); padding: 0.75rem; border-radius: var(--border-radius-soft); }
 
-.main-footer { background-color: #212529; color: rgba(255, 255, 255, 0.8); padding: 3rem 1rem 0; margin-top: 4rem; }
+.main-footer {
+    background-color: #212529; color: rgba(255, 255, 255, 0.8);
+    padding: 3rem 1rem 0; margin-top: auto; flex-shrink: 0;
+}
 .footer-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 2.5rem; padding-bottom: 2.5rem; text-align: center; }
 .footer-title { font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 1rem; }
+.footer-section.links ul { list-style: none; padding: 0; }
+.footer-section.links a { color: inherit; text-decoration: none; }
+.footer-section.links a:hover { color: white; text-decoration: underline; }
 .footer-bottom { padding: 1.5rem 0; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.9rem; }
 
+/* ============================================= */
+/* --- SECCIÓN DE PATROCINADORES (ANIMADO) --- */
+/* ============================================= */
+@keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.sponsors-section-v2 {
+    background: var(--background-color);
+    padding: 4rem 0;
+    margin-top: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+.sponsors-header { text-align: center; max-width: 800px; margin: 0 auto 2.5rem; padding: 0 1rem;}
+.sponsors-title-v2 { font-size: 2rem; font-weight: 700; color: var(--text-color); margin-bottom: 1rem; }
+.sponsors-subtitle-v2 { font-size: 1.1rem; color: var(--text-muted-color); line-height: 1.8; }
+.sponsors-cta { text-align: center; margin-top: 3rem; }
+.sponsors-cta .btn { font-size: 1.1rem; padding: 14px 32px; }
+.no-sponsors-message { width: 100%; text-align: center; padding: 2rem; color: var(--text-muted-color); }
+
+.sponsors-carousel-wrapper {
+    position: relative;
+    width: 100%;
+}
+.sponsors-carousel-wrapper::before,
+.sponsors-carousel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    z-index: 2;
+    pointer-events: none;
+}
+.sponsors-carousel-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--background-color), transparent);
+}
+.sponsors-carousel-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--background-color), transparent);
+}
+
+.sponsors-scroll-container {
+    display: flex;
+    width: fit-content;
+    animation: scroll 60s linear infinite;
+}
+.sponsors-scroll-container:hover {
+    animation-play-state: paused;
+}
+.sponsor-card {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    width: 200px;
+    height: 120px;
+    margin: 0 1rem;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+.sponsor-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+.sponsor-card img { max-width: 100%; max-height: 70px; height: auto; opacity: 0.8; transition: all var(--transition-speed) ease; }
+.sponsor-card:hover img { opacity: 1; }
 
 /* ============================================= */
-/* --- RESPONSIVE DESIGN --- */
+/* --- NUEVAS FUNCIONES Y MEJORAS --- */
 /* ============================================= */
+.badges-list-container { background-color: var(--surface-color); border-radius: var(--border-radius); border: 1px solid var(--border-color); overflow: hidden; }
+.badge-list-item { display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem; border-bottom: 1px solid var(--border-color); }
+.badge-list-item:last-child { border-bottom: none; }
+.badge-list-icon i { font-size: 1.8rem; color: var(--primary-color); width: 55px; height: 55px; line-height: 55px; text-align: center; border-radius: 50%; background-color: var(--primary-color-light); }
+.badge-list-info h4 { margin: 0 0 0.25rem; font-size: 1.05rem; font-weight: 600; }
+.badge-list-info p { margin: 0; color: var(--text-muted-color); font-size: 0.9rem; }
+.campaign-story { background: var(--surface-color); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); margin-top: 2rem; }
+.campaign-story h3 { font-size: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+.btn-donate { padding: 1rem; font-size: 1.2rem; width: 100%; margin-top: 1.5rem; }
+.campaign-tabs-container { margin-top: 3rem; background: var(--surface-color); border-radius: var(--border-radius); border: 1px solid var(--border-color); overflow: hidden; }
+.recommended-section { margin-top: 3rem; }
+.image-slider-container { position: relative; overflow: hidden; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); }
+.image-slider-container .slide { display: none; }
+.image-slider-container .slide.active { display: block; }
+.slider-control { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0,0,0,0.4); color: white; padding: 0.5rem 1rem; border-radius: 50%; cursor: pointer; user-select: none; transition: background-color 0.2s ease; }
+.slider-control:hover { background-color: rgba(0,0,0,0.7); }
+.slider-control.prev { left: 10px; }
+.slider-control.next { right: 10px; }
+.organizer-info { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--border-color); }
+.avatar-lg { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+.organizer-info h4 { margin: 0; font-weight: 600; }
+.donation-summary { padding: 1.5rem 0 0; }
+.donation-stats { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;}
+.amount-raised { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); }
+
+/* ============================================= */
+/* --- DASHBOARD DE ORGANIZADOR --- */
+/* ============================================= */
+.dashboard-header { margin-bottom: 2rem; }
+.dashboard-header h2 { font-size: 2rem; font-weight: 700; }
+.stats-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
+.stat-card { background-color: var(--surface-color); border-radius: var(--border-radius); padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem; border: 1px solid var(--border-color); }
+.stat-card .stat-icon i { font-size: 1.8rem; color: var(--primary-color); width: 60px; height: 60px; display: grid; place-items: center; border-radius: 50%; background-color: var(--primary-color-light); }
+.stat-info h4 { font-size: 1rem; color: var(--text-muted-color); font-weight: 500; margin: 0 0 0.25rem; }
+.stat-info .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+.stat-card.main-balance { background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark)); color: white; }
+.stat-card.main-balance .stat-icon i, .stat-card.main-balance .stat-info h4, .stat-card.main-balance .stat-description { color: white; opacity: 0.9; }
+.stat-card.main-balance .stat-icon { background-color: rgba(255,255,255,0.2); }
+.campaign-management-list .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.campaign-management-list h3 { font-size: 1.5rem; }
+.campaign-list-cards { display: flex; flex-direction: column; gap: 1rem; }
+.campaign-manage-card { background-color: var(--surface-color); border-radius: var(--border-radius-soft); padding: 1rem 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; border: 1px solid var(--border-color); }
+.campaign-card-info .campaign-title { font-weight: 600; color: var(--text-color); }
+.campaign-card-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.8rem; color: var(--text-muted-color); margin-top: 0.5rem; }
+.campaign-card-progress { display: none; }
+.progress-bar-container.small { height: 6px; }
+.campaign-card-actions { display: flex; gap: 0.5rem; }
+.campaign-card-actions .btn-sm { width: 40px; height: 40px; padding: 0; font-size: 1rem; }
+
+/* ============================================= */
+/* --- MENÚ MÓVIL (PANEL LATERAL) --- */
+/* ============================================= */
+.mobile-nav-panel {
+    position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+    background: var(--surface-color); z-index: 2000;
+    transition: transform 0.3s ease-in-out;
+    padding: 2rem 1rem;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; gap: 1rem;
+}
+.mobile-nav-panel.active { transform: translateX(-300px); }
+.mobile-nav-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1999;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+}
+.mobile-nav-overlay.active { opacity: 1; visibility: visible; }
+.mobile-nav-panel .navbar-nav,
+.mobile-nav-panel .navbar-actions,
+.mobile-nav-panel .user-dropdown-links {
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 0.5rem; width: 100%;
+}
+.mobile-nav-panel .btn { width: 100%; justify-content: center; margin-top: 0.5rem;}
+.mobile-nav-panel a {
+    font-size: 1.1rem;
+    padding: 0.75rem;
+    color: var(--text-color);
+    width: 100%;
+    border-radius: var(--border-radius-soft);
+}
+.mobile-nav-panel a:hover {
+    background-color: var(--background-color);
+}
+.mobile-nav-panel .dropdown-divider { border-top: 1px solid var(--border-color); width: 100%; margin: 0.5rem 0; }
+
+/* ============================================= */
+/* --- MEDIA QUERIES --- */
+/* ============================================= */
+@media (max-width: 767px) {
+    .navbar-container .navbar-nav,
+    .navbar-container .navbar-actions { display: none; }
+    .mobile-menu-icon { display: block; }
+}
 
 @media (min-width: 768px) {
-    .container { padding: 0 2rem; }
+    .container { padding: 0 2rem; margin: 2.5rem auto; }
+    .form-container, .auth-container { padding: 2.5rem; }
     .navbar-nav { display: flex; }
+    .navbar-actions { display: flex; }
     .user-avatar-button span { display: inline; }
     .mobile-menu-icon { display: none; }
     .post-grid { grid-template-columns: repeat(2, 1fr); }
@@ -344,12 +537,23 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
     .footer-container { grid-template-columns: 2fr 1fr 1fr; text-align: left; }
     .settings-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
     .settings-sidebar { flex: 0 0 240px; }
-    .settings-sidebar nav { flex-direction: column; border-bottom: none; }
+    .settings-sidebar nav { flex-direction: column; border-bottom: none; overflow-x: visible; }
     .anuncio-container { grid-template-columns: 2fr 1fr; }
-    .profile-header { flex-direction: row; text-align: left; }
+    .campaign-actions { grid-template-columns: 1fr 1fr; }
+    .profile-header { flex-direction: row; text-align: left; padding: 2rem; }
     .profile-info h1 { justify-content: flex-start; }
     .profile-stats, .profile-actions { justify-content: flex-start; }
+    .profile-actions { flex-direction: row; width: auto; max-width: none; }
     .profile-avatar { margin-right: 2rem; margin-bottom: 0; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-card.main-balance { grid-column: 1 / -1; }
+    .campaign-manage-card { grid-template-columns: 2fr 1fr auto; }
+    .campaign-card-progress { display: block; }
+}
+
+@media (min-width: 992px) {
+    .anuncio-container { grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.5fr); }
+    .anuncio-sidebar .anuncio-info-card { position: sticky; top: 90px; }
 }
 
 @media (min-width: 1024px) {
@@ -357,540 +561,11 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
 }
 
 
-
-/* ============================================= */
-/* --- SECCIÓN DE PATROCINADORES --- */
-/* ============================================= */
-
-.sponsors-section {
-    background-color: var(--surface-color);
-    text-align: center;
-    padding: 3rem 1rem;
-    margin-top: 3rem;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.sponsors-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.sponsors-subtitle {
-    font-size: 1.1rem;
-    color: var(--text-muted-color);
-    max-width: 700px;
-    margin: 0 auto 2.5rem;
-}
-
-.sponsors-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-}
-
-.sponsor-logo {
-    flex-basis: 150px; /* Ancho base del logo */
-    opacity: 0.7;
-    transition: opacity var(--transition-speed) ease;
-}
-
-.sponsor-logo:hover {
-    opacity: 1;
-}
-
-.sponsor-logo img {
-    max-width: 100%;
-    height: auto;
-}
-
-/* Estilo para el nuevo botón de compartir */
-.btn-share {
-    background-color: #25D366; /* Color de WhatsApp */
-    color: white;
-}
-.btn-share:hover {
-    background-color: #128C7E;
-    color: white;
-}
-
-
-
-/* ============================================= */
-/* --- ESTILOS FORMULARIO DE SPONSORS --- */
-/* ============================================= */
-.sponsorship-total-box {
-    background-color: var(--primary-color-light);
-    border-left: 4px solid var(--primary-color);
-    border-radius: var(--border-radius-soft);
-    padding: 1rem 1.5rem;
-    margin-top: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-.sponsorship-total-box strong {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color-dark);
-}
-
-
-
-
-
-
-
-/* ============================================= */
-/* --- SECCIÓN DE PATROCINADORES v2 (REDiseño) --- */
-/* ============================================= */
-
-.sponsors-section-v2 {
-    background-color: var(--primary-color-light); /* Fondo azul claro suave */
-    padding: 4rem 1rem;
-    margin-top: 3rem;
-}
-
-.sponsors-header {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto 3rem;
-}
-
-.sponsors-title-v2 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--primary-color-dark);
-    margin-bottom: 1rem;
-}
-
-.sponsors-subtitle-v2 {
-    font-size: 1.1rem;
-    color: var(--text-muted-color);
-    line-height: 1.8;
-}
-
-.sponsors-grid-v2 {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.sponsor-card {
-    background-color: var(--surface-color);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    flex-basis: 200px; /* Ancho base de la tarjeta */
-    transition: all var(--transition-speed) ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 120px;
-}
-
-.sponsor-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-
-.sponsor-card img {
-    max-width: 100%;
-    height: auto;
-   /* filter: grayscale(100%); /* Logos en escala de grises */
-    opacity: 0.8;
-    transition: all var(--transition-speed) ease;
-}
-
-.sponsor-card:hover img {
-   /* filter: grayscale(0%);  /* Logos a color al pasar el mouse */
-    opacity: 1;
-}
-
-.sponsors-cta {
-    text-align: center;
-    margin-top: 3rem;
-}
-
-.sponsors-cta .btn {
-    font-size: 1.1rem;
-    padding: 14px 32px;
-}
-
-.no-sponsors-message {
-    width: 100%;
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted-color);
-}
-
-
-
-
 /* ================================================= */
-/* --- CSS FINAL PARA NUEVAS FUNCIONES Y MEJORAS --- */
+/* --- CSS ADICIONAL PARA DETALLE DE CAMPAÑA (MEJORADO) --- */
 /* ================================================= */
 
-/* --- Insignias en Perfil (Estilo Lista) --- */
-.badges-list-container {
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-}
-.badge-list-item {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-}
-.badge-list-item:last-child {
-    border-bottom: none;
-}
-.badge-list-icon i {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    width: 55px;
-    height: 55px;
-    line-height: 55px;
-    text-align: center;
-    border-radius: 50%;
-    background-color: var(--primary-color-light);
-}
-.badge-list-info h4 {
-    margin: 0 0 0.25rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-}
-.badge-list-info p {
-    margin: 0;
-    color: var(--text-muted-color);
-    font-size: 0.9rem;
-}
-
-/* --- Mejoras Generales en Detalle de Campaña --- */
-.anuncio-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
-@media (min-width: 992px) {
-    .anuncio-container {
-        grid-template-columns: 3fr 2fr; /* Proporción más balanceada */
-    }
-}
-.anuncio-info {
-    background-color: var(--surface-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-.anuncio-info h1 {
-    font-size: 2rem; /* Título ligeramente más pequeño y manejable */
-}
-
-/* --- Pestañas y su Contenido --- */
-.campaign-tabs {
-    display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-}
-.campaign-tabs .tab-link {
-    padding: 0.75rem 1rem;
-    margin-bottom: -2px;
-    border-bottom: 3px solid transparent;
-}
-.campaign-tabs .tab-link.active {
-    border-bottom-color: var(--primary-color);
-    font-weight: 600;
-}
-
-/* --- Estilo de Comentarios Mejorado --- */
-.comment-item {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.comment-item:last-child {
-    border-bottom: none;
-}
-.comment-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-.comment-content strong {
-    font-size: 0.95rem;
-}
-.comment-content p {
-    margin: 0.25rem 0 0.5rem;
-    font-size: 1rem;
-}
-.comment-content small {
-    font-size: 0.8rem;
-}
-
-/* --- Estilo de Actualizaciones --- */
-.update-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.update-item:last-child {
-    border-bottom: none;
-}
-.update-item p {
-    white-space: pre-wrap;
-    margin-bottom: 0.5rem;
-}
-
-/* --- Modal de Compartir (Sin cambios, ya estaba bien) --- */
-.share-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-.btn-share-whatsapp { background-color: #25D366; color: white; }
-.btn-share-facebook { background-color: #1877F2; color: white; }
-.btn-share-twitter { background-color: #1DA1F2; color: white; }
-
-
-
-
-
-/* ================================================= */
-/* --- CSS ADICIONAL PARA DETALLE DE CAMPAÑA --- */
-/* ================================================= */
-
-/* --- Slider de Imágenes --- */
-.image-slider-container {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-}
-.image-slider-container .slide {
-    display: none;
-}
-.image-slider-container .slide.active {
-    display: block;
-}
-.slider-control {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0,0,0,0.4);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 50%;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.2s ease;
-}
-.slider-control:hover {
-    background-color: rgba(0,0,0,0.7);
-}
-.slider-control.prev { left: 10px; }
-.slider-control.next { right: 10px; }
-
-
-/* --- Pestañas y su Contenido --- */
-.campaign-tabs {
-    display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-}
-.campaign-tabs .tab-link {
-    padding: 0.75rem 1rem;
-    margin-bottom: -2px;
-    border-bottom: 3px solid transparent;
-    font-weight: 500;
-    color: var(--text-muted-color);
-}
-.campaign-tabs .tab-link .badge {
-    background-color: var(--border-color);
-    color: var(--text-muted-color);
-}
-.campaign-tabs .tab-link.active {
-    border-bottom-color: var(--primary-color);
-    font-weight: 600;
-    color: var(--primary-color);
-}
-.campaign-tabs .tab-link.active .badge {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-/* --- Estilo de Comentarios Mejorado --- */
-.comment-item {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.comment-item:last-child {
-    border-bottom: none;
-}
-.comment-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-.comment-content strong {
-    font-size: 0.95rem;
-}
-.comment-content p {
-    margin: 0.25rem 0 0.5rem;
-    font-size: 1rem;
-}
-.comment-content small {
-    font-size: 0.8rem;
-    color: var(--text-muted-color);
-}
-.comment-form, .update-form {
-    margin-bottom: 2rem;
-}
-
-
-/* --- Estilo de Actualizaciones --- */
-.update-item {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    background-color: #fdfdfd;
-    border-left: 3px solid var(--primary-color-light);
-}
-.update-item:first-of-type {
-    border-top-left-radius: var(--border-radius-soft);
-    border-top-right-radius: var(--border-radius-soft);
-}
-.update-item:last-child {
-    border-bottom: none;
-    border-bottom-left-radius: var(--border-radius-soft);
-    border-bottom-right-radius: var(--border-radius-soft);
-}
-.update-item p {
-    white-space: pre-wrap;
-    margin-bottom: 0.5rem;
-}
-.update-item small {
-    color: var(--text-muted-color);
-}
-
-
-/* --- Mejoras Layout Detalle de Campaña --- */
-@media (min-width: 992px) {
-    .anuncio-container {
-        grid-template-columns: 3fr 2fr; /* Proporción más balanceada */
-    }
-}
-.anuncio-info {
-    background-color: var(--surface-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-.anuncio-info h1 {
-    font-size: 2rem; /* Título ligeramente más pequeño y manejable */
-}
-
-.organizer-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.avatar-lg {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.organizer-info h4 {
-    margin: 0;
-    font-weight: 600;
-}
-.donation-summary {
-    padding: 1.5rem 0 0;
-}
-.donation-stats {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-.amount-raised {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-
-
-
-/* ================================================= */
-/* --- CSS FINAL PARA DETALLE DE CAMPAÑA MEJORADO --- */
-/* ================================================= */
-
-/* --- Layout Principal --- */
-.anuncio-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
-@media (min-width: 992px) {
-    .anuncio-container {
-        grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.5fr); /* Layout flexible */
-    }
-}
-
-.anuncio-sidebar .anuncio-info-card {
-    position: sticky;
-    top: 90px; /* Debajo del header */
-    background: var(--surface-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-.campaign-story {
-    background: var(--surface-color);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    margin-top: 2rem;
-}
-.campaign-story h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
-}
-
-.btn-donate {
-    padding: 1rem;
-    font-size: 1.2rem;
-    width: 100%;
-    margin-top: 1.5rem;
-}
-.campaign-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-/* --- Tabs --- */
+/* --- Contenedor Principal de Pestañas --- */
 .campaign-tabs-container {
     margin-top: 3rem;
     background: var(--surface-color);
@@ -899,239 +574,304 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 2rem 0; }
     overflow: hidden;
 }
 
-/* --- Campañas Recomendadas --- */
-.recommended-section {
-    margin-top: 3rem;
-}
-
-
-
-/* ============================================= */
-/* --- V9 - MEJORAS DE ESTILO Y RESPONSIVIDAD --- */
-/* ============================================= */
-
-/* --- NUEVO DASHBOARD DE ORGANIZADOR --- */
-.dashboard-header {
-    margin-bottom: 2rem;
-}
-.dashboard-header h2 {
-    font-size: 2rem;
-    font-weight: 700;
-}
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-}
-.stat-card {
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
+/* --- Barra de Pestañas (Scrollable en móvil) --- */
+.campaign-tabs {
     display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    border: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto; /* Permite scroll horizontal en móvil */
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
 }
-.stat-card .stat-icon i {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    width: 60px;
-    height: 60px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background-color: var(--primary-color-light);
+/* Ocultar la barra de scroll visualmente */
+.campaign-tabs::-webkit-scrollbar {
+    display: none;
 }
-.stat-info h4 {
-    font-size: 1rem;
+
+.campaign-tabs .tab-link {
+    padding: 1rem 1.25rem; /* Más espacio para tocar */
+    margin-bottom: -2px;
+    border-bottom: 3px solid transparent;
+    font-weight: 600; /* Letra más legible */
     color: var(--text-muted-color);
-    font-weight: 500;
-    margin: 0 0 0.25rem;
-}
-.stat-info .stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    line-height: 1.2;
-}
-.stat-card.main-balance {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
-    color: white;
-}
-.stat-card.main-balance .stat-icon i, .stat-card.main-balance .stat-info h4 {
-    color: white;
-    opacity: 0.9;
-}
-.stat-card.main-balance .stat-icon {
-    background-color: rgba(255,255,255,0.2);
+    white-space: nowrap; /* Evita que el texto se parta */
+    flex-shrink: 0; /* Evita que los botones se encojan */
+    font-size: 1rem;
 }
 
-.campaign-management-list .list-header {
+.campaign-tabs .tab-link .badge {
+    background-color: var(--border-color);
+    color: var(--text-muted-color);
+    margin-left: 0.5rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.campaign-tabs .tab-link.active {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.campaign-tabs .tab-link.active .badge {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* --- Contenido de las Pestañas --- */
+.tab-content {
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .tab-content {
+        padding: 1.5rem 2rem;
+    }
+}
+
+/* --- Estilo de Comentarios Mejorado --- */
+.comment-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.campaign-management-list h3 {
-    font-size: 1.5rem;
-}
-.campaign-list-cards {
-    display: flex;
-    flex-direction: column;
     gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
-.campaign-manage-card {
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius-soft);
-    padding: 1rem 1.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    border: 1px solid var(--border-color);
+.comment-item:last-child {
+    border-bottom: none;
 }
-.campaign-card-info .campaign-title {
-    font-weight: 600;
+.comment-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.comment-content strong a {
+    font-size: 1rem;
     color: var(--text-color);
 }
-.campaign-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    font-size: 0.8rem;
-    color: var(--text-muted-color);
-    margin-top: 0.5rem;
-}
-.campaign-card-progress {
-    display: none; /* Oculto en móviles, visible en pantallas más grandes */
-}
-.progress-bar-container.small { height: 6px; }
-
-.campaign-card-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-.campaign-card-actions .btn-sm {
-    width: 40px;
-    height: 40px;
-    padding: 0;
+.comment-content p {
+    margin: 0.25rem 0 0.5rem;
     font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-muted-color);
+}
+.comment-content small {
+    font-size: 0.85rem;
+    color: var(--text-muted-color);
+}
+.comment-form, .update-form {
+    margin-bottom: 2rem;
 }
 
-/* --- SPONSORS CON SCROLL HORIZONTAL (MÓVIL) --- */
-.sponsors-scroll-container {
-    overflow-x: auto;
-    padding: 1rem 0;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+/* --- Estilo de Actualizaciones Mejorado --- */
+.update-item {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fdfdfd;
+    border-left: 4px solid var(--primary-color-light);
 }
-.sponsors-scroll-container::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+.update-item:first-of-type {
+    border-top: 1px solid var(--border-color);
 }
-.sponsors-grid-v2 {
-    flex-wrap: nowrap; /* Evita que los elementos se apilen */
-    gap: 1.5rem;
-    padding: 0 1rem;
-    justify-content: flex-start; /* Alinea al inicio */
+.update-item p {
+    white-space: pre-wrap;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.7;
 }
-.sponsor-card {
-    flex: 0 0 160px; /* Ancho fijo para cada tarjeta de sponsor */
+.update-item small {
+    color: var(--text-muted-color);
+    font-weight: 500;
 }
 
-/* --- AJUSTES RESPONSIVE GENERALES --- */
 
-/* Menú de móvil y Header */
-.mobile-nav-panel {
-    position: fixed;
-    top: 0;
-    right: -300px; /* Inicia fuera de la pantalla */
-    width: 280px;
-    height: 100%;
-    background: var(--surface-color);
-    z-index: 2000;
-    transition: transform 0.3s ease-in-out;
-    padding: 2rem 1rem;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+/* --- Mejoras Layout Detalle de Campaña --- */
+.anuncio-info {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
 }
-.mobile-nav-panel.active {
-    transform: translateX(-300px);
+.anuncio-info h1 {
+    font-size: 1.8rem; /* Título ligeramente más pequeño y manejable en móvil */
 }
-.mobile-nav-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
+
+@media (min-width: 768px) {
+    .anuncio-info {
+        padding: 2rem;
+    }
+    .anuncio-info h1 {
+        font-size: 2rem;
+    }
 }
-.mobile-nav-overlay.active {
-    opacity: 1;
-    visibility: visible;
+
+
+
+
+/* ============================================= */
+/* --- ESTILOS PARA PÁGINA "MIS DONACIONES" --- */
+/* ============================================= */
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
 }
-.mobile-nav-panel .navbar-nav, .mobile-nav-panel .navbar-actions {
+.page-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.page-header p {
+    font-size: 1.1rem;
+    color: var(--text-muted-color);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.donations-summary-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background-color: var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-sm);
+}
+.summary-item {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    text-align: center;
+}
+.summary-item .summary-value {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1.2;
+}
+.summary-item .summary-label {
+    font-size: 0.9rem;
+    color: var(--text-muted-color);
+}
+
+@media (min-width: 768px) {
+    .donations-summary-card {
+        grid-template-columns: repeat(3, 1fr);
+   }
+}
+
+.donations-list-container {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 1rem;
-    width: 100%;
-}
-.mobile-nav-panel .btn {
-    width: 100%;
-    justify-content: center;
 }
 
-/* Media Queries */
+.donation-history-card {
+    background-color: var(--surface-color);
+    border-radius: var(--border-radius-soft);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    transition: all var(--transition-speed) ease;
+}
+.donation-history-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.card-main-info .campaign-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+.card-main-info .campaign-title:hover {
+    color: var(--primary-color);
+}
+
+.card-main-info .donation-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.card-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-muted-color);
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.card-meta-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 @media (min-width: 768px) {
-    /* Grid de estadísticas del dashboard */
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .stat-card.main-balance {
-        grid-column: 1 / -1; /* Ocupa todo el ancho */
-    }
-    .campaign-manage-card {
-        grid-template-columns: 2fr 1fr auto;
-    }
-    .campaign-card-progress {
-        display: block;
-    }
-
-    /* Patrocinadores en desktop */
-    .sponsors-scroll-container {
-        overflow-x: visible;
-    }
-    .sponsors-grid-v2 {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .sponsor-card {
-        flex-basis: 200px;
-    }
+    .card-main-info {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+   }
+    .card-meta-info {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+   }
+    .card-main-info .donation-amount {
+        font-size: 1.25rem;
+   }
 }
 
-@media (max-width: 767px) {
-    /* Ocultar menú de escritorio en móvil */
-    .navbar-container .navbar-nav, 
-    .navbar-container .navbar-actions .btn,
-    .navbar-container .user-menu {
-        display: none;
-    }
-    .mobile-menu-icon {
-        display: block;
-    }
-    .anuncio-container {
-        grid-template-columns: 1fr;
-    }
-    .anuncio-sidebar .anuncio-info-card {
-        position: static;
-        top: auto;
-    }
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-    }
+
+
+
+
+/* --- ESTILOS PARA COMENTARIOS ANIDADOS --- */
+.comment-replies {
+    margin-top: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border-color);
+}
+.reply-btn {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    color: var(--text-muted-color);
+}
+.reply-btn:hover {
+    color: var(--primary-color);
+}
+.reply-form-container {
+    margin-top: 1rem;
+}
+.reply-form-container form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+.reply-form-container .btn-sm {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+}
+
+
+/* ============================================= */
+/* --- ESTILOS PARA FEEDBACK DE BOTÓN COPIAR --- */
+/* ============================================= */
+#copy-link-btn.copied {
+    background-color: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    cursor: default;
+}
+#copy-link-btn.copied:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
 }

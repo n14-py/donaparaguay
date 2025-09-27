@@ -258,8 +258,25 @@ const updateSchema = new mongoose.Schema({
 const commentSchema = new mongoose.Schema({
     campaignId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campaign', required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    text: { type: String, required: true, trim: true }
+    text: { type: String, required: true, trim: true },
+    parentCommentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null },
+    // Campos nuevos para manejar anidación y respuestas
+    replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+    depth: { type: Number, default: 0 } 
 }, { timestamps: true });
+
+// Busca este bloque en server.js
+const siteConfigSchema = new mongoose.Schema({
+    configKey: { type: String, default: 'main_config', unique: true },
+    verificationRequired: { type: Boolean, default: true },
+    platformFeeRate: { type: Number, default: 0.10, min: 0, max: 1 }, // 10% de comisión por defecto
+    cities: { type: [String], default: CITIES },
+    categories: { type: [String], default: CATEGORIES },
+    maxSponsorSlots: { type: Number, default: 10 },
+    // --- AÑADE ESTA LÍNEA ---
+    donationDetails: { type: String, default: '<strong>Banco:</strong> [Tu Banco]<br><strong>N° de Cuenta:</strong> [Tu N° de Cuenta]<br><strong>A nombre de:</strong> [Tu Nombre]<br><strong>CI:</strong> [Tu CI]' }
+});
+
 
 // Declaración de todos los modelos
 const User = mongoose.model('User', userSchema);
@@ -350,14 +367,7 @@ const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, max: 15, message: 'Demasiados intentos. Intenta de nuevo en 15 minutos.', standardHeaders: true, legacyHeaders: false,
 });
 
-const siteConfigSchema = new mongoose.Schema({
-    configKey: { type: String, default: 'main_config', unique: true },
-    verificationRequired: { type: Boolean, default: true },
-    platformFeeRate: { type: Number, default: 0.10, min: 0, max: 1 }, // 10% de comisión por defecto
-    cities: { type: [String], default: CITIES },
-    categories: { type: [String], default: CATEGORIES },
-    maxSponsorSlots: { type: Number, default: 10 },
-});
+
 const SiteConfig = mongoose.model('SiteConfig', siteConfigSchema);
 
 app.use(async (req, res, next) => {
@@ -659,11 +669,15 @@ app.get('/user/:username', async (req, res, next) => {
         if (!req.user || !req.user._id.equals(userProfile._id)) campaignQuery.status = 'approved';
         const campaigns = await Campaign.find(campaignQuery).sort({ createdAt: -1 });
 
-        let userDonations = [], totalDonated = 0;
+        const donations = await ManualDonation.find({ userId: userProfile._id, status: 'Aprobado' }).populate('campaignId', 'title _id');
+        
+        // --- CÓDIGO CORREGIDO ---
+        // Se asegura de que cada donación sea un número antes de sumar
+        const totalDonated = donations.reduce((sum, d) => sum + (Number(d.campaignAmount) || 0), 0);
+        
+        let userDonations = [];
         if (userProfile.privacySettings.showDonations || (req.user && req.user._id.equals(userProfile._id))) {
-            const donations = await ManualDonation.find({ userId: userProfile._id, status: 'Aprobado' }).populate('campaignId', 'title _id');
             userDonations = donations;
-            totalDonated = donations.reduce((sum, d) => sum + d.campaignAmount, 0);
         }
 
         const isFollowing = req.user ? req.user.following.some(id => id.equals(userProfile._id)) : false;
@@ -672,7 +686,6 @@ app.get('/user/:username', async (req, res, next) => {
         res.render(viewToRender, {
             userProfile, campaigns, userDonations, totalDonated,
             isFollowing,
-            badges: userProfile.badges, // <-- Dato para el botón de seguir
             pageTitle: `Perfil de ${userProfile.username}`,
             pageDescription: `Campañas y actividad de ${userProfile.username}.`
         });
@@ -826,15 +839,19 @@ app.post('/new-campaign', requireAuth, requireVerification, upload.array('files'
     }
 });
 
+// REEMPLAZA LA RUTA app.get('/campaign/:id', ...) COMPLETA CON ESTO:
 app.get('/campaign/:id', async (req, res, next) => {
     try {
         const campaign = await Campaign.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }, { new: true })
             .populate({ path: 'userId', match: { isBanned: { $ne: true } } });
 
-        if (!campaign || !campaign.userId) return res.status(404).render('error.html', { message: 'Esta campaña no está disponible.' });
+        if (!campaign || !campaign.userId) {
+            return res.status(404).render('error.html', { message: 'Esta campaña no está disponible.' });
+        }
 
         const isOwner = req.user && req.user._id.equals(campaign.userId._id);
         const isAdmin = req.user && req.user.role === 'Admin';
+
         if (campaign.status !== 'approved' && !isOwner && !isAdmin) {
              return res.status(403).render('error.html', { message: 'Esta campaña aún no ha sido aprobada.' });
         }
@@ -845,38 +862,58 @@ app.get('/campaign/:id', async (req, res, next) => {
             category: campaign.category, status: 'approved', _id: { $ne: campaign._id }
         }).sort({ views: -1 }).limit(3).populate('userId', 'username profilePic isVerified');
 
-const donations = await ManualDonation.find({ campaignId: campaign._id, status: 'Aprobado' })
-    .populate('userId', 'username profilePic')
-    .sort({ createdAt: -1 })
-    .limit(ITEMS_PER_PAGE);
-const totalDonations = await ManualDonation.countDocuments({ campaignId: campaign._id, status: 'Aprobado' });
+        const donations = await ManualDonation.find({ campaignId: campaign._id, status: 'Aprobado' })
+            .populate('userId', 'username profilePic')
+            .sort({ createdAt: -1 })
+            .limit(ITEMS_PER_PAGE);
+        const totalDonations = await ManualDonation.countDocuments({ campaignId: campaign._id, status: 'Aprobado' });
 
-            
-       const updates = await Update.find({ campaignId: campaign._id }).sort({ createdAt: -1 }).limit(ITEMS_PER_PAGE);
-const totalUpdates = await Update.countDocuments({ campaignId: campaign._id });
+        const updates = await Update.find({ campaignId: campaign._id }).sort({ createdAt: -1 }).limit(ITEMS_PER_PAGE);
+        const totalUpdates = await Update.countDocuments({ campaignId: campaign._id });
 
-const comments = await Comment.find({ campaignId: campaign._id }).populate('userId', 'username profilePic').sort({ createdAt: -1 }).limit(ITEMS_PER_PAGE);
-const totalComments = await Comment.countDocuments({ campaignId: campaign._id });
+        // --- LÓGICA DE BÚSQUEDA DE COMENTARIOS CORREGIDA Y ROBUSTA ---
+        const allComments = await Comment.find({ campaignId: campaign._id })
+            .populate('userId', 'username profilePic')
+            .sort({ createdAt: 'asc' });
 
-const userHasLiked = req.user ? campaign.likes.some(like => like.equals(req.user._id)) : false;
+        const commentMap = {};
+        allComments.forEach(comment => {
+            comment.replies = [];
+            commentMap[comment._id] = comment;
+        });
+
+        const nestedComments = [];
+        allComments.forEach(comment => {
+            if (comment.parentCommentId && commentMap[comment.parentCommentId]) {
+                commentMap[comment.parentCommentId].replies.push(comment);
+            } else {
+                nestedComments.push(comment);
+            }
+        });
+
+        nestedComments.sort((a, b) => b.createdAt - a.createdAt);
+        const totalComments = await Comment.countDocuments({ campaignId: campaign._id });
         
-const activeSponsors = await Sponsor.find({ status: 'active', expiresAt: { $gt: new Date() } }).sort({ createdAt: 1 });
+        const userHasLiked = req.user ? campaign.likes.some(like => like.equals(req.user._id)) : false;
+        
+        const activeSponsors = await Sponsor.find({ status: 'active', expiresAt: { $gt: new Date() } }).sort({ createdAt: 1 });
 
-res.render('campaign-detail.html', {
-    campaign, 
-    isOwner,
-    donations, // Lote inicial de donaciones
-    totalDonations, // Total para saber si mostrar el botón "cargar más"
-    updates,
-    totalUpdates,
-    comments,
-    totalComments,
-    recommendedCampaigns,
-    userHasLiked,
-    pageTitle: `${campaign.title} - Dona Paraguay`,
-    pageDescription: campaign.description.replace(/<[^>]*>?/gm, '').slice(0, 150),
-    activeSponsors
-});
+        res.render('campaign-detail.html', {
+            campaign, 
+            isOwner,
+            donations,
+            totalDonations,
+            updates,
+            totalUpdates,
+            comments: nestedComments,
+            totalComments,
+            recommendedCampaigns,
+            userHasLiked,
+            isAdmin,
+            pageTitle: `${campaign.title} - Dona Paraguay`,
+            pageDescription: campaign.description.replace(/<[^>]*>?/gm, '').slice(0, 150),
+            activeSponsors
+        });
     } catch (err) {
         next(err);
     }
@@ -932,11 +969,10 @@ app.post('/campaign/:id/delete', requireAuth, async (req, res, next) => {
 
 
 
-// Ruta para publicar una actualización de campaña
+// REEMPLAZA LA RUTA app.post('/campaign/:id/update', ...) COMPLETA CON ESTA:
 app.post('/campaign/:id/update', requireAuth, async (req, res, next) => {
     try {
         const campaign = await Campaign.findById(req.params.id);
-        // Solo el dueño puede publicar actualizaciones
         if (!campaign || !campaign.userId.equals(req.user._id)) {
             return res.status(403).send('No tienes permiso para hacer esto.');
         }
@@ -945,43 +981,90 @@ app.post('/campaign/:id/update', requireAuth, async (req, res, next) => {
         const newUpdate = new Update({
             campaignId: req.params.id,
             userId: req.user._id,
-            content: purify.sanitize(content, { USE_PROFILES: { html: true } }) // Permitimos HTML básico
+            content: purify.sanitize(content, { USE_PROFILES: { html: true } })
         });
         await newUpdate.save();
 
-        // Opcional: Notificar a seguidores/donantes
-        
+        // Si la petición es AJAX (desde el formulario), renderizamos solo el partial.
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            const partialPath = path.join(__dirname, 'views', 'partials', 'update-partial.html');
+            const html = await ejs.renderFile(partialPath, {
+                update: newUpdate,
+                formatDate: formatDate,
+                locals: res.locals 
+            });
+            // Enviamos solo el HTML del nuevo item, no la página completa.
+            return res.send(html);
+        }
+
+        // Si no es AJAX, redirigimos (como fallback).
         res.redirect(`/campaign/${req.params.id}`);
     } catch (err) {
+        console.error("Error al publicar actualización:", err);
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).send('No se pudo publicar la actualización.');
+        }
         next(err);
     }
 });
 
-// Ruta para publicar un comentario
+// REEMPLAZA LA RUTA app.post('/campaign/:id/comment', ...) COMPLETA CON ESTA:
 app.post('/campaign/:id/comment', requireAuth, async (req, res, next) => {
     try {
-        const { text } = req.body;
-        const newComment = new Comment({
-            campaignId: req.params.id,
+        const { text, parentCommentId } = req.body;
+        const campaignId = req.params.id;
+        const sanitizedText = purify.sanitize(text);
+        let rootCommentId = parentCommentId; // Asumimos que el padre es el comentario raíz inicialmente.
+
+        const newCommentData = {
+            campaignId,
             userId: req.user._id,
-            text: purify.sanitize(text) // No permitimos HTML en comentarios
-        });
+            text: sanitizedText
+        };
+
+        if (parentCommentId) {
+            const parentComment = await Comment.findById(parentCommentId).populate('userId', 'username');
+            if (parentComment) {
+                // Si el comentario al que respondo ya es una respuesta, busco a su verdadero padre (el comentario raíz).
+                if (parentComment.parentCommentId) {
+                    rootCommentId = parentComment.parentCommentId;
+                }
+                // Añadimos una mención al usuario que estamos respondiendo para dar contexto.
+                newCommentData.text = `<span class="mention">@${parentComment.userId.username}</span> ${sanitizedText}`;
+                newCommentData.parentCommentId = rootCommentId;
+            }
+        }
+        
+        const newComment = new Comment(newCommentData);
         await newComment.save();
         
-        const campaign = await Campaign.findById(req.params.id);
-        // Notificar al organizador sobre el nuevo comentario
-        if (campaign && !campaign.userId.equals(req.user._id)) {
-            await new Notification({
-                userId: campaign.userId,
-                actorId: req.user._id,
-                type: 'comment',
-                campaignId: campaign._id,
-                message: `dejó un nuevo comentario en tu campaña "${campaign.title}".`
-            }).save();
+        // Siempre añadimos la nueva respuesta al comentario raíz.
+        if (rootCommentId) {
+            await Comment.findByIdAndUpdate(rootCommentId, { $push: { replies: newComment._id } });
         }
 
-        res.redirect(`/campaign/${req.params.id}`);
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            const populatedComment = await Comment.findById(newComment._id).populate('userId', 'username profilePic');
+            const partialToRender = 'partials/reply-partial.html'; // Usamos siempre el partial de respuesta
+            const partialPath = path.join(__dirname, 'views', partialToRender);
+
+            const html = await ejs.renderFile(partialPath, { 
+                comment: populatedComment,
+                campaign: { _id: campaignId },
+                currentUser: req.user,
+                formatDate: formatDate,
+                locals: res.locals,
+                rootCommentId: rootCommentId // Pasamos el ID del comentario raíz a la plantilla
+            });
+            return res.send(html);
+        }
+        
+        res.redirect(`/campaign/${campaignId}`);
     } catch (err) {
+        console.error("Error al publicar comentario:", err);
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).send('No se pudo publicar el comentario.');
+        }
         next(err);
     }
 });
@@ -1493,6 +1576,39 @@ app.post('/admin/verification/:id/reject', requireAdmin, async (req, res, next) 
         }
         res.redirect('/admin/verifications');
     } catch (err) { next(err); }
+});
+
+
+
+// --- RUTAS DE CONFIGURACIÓN DEL ADMIN ---
+app.get('/admin/settings', requireAdmin, (req, res, next) => {
+    res.render('admin/settings.html', { 
+        path: req.path,
+        success: req.session.success,
+        error: req.session.error
+    });
+    delete req.session.success;
+    delete req.session.error;
+});
+
+app.post('/admin/settings', requireAdmin, async (req, res, next) => {
+    try {
+        const { donationDetails } = req.body;
+        const sanitizedDetails = purify.sanitize(donationDetails, {
+            ALLOWED_TAGS: ['strong', 'b', 'i', 'em', 'br', 'p', 'ul', 'li'],
+        });
+
+        await SiteConfig.findOneAndUpdate(
+            { configKey: 'main_config' },
+            { donationDetails: sanitizedDetails },
+            { upsert: true, new: true }
+        );
+        req.session.success = '¡Configuración guardada con éxito!';
+        res.redirect('/admin/settings');
+    } catch (err) {
+        req.session.error = 'Error al guardar la configuración.';
+        res.redirect('/admin/settings');
+    }
 });
 
 // =============================================
