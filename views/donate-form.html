@@ -40,7 +40,17 @@
                     <div id="donation-breakdown" style="font-size: 0.9em; color: #555;"></div>
                     <hr>
                     <p><strong>Datos para la transferencia/giro:</strong><br>
-                    <%- siteConfig.donationDetails %></p>
+                    <% if (activeBankAccount) { %>
+    <strong>Banco:</strong> <%= activeBankAccount.bankName %><br>
+    <strong>A nombre de:</strong> <%= activeBankAccount.accountHolderName %><br>
+    <strong>N° de Cuenta:</strong> <%= activeBankAccount.accountNumber %><br>
+    <strong>CI:</strong> <%= activeBankAccount.ci %><br>
+    <% if (activeBankAccount.details) { %>
+        <strong><%= activeBankAccount.details %></strong>
+    <% } %>
+<% } else { %>
+    <strong>Administrador: Por favor, activa una cuenta bancaria en el panel de configuración.</strong>
+<% } %>
                 </div>
 
                 <input type="hidden" id="amount" name="amount" value="">

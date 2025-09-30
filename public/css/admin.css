@@ -1,0 +1,167 @@
+/* ============================================= */
+/* --- ESTILOS PARA EL PANEL DE ADMINISTRADOR --- */
+/* v1.0 - Diseño Profesional y Responsivo      */
+/* ============================================= */
+
+/* --- VARIABLES Y ESTILOS BASE --- */
+:root {
+    --admin-primary: #4e73df;
+    --admin-secondary: #858796;
+    --admin-success: #1cc88a;
+    --admin-info: #36b9cc;
+    --admin-warning: #f6c23e;
+    --admin-danger: #e74a3b;
+    --admin-light: #f8f9fc;
+    --admin-dark: #5a5c69;
+    --font-family-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    background-color: var(--admin-light);
+    color: var(--admin-dark);
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.d-flex {
+    display: flex;
+    flex-direction: column; /* Cambiado para móviles primero */
+}
+
+/* --- BARRA LATERAL (SIDEBAR) --- */
+.sidebar {
+    background: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+    width: 100%; /* Ocupa todo el ancho en móvil */
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-content {
+    flex-grow: 1;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.9rem 1.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: white;
+    font-weight: 700;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.main-content {
+    flex-grow: 1;
+    padding: 1.5rem;
+}
+
+.text-gray-800 {
+    color: #3a3b45 !important;
+}
+
+.h3 {
+    font-weight: 400;
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 1rem 1.25rem;
+}
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.text-primary {
+    color: var(--admin-primary) !important;
+}
+
+/* --- TARJETAS DEL DASHBOARD --- */
+.card.border-left-warning { border-left: 4px solid var(--admin-warning); }
+.card.border-left-info { border-left: 4px solid var(--admin-info); }
+.card.border-left-success { border-left: 4px solid var(--admin-success); }
+.card.border-left-primary { border-left: 4px solid var(--admin-primary); }
+
+.card-footer {
+    text-decoration: none;
+    background: white;
+    border-top: 1px solid #e3e6f0;
+    transition: background-color 0.2s;
+}
+.card-footer:hover {
+    background-color: #f8f9fc;
+}
+
+/* --- TABLAS --- */
+.table-responsive {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+}
+.table {
+    margin-bottom: 0;
+}
+.table th, .table td {
+    vertical-align: middle;
+}
+
+/* --- MODALES --- */
+.modal-body img {
+    border: 3px solid #e3e6f0;
+    border-radius: 0.35rem;
+}
+
+/* ============================================= */
+/* --- DISEÑO RESPONSIVO --- */
+/* ============================================= */
+
+/* Para Tablets y Escritorios Pequeños (768px y más) */
+@media (min-width: 768px) {
+    .d-flex {
+        flex-direction: row; /* Vuelve al layout de columnas */
+    }
+
+    .sidebar {
+        width: 240px; /* Ancho fijo para la barra lateral */
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+
+    .main-content {
+        width: calc(100% - 240px); /* El contenido principal ocupa el resto */
+        padding: 2.5rem;
+    }
+}

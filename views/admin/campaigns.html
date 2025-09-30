@@ -17,14 +17,17 @@
                 DonaPY ADMIN
             </div>
             <ul class="nav flex-column">
-                <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
-                <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
-                <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
-                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
-                <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
-                <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
-            </ul>
+    <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+    <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
+    <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+    <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+    <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+    <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+    <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+    <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+    <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
+    <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
+</ul>
         </div>
         <div class="sidebar-footer">
             <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>

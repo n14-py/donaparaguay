@@ -125,7 +125,7 @@ const badgeSchema = new mongoose.Schema({
     icon: { type: String, required: true } // e.g., 'fa-heart', 'fa-fist-raised'
 });
 
-// Schemas
+// EN la sección de userSchema, añadir los nuevos campos:
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true, lowercase: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -133,7 +133,7 @@ const userSchema = new mongoose.Schema({
     googleId: { type: String },
     phone: { type: String },
     bio: String,
-    profilePic: { type: String, default: 'https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png' },
+    profilePic: { type: String, default: 'https://res.cloudinary.com/dmedd6w1q/image/upload/v1759087462/donaparaguay/assets/u9ldwfwvnvnblocojndb.png' },
     isVerified: { type: Boolean, default: false },
     isBanned: { type: Boolean, default: false },
     role: { type: String, enum: ['User', 'Admin', 'Moderator'], default: 'User' },
@@ -143,11 +143,18 @@ const userSchema = new mongoose.Schema({
     verificationCodeExpires: Date,
     verificationSecret: { type: String },
     isVerifiedEmail: { type: Boolean, default: false },
-    // --- LÍNEAS NUEVAS ---
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     privacySettings: { showDonations: { type: Boolean, default: true } },
-    badges: [badgeSchema] // Añade este campo al final de tu userSchema
+    badges: [badgeSchema],
+    // --- NUEVOS CAMPOS ---
+    gender: { type: String, enum: ['Masculino', 'Femenino', 'Otro', 'Prefiero no decirlo'] },
+    location: { type: String },
+    socialLinks: {
+        facebook: { type: String },
+        instagram: { type: String },
+        twitter: { type: String }
+    }
 }, { timestamps: true });
 
 
@@ -266,6 +273,7 @@ const commentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Busca este bloque en server.js
+// Busca este bloque en server.js
 const siteConfigSchema = new mongoose.Schema({
     configKey: { type: String, default: 'main_config', unique: true },
     verificationRequired: { type: Boolean, default: true },
@@ -273,8 +281,15 @@ const siteConfigSchema = new mongoose.Schema({
     cities: { type: [String], default: CITIES },
     categories: { type: [String], default: CATEGORIES },
     maxSponsorSlots: { type: Number, default: 10 },
-    // --- AÑADE ESTA LÍNEA ---
-    donationDetails: { type: String, default: '<strong>Banco:</strong> [Tu Banco]<br><strong>N° de Cuenta:</strong> [Tu N° de Cuenta]<br><strong>A nombre de:</strong> [Tu Nombre]<br><strong>CI:</strong> [Tu CI]' }
+    // --- LÍNEAS MODIFICADAS Y AÑADIDAS ---
+    bankAccounts: [{
+        bankName: String,
+        accountHolderName: String,
+        accountNumber: String,
+        ci: String,
+        details: String // Para alias, etc.
+    }],
+    activeBankAccountId: { type: mongoose.Schema.Types.ObjectId }
 });
 
 
@@ -380,6 +395,26 @@ app.use(async (req, res, next) => {
         res.locals.siteConfig = config;
         res.locals.CITIES = config.cities;
         res.locals.CATEGORIES = config.categories;
+
+        // --- CÓDIGO AÑADIDO PARA BANCO ACTIVO ---
+        if (config.activeBankAccountId) {
+            res.locals.activeBankAccount = config.bankAccounts.id(config.activeBankAccountId);
+        } else {
+            res.locals.activeBankAccount = null;
+        }
+        // --- FIN DEL CÓDIGO AÑADIDO ---
+
+        res.locals.currentUser = req.user;
+        res.locals.formatDate = formatDate;
+        res.locals.path = req.path;
+        res.locals.query = req.query;
+        res.locals.baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+        res.locals.session = req.session;
+        if (req.user) {
+            res.locals.unreadNotifications = await Notification.countDocuments({ userId: req.user._id, isRead: false });
+        } else {
+            res.locals.unreadNotifications = 0;
+        }
         next();
     } catch (err) {
         next(err);
@@ -507,35 +542,39 @@ app.get('/terms', (req, res) => res.render('terms'));
 app.get('/faq', (req, res) => res.render('faq'));
 
 app.get('/register', (req, res) => res.render('register', { error: null }));
+// REEMPLAZAR la ruta app.post('/register', ...) con este nuevo código:
 app.post('/register', loginLimiter, async (req, res, next) => {
     try {
-        const { username, email, password, phone } = req.body;
+        const { username, email, password, phone, gender } = req.body;
         if (!username || !email || !password) throw new Error("Todos los campos son obligatorios.");
 
         const existingUser = await User.findOne({ $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }] });
         if (existingUser) throw new Error('El email o nombre de usuario ya está en uso.');
 
         const hashedPassword = await bcrypt.hash(password, 12);
-        const secret = speakeasy.generateSecret({ length: 20 });
-
-        const user = new User({ username, email, password: hashedPassword, phone, verificationSecret: secret.base32 });
+        
+        const user = new User({ 
+            username, 
+            email, 
+            password: hashedPassword, 
+            phone,
+            gender,
+            isVerifiedEmail: true // El email se considera verificado al registrarse
+        });
         await user.save();
 
-        const token = speakeasy.totp({ secret: user.verificationSecret, encoding: 'base32' });
-
-        await transporter.sendMail({
-            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
-            to: user.email,
-            subject: `Tu código de verificación para Dona Paraguay es ${token}`,
-            html: `<h2>¡Bienvenido/a a Dona Paraguay!</h2><p>Usa este código para verificar tu cuenta: <strong>${token}</strong></p>`
+        // Iniciar sesión automáticamente al usuario
+        req.login(user, (err) => {
+            if (err) return next(err);
+            // Redirigir al perfil del usuario recién creado
+            res.redirect('/profile');
         });
 
-        req.session.verifyUserId = user._id;
-        res.redirect('/verify-2fa');
     } catch (err) {
         res.render('register', { error: err.message });
     }
 });
+
 
 app.get('/verify-2fa', async (req, res) => {
     if (!req.session.verifyUserId) return res.redirect('/login');
@@ -1214,25 +1253,37 @@ app.get('/settings/profile', requireAuth, (req, res) => {
 
 app.post('/settings/profile', requireAuth, upload.single('profilePic'), async (req, res, next) => {
     try {
-        const { username, bio, phone } = req.body;
+        const { username, bio, phone, location, socialLinks } = req.body;
         const userToUpdate = await User.findById(req.user._id);
 
         if (req.file) {
-            // Si el usuario ya tiene una foto de perfil y no es la de por defecto, la eliminamos de Cloudinary
             if (userToUpdate.profilePic && !userToUpdate.profilePic.includes('default')) {
                 const publicId = getPublicId(userToUpdate.profilePic);
                 if (publicId) await cloudinary.uploader.destroy(publicId);
             }
         }
+        
         const updateData = {
             username: purify.sanitize(username),
             bio: purify.sanitize(bio),
-            phone
+            phone,
+            location,
+            socialLinks: {
+                facebook: socialLinks.facebook,
+                instagram: socialLinks.instagram,
+                twitter: socialLinks.twitter
+            }
         };
+
         if (req.file) updateData.profilePic = req.file.path;
-        await User.findByIdAndUpdate(req.user._id, updateData);
+        
+        await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+
         res.redirect('/settings/profile');
-    } catch (err) { next(err); }
+
+    } catch (err) { 
+        next(err); 
+    }
 });
 
 app.get('/settings/payouts', requireAuth, async (req, res, next) => {
@@ -1315,6 +1366,10 @@ app.get('/my-donations', requireAuth, async (req, res, next) => {
         next(err);
     }
 });
+
+
+
+
 
 // =============================================
 //               FIN DE LA PARTE 2
@@ -1611,6 +1666,95 @@ app.post('/admin/settings', requireAdmin, async (req, res, next) => {
     }
 });
 
+
+
+
+// =============================================
+// RUTAS DE GESTIÓN DE BANCOS (ADMIN)
+// =============================================
+app.get('/admin/banks', requireAdmin, async (req, res, next) => {
+    try {
+        // La configuración ya está en res.locals.siteConfig
+        res.render('admin/banks.html', {
+            path: req.path,
+            success: req.session.success,
+            error: req.session.error
+        });
+        delete req.session.success;
+        delete req.session.error;
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.post('/admin/banks/add', requireAdmin, async (req, res, next) => {
+    try {
+        const { bankName, accountHolderName, accountNumber, ci, details } = req.body;
+        const config = await SiteConfig.findOne({ configKey: 'main_config' });
+        config.bankAccounts.push({ bankName, accountHolderName, accountNumber, ci, details });
+        await config.save();
+        req.session.success = '¡Cuenta bancaria añadida con éxito!';
+        res.redirect('/admin/banks');
+    } catch (err) {
+        req.session.error = 'Error al añadir la cuenta.';
+        res.redirect('/admin/banks');
+    }
+});
+
+app.post('/admin/banks/:id/delete', requireAdmin, async (req, res, next) => {
+    try {
+        const bankId = req.params.id;
+        const config = await SiteConfig.findOne({ configKey: 'main_config' });
+        config.bankAccounts.id(bankId).remove();
+        // Si la cuenta eliminada era la activa, desactívala.
+        if (config.activeBankAccountId && config.activeBankAccountId.toString() === bankId) {
+            config.activeBankAccountId = null;
+        }
+        await config.save();
+        req.session.success = 'Cuenta bancaria eliminada.';
+        res.redirect('/admin/banks');
+    } catch (err) {
+        req.session.error = 'Error al eliminar la cuenta.';
+        res.redirect('/admin/banks');
+    }
+});
+
+app.post('/admin/banks/:id/set-active', requireAdmin, async (req, res, next) => {
+    try {
+        const bankId = req.params.id;
+        await SiteConfig.findOneAndUpdate(
+            { configKey: 'main_config' },
+            { activeBankAccountId: bankId }
+        );
+        req.session.success = '¡Nueva cuenta bancaria activada para recibir donaciones!';
+        res.redirect('/admin/banks');
+    } catch (err) {
+        req.session.error = 'Error al activar la cuenta.';
+        res.redirect('/admin/banks');
+    }
+});
+
+
+
+
+// =============================================
+// RUTA DE CAMPAÑAS PENDIENTES (ADMIN)
+// =============================================
+app.get('/admin/pending-campaigns', requireAdmin, async (req, res, next) => {
+    try {
+        // Busca la primera campaña pendiente que encuentre
+        const pendingCampaign = await Campaign.findOne({ status: 'pending' })
+            .populate('userId', 'username email profilePic');
+        
+        res.render('admin/pending-campaigns.html', {
+            path: req.path,
+            campaign: pendingCampaign // Será null si no hay ninguna
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // =============================================
 //               FIN DE LA PARTE 3
 // =============================================
@@ -1727,16 +1871,26 @@ app.post('/admin/campaign/:id/update-status', requireAdmin, async (req, res, nex
         const validStatuses = ['approved', 'rejected', 'hidden'];
         if (validStatuses.includes(status)) {
             const campaign = await Campaign.findByIdAndUpdate(req.params.id, { status }, { new: true });
-            // Opcional: Notificar al creador de la campaña
             if (campaign) {
+                let message = `El estado de tu campaña "${campaign.title}" ha sido actualizado a: ${status}.`;
+                if (status === 'approved') {
+                    message = `¡Buenas noticias! Tu campaña "${campaign.title}" ha sido aprobada y ya está visible para recibir donaciones.`;
+                } else if (status === 'rejected') {
+                    message = `Tu campaña "${campaign.title}" fue rechazada. Por favor, revisa que cumpla con nuestros términos y contacta a soporte si tienes dudas.`;
+                }
                 await new Notification({
                     userId: campaign.userId,
                     type: 'admin',
-                    message: `El estado de tu campaña "${campaign.title}" ha sido actualizado a: ${status}.`
+                    message: message
                 }).save();
             }
         }
-        res.redirect('/admin/campaigns');
+        // Redirección inteligente: si vienes de la página de pendientes, vuelve allí.
+        if (req.query.redirect === 'pending') {
+            res.redirect('/admin/pending-campaigns');
+        } else {
+            res.redirect('/admin/campaigns');
+        }
     } catch (err) {
         next(err);
     }

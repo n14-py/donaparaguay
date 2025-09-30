@@ -35,6 +35,21 @@
                 <p class="profile-bio"><%- userProfile.bio %></p>
             <% } %>
 
+            <div class="profile-meta-info">
+                <% if (userProfile.location) { %>
+                    <span class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i> <%= userProfile.location %>
+                    </span>
+                <% } %>
+                <% if (userProfile.socialLinks && (userProfile.socialLinks.facebook || userProfile.socialLinks.instagram || userProfile.socialLinks.twitter)) { %>
+                    <div class="social-links">
+                        <% if (userProfile.socialLinks.facebook) { %><a href="<%= userProfile.socialLinks.facebook %>" target="_blank" rel="noopener noreferrer" class="social-icon facebook"><i class="fab fa-facebook-f"></i></a><% } %>
+                        <% if (userProfile.socialLinks.instagram) { %><a href="<%= userProfile.socialLinks.instagram %>" target="_blank" rel="noopener noreferrer" class="social-icon instagram"><i class="fab fa-instagram"></i></a><% } %>
+                        <% if (userProfile.socialLinks.twitter) { %><a href="<%= userProfile.socialLinks.twitter %>" target="_blank" rel="noopener noreferrer" class="social-icon twitter"><i class="fab fa-twitter"></i></a><% } %>
+                    </div>
+                <% } %>
+            </div>
+
             <div class="profile-actions">
                 <a href="/settings/profile" class="btn btn-secondary">Editar Perfil</a>
                 <% if (userProfile.isVerified) { %>
