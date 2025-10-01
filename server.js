@@ -8,6 +8,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
@@ -424,7 +425,28 @@ app.use(async (req, res, next) => {
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(session({ secret: process.env.SESSION_SECRET || 'dona-paraguay-super-secret-key', resave: false, saveUninitialized: true, cookie: { secure: 'auto', sameSite: 'lax' } }));
+
+// REEMPLAZA LA LÍNEA DE "app.use(session...)" CON TODO ESTE NUEVO BLOQUE
+const sessionStore = MongoStore.create({
+  mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/donaparaguay_db',
+  collectionName: 'sessions',
+  ttl: 10 * 24 * 60 * 60 // = 10 días
+});
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'dona-paraguay-super-secret-key',
+    resave: false,
+    saveUninitialized: false, // Cambiado a false
+    store: sessionStore,
+    cookie: {
+        maxAge: 10 * 24 * 60 * 60 * 1000, // 10 días en milisegundos
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax'
+    }
+}));
+// HASTA AQUÍ LLEGA EL REEMPLAZO
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -699,36 +721,62 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 // =============================================
 app.get('/profile', requireAuth, (req, res) => res.redirect(`/user/${req.user.username}`));
 
+// REEMPLAZA TODA LA FUNCIÓN app.get('/user/:username', ...) CON ESTE CÓDIGO
 app.get('/user/:username', async (req, res, next) => {
     try {
         const userProfile = await User.findOne({ username: req.params.username.toLowerCase() });
-        if (!userProfile || userProfile.isBanned) return res.status(404).render('error.html', { message: 'Usuario no encontrado.' });
+        if (!userProfile || userProfile.isBanned) {
+            return res.status(404).render('error.html', { message: 'Usuario no encontrado.' });
+        }
+
+        const isOwner = req.user && req.user._id.equals(userProfile._id);
 
         const campaignQuery = { userId: userProfile._id };
-        if (!req.user || !req.user._id.equals(userProfile._id)) campaignQuery.status = 'approved';
+        // Si no es el dueño, solo mostrar campañas aprobadas
+        if (!isOwner) {
+            campaignQuery.status = 'approved';
+        }
         const campaigns = await Campaign.find(campaignQuery).sort({ createdAt: -1 });
 
-        const donations = await ManualDonation.find({ userId: userProfile._id, status: 'Aprobado' }).populate('campaignId', 'title _id');
+        // Modificamos la consulta de donaciones
+        let donationQuery = { userId: userProfile._id };
+        // Si no es el dueño, solo mostrar donaciones aprobadas
+        if (!isOwner) {
+            donationQuery.status = 'Aprobado';
+        }
         
-        // --- CÓDIGO CORREGIDO ---
-        // Se asegura de que cada donación sea un número antes de sumar
-        const totalDonated = donations.reduce((sum, d) => sum + (Number(d.campaignAmount) || 0), 0);
+        const donations = await ManualDonation.find(donationQuery)
+            .populate('campaignId', 'title _id')
+            .sort({ createdAt: -1 });
+        
+        // El total donado público siempre se calcula sobre las donaciones aprobadas
+        const totalDonated = donations
+            .filter(d => d.status === 'Aprobado')
+            .reduce((sum, d) => sum + (Number(d.campaignAmount) || 0), 0);
         
         let userDonations = [];
-        if (userProfile.privacySettings.showDonations || (req.user && req.user._id.equals(userProfile._id))) {
+        // Mostrar donaciones si la privacidad lo permite o si es el dueño del perfil
+        if (userProfile.privacySettings.showDonations || isOwner) {
             userDonations = donations;
         }
 
         const isFollowing = req.user ? req.user.following.some(id => id.equals(userProfile._id)) : false;
-        const viewToRender = req.user && req.user._id.equals(userProfile._id) ? 'profile.html' : 'user-profile.html';
+        
+        // Determinar qué vista renderizar
+        const viewToRender = isOwner ? 'profile.html' : 'user-profile.html';
 
         res.render(viewToRender, {
-            userProfile, campaigns, userDonations, totalDonated,
+            userProfile,
+            campaigns,
+            userDonations, // Esta variable ahora contiene las donaciones correctas a mostrar
+            totalDonated, // Este es el total público (solo aprobado)
             isFollowing,
             pageTitle: `Perfil de ${userProfile.username}`,
             pageDescription: `Campañas y actividad de ${userProfile.username}.`
         });
-    } catch (err) { next(err); }
+    } catch (err) {
+        next(err);
+    }
 });
 
 app.get('/notifications', requireAuth, async (req, res, next) => {
@@ -897,9 +945,10 @@ app.get('/campaign/:id', async (req, res, next) => {
 
         campaign.description = purify.sanitize(campaign.description, { USE_PROFILES: { html: true } });
 
-        const recommendedCampaigns = await Campaign.find({
-            category: campaign.category, status: 'approved', _id: { $ne: campaign._id }
-        }).sort({ views: -1 }).limit(3).populate('userId', 'username profilePic isVerified');
+        // Y reemplázala por esta (cambiando 3 por 5):
+const recommendedCampaigns = await Campaign.find({
+    category: campaign.category, status: 'approved', _id: { $ne: campaign._id }
+}).sort({ views: -1 }).limit(5).populate('userId', 'username profilePic isVerified');
 
         const donations = await ManualDonation.find({ campaignId: campaign._id, status: 'Aprobado' })
             .populate('userId', 'username profilePic')

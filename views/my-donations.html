@@ -18,14 +18,14 @@
     </div>
 
     <% if (donations && donations.length > 0) { %>
-        <% 
-            const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0);
-            const totalCampaignsSupported = new Set(donations.map(d => d.campaignId ? d.campaignId.toString() : null)).size;
+        <%
+            const totalDonated = donations.filter(d => d.status === 'Aprobado').reduce((sum, d) => sum + d.amount, 0);
+            const totalCampaignsSupported = new Set(donations.filter(d => d.status === 'Aprobado').map(d => d.campaignId ? d.campaignId.toString() : null)).size;
         %>
         <div class="donations-summary-card">
             <div class="summary-item">
                 <span class="summary-value"><%= new Intl.NumberFormat('es-PY').format(totalDonated) %> Gs.</span>
-                <span class="summary-label">Total Donado</span>
+                <span class="summary-label">Total Donado (Aprobado)</span>
             </div>
             <div class="summary-item">
                 <span class="summary-value"><%= donations.length %></span>
@@ -67,5 +67,6 @@
 </main>
 
 <%- include('partials/footer.html') %>
+
 </body>
 </html>

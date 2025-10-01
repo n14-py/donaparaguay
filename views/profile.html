@@ -51,13 +51,13 @@
             </div>
 
             <div class="profile-actions">
-                <a href="/settings/profile" class="btn btn-secondary">Editar Perfil</a>
-                <% if (userProfile.isVerified) { %>
-                    <a href="/new-campaign" class="btn btn-primary">Crear Campaña</a>
-                <% } else { %>
-                     <a href="/verify-account" class="btn btn-primary">Verificarme para crear Campaña</a>
-                <% } %>
-            </div>
+    <a href="/settings/profile" class="btn btn-secondary">Editar Perfil</a>
+    <% if (userProfile.isVerified) { %>
+        <a href="/new-campaign" class="btn btn-primary">Crear Campaña</a>
+    <% } else { %>
+         <a href="/verify-account" class="btn btn-primary">Verificarme para crear Campaña</a>
+    <% } %>
+</div>
         </div>
     </div>
 
@@ -84,43 +84,35 @@
     </div>
     
     <div id="donations-content" class="tab-content" style="display: none;">
-         <% if (userDonations && userDonations.length > 0) { %>
-            <div class="table-responsive">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Campaña</th>
-                            <th>Monto Donado</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% userDonations.forEach(donation => { %>
-                            <tr>
-                                <td><%= formatDate(donation.createdAt) %></td>
-                                <td>
-                                    <% if (donation.campaignId) { %>
-                                        <a href="/campaign/<%= donation.campaignId._id %>" style="font-weight: bold;"><%= donation.campaignId.title %></a>
-                                    <% } else { %>
-                                        <span class="text-muted">Campaña eliminada</span>
-                                    <% } %>
-                                </td>
-                                <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.campaignAmount) %> Gs.</strong></td>
-                                <td><span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span></td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
-        <% } else { %>
-            <div class="no-results-card">
-                <h3>Aún no has realizado ninguna donación</h3>
-                <p>Explora las campañas y encuentra una causa para apoyar.</p>
-                <a href="/campaigns" class="btn btn-primary">Ver Campañas</a>
-            </div>
-        <% } %>
-    </div>
+    <% if (userDonations && userDonations.length > 0) { %>
+        <div class="donations-list-container">
+            <% userDonations.forEach(donation => { %>
+                <div class="donation-history-card">
+                    <div class="card-main-info">
+                        <% if (donation.campaignId) { %>
+                            <a href="/campaign/<%= donation.campaignId._id %>" class="campaign-title"><%= donation.campaignId.title %></a>
+                        <% } else { %>
+                            <span class="campaign-title text-muted">Campaña eliminada</span>
+                        <% } %>
+                        <div class="donation-amount">
+                            <%= new Intl.NumberFormat('es-PY').format(donation.campaignAmount) %> Gs.
+                        </div>
+                    </div>
+                    <div class="card-meta-info">
+                        <span><i class="fas fa-calendar-alt"></i> <%= formatDate(donation.createdAt) %></span>
+                        <span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="no-results-card">
+            <h3>Aún no has realizado ninguna donación</h3>
+            <p>Explora las campañas y encuentra una causa para apoyar.</p>
+            <a href="/campaigns" class="btn btn-primary">Ver Campañas</a>
+        </div>
+    <% } %>
+</div>
 
     <div id="badges-content" class="tab-content" style="display: none;">
         <div class="badges-list-container">
