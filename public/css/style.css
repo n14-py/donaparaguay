@@ -359,6 +359,9 @@ body.auth-page main.container {
 /* ============================================= */
 /* --- SECCIÓN DE PATROCINADORES (ANIMADO) --- */
 /* ============================================= */
+/* ============================================= */
+/* --- SECCIÓN DE PATROCINADORES (INTELIGENTE) --- */
+/* ============================================= */
 @keyframes scroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
@@ -368,10 +371,15 @@ body.auth-page main.container {
     background: var(--background-color);
     padding: 4rem 0;
     margin-top: 3rem;
-    position: relative;
-    overflow: hidden;
 }
-.sponsors-header { text-align: center; max-width: 800px; margin: 0 auto 2.5rem; padding: 0 1rem;}
+
+.sponsors-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1rem;
+}
+
 .sponsors-title-v2 { font-size: 2rem; font-weight: 700; color: var(--text-color); margin-bottom: 1rem; }
 .sponsors-subtitle-v2 { font-size: 1.1rem; color: var(--text-muted-color); line-height: 1.8; }
 .sponsors-cta { text-align: center; margin-top: 3rem; }
@@ -381,7 +389,10 @@ body.auth-page main.container {
 .sponsors-carousel-wrapper {
     position: relative;
     width: 100%;
+    overflow: hidden; /* Previene que el contenido se desborde */
 }
+
+/* Escondemos los efectos de degradado por defecto */
 .sponsors-carousel-wrapper::before,
 .sponsors-carousel-wrapper::after {
     content: '';
@@ -391,24 +402,49 @@ body.auth-page main.container {
     width: 100px;
     z-index: 2;
     pointer-events: none;
+    opacity: 0; /* Ocultos por defecto */
+    transition: opacity 0.3s ease-in-out;
 }
+
+/* Mostramos los degradados SOLO cuando la clase .scrolling está presente */
+.sponsors-carousel-wrapper.scrolling::before,
+.sponsors-carousel-wrapper.scrolling::after {
+    opacity: 1;
+}
+
 .sponsors-carousel-wrapper::before {
     left: 0;
     background: linear-gradient(to right, var(--background-color), transparent);
 }
+
 .sponsors-carousel-wrapper::after {
     right: 0;
     background: linear-gradient(to left, var(--background-color), transparent);
 }
 
+/* Estilos por defecto para el contenedor (estático y centrado) */
 .sponsors-scroll-container {
     display: flex;
-    width: fit-content;
-    animation: scroll 60s linear infinite;
+    justify-content: center; /* Centra los logos horizontalmente */
+    flex-wrap: wrap;
+    gap: 1.5rem; /* Espacio entre los logos estáticos */
+    padding: 0 1rem;
 }
-.sponsors-scroll-container:hover {
+
+/* Estilos que se aplican SOLO cuando hay la clase .scrolling */
+.sponsors-carousel-wrapper.scrolling .sponsors-scroll-container {
+    justify-content: flex-start; /* Resetea la justificación para el scroll */
+    flex-wrap: nowrap;
+    width: fit-content; /* Crítico para la animación */
+    padding: 0;
+    gap: 0; /* Sin espacio para que el scroll sea fluido */
+    /* La animación se aplica desde el script JS */
+}
+
+.sponsors-carousel-wrapper.scrolling .sponsors-scroll-container:hover {
     animation-play-state: paused;
 }
+
 .sponsor-card {
     background-color: var(--surface-color);
     padding: 1.5rem;
@@ -416,16 +452,35 @@ body.auth-page main.container {
     box-shadow: var(--shadow-sm);
     width: 200px;
     height: 120px;
-    margin: 0 1rem;
     transition: all var(--transition-speed) ease;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 1px solid var(--border-color);
+    flex-shrink: 0; /* Previene que las tarjetas se encojan */
 }
-.sponsor-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
-.sponsor-card img { max-width: 100%; max-height: 70px; height: auto; opacity: 0.8; transition: all var(--transition-speed) ease; }
-.sponsor-card:hover img { opacity: 1; }
+
+/* Añadimos margen a las tarjetas solo cuando se están deslizando */
+.sponsors-carousel-wrapper.scrolling .sponsor-card {
+    margin: 0 1rem;
+}
+
+.sponsor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.sponsor-card img {
+    max-width: 100%;
+    max-height: 70px;
+    height: auto;
+    opacity: 0.8;
+    transition: all var(--transition-speed) ease;
+}
+
+.sponsor-card:hover img {
+    opacity: 1;
+}
 
 /* ============================================= */
 /* --- NUEVAS FUNCIONES Y MEJORAS --- */

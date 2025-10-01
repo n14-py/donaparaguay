@@ -2414,17 +2414,14 @@ app.post('/sponsors/apply', upload.fields([
     { name: 'paymentProof', maxCount: 1 }
 ]), async (req, res, next) => {
     try {
-        // --- INICIO DE NUEVA VERIFICACIÓN ---
         const config = res.locals.siteConfig;
         const activeSponsorCount = await Sponsor.countDocuments({
-            status: { $in: ['active', 'pending'] },
-            expiresAt: { $gt: new Date() }
+            status: { $in: ['active', 'pending'] }
         });
 
         if (activeSponsorCount >= config.maxSponsorSlots) {
-            throw new Error("Lo sentimos, todos los espacios para patrocinadores pioneros ya han sido ocupados.");
+            throw new Error("Lo sentimos, todos los espacios para patrocinadores ya han sido ocupados.");
         }
-        // --- FIN DE NUEVA VERIFICACIÓN ---
 
         const { companyName, companyWebsite, contactEmail, sponsorshipMonths } = req.body;
         if (!req.files || !req.files.companyLogo || !req.files.paymentProof) {
@@ -2452,7 +2449,6 @@ app.post('/sponsors/apply', upload.fields([
         res.render('sponsor-success');
 
    } catch (err) {
-    // Si hay un error, debemos recalcular los espacios disponibles antes de volver a renderizar el formulario.
     const config = res.locals.siteConfig;
     const activeSponsorCount = await Sponsor.countDocuments({
         status: { $in: ['active', 'pending'] }
@@ -2463,7 +2459,6 @@ app.post('/sponsors/apply', upload.fields([
     res.render('sponsors-form', { 
         error: err.message, 
         success: null,
-        // Añadimos las variables que faltaban:
         slotsAvailable: availableSlots > 0,
         availableSlots: Math.max(0, availableSlots),
         totalSlots: config.maxSponsorSlots

@@ -6,8 +6,11 @@
         </p>
     </div>
     
-    <div class="sponsors-scroll-container" id="sponsors-container">
+    <div class="sponsors-carousel-wrapper">
+        <div class="sponsors-scroll-container" id="sponsors-container">
+            <% /* El contenido se generará con JavaScript */ %>
         </div>
+    </div>
 
     <div class="sponsors-cta">
          <a href="/sponsors/apply" class="btn btn-primary">Suma tu Apoyo Aquí</a>
@@ -18,9 +21,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sponsorsData = <%- JSON.stringify(typeof activeSponsors !== 'undefined' ? activeSponsors : []) %>;
     const container = document.getElementById('sponsors-container');
+    const wrapper = container.parentElement; // Esto selecciona a .sponsors-carousel-wrapper
 
     if (sponsorsData.length > 0) {
-        // Crear el contenido original
         let content = '';
         sponsorsData.forEach(sponsor => {
             content += `
@@ -31,15 +34,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         });
-        
-        // Duplicar el contenido para el bucle infinito y añadirlo al contenedor
-        container.innerHTML = content + content;
-        
-        // Ajustar la duración de la animación según la cantidad de sponsors
-        const duration = sponsorsData.length * 5; // 5 segundos por sponsor (ajustable)
-        container.style.animation = `scroll ${duration}s linear infinite`;
+
+        // Establecemos un umbral. Si hay más de 4 patrocinadores, se activará el deslizamiento.
+        const SCROLL_THRESHOLD = 4;
+
+        if (sponsorsData.length > SCROLL_THRESHOLD) {
+            // LÓGICA DE DESLIZAMIENTO
+            wrapper.classList.add('scrolling');
+            
+            // Duplicamos el contenido para un bucle infinito y fluido
+            container.innerHTML = content + content;
+            
+            // Ajustamos la velocidad de la animación según la cantidad de logos
+            const duration = sponsorsData.length * 5; // 5 segundos por patrocinador
+            container.style.animation = `scroll ${duration}s linear infinite`;
+
+        } else {
+            // LÓGICA ESTÁTICA
+            // Simplemente mostramos los logos. El CSS se encargará de centrarlos.
+            container.innerHTML = content;
+        }
 
     } else {
+        // Si no hay patrocinadores, mostramos un mensaje
         container.innerHTML = `
             <div class="no-sponsors-message">
                 <h4>¡Conviértete en el primer aliado de nuestra causa!</h4>
