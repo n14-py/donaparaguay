@@ -1,5 +1,12 @@
-<!-- donaparaguay/views/partials/update-partial.html -->
-<div class="update-item">
+<div class="update-item" id="update-<%= update._id %>">
     <p><%- update.content %></p>
-    <small><%= formatDate(update.createdAt) %></small>
+    <div class="d-flex justify-content-between align-items-center">
+        <small><%= formatDate(update.createdAt) %></small>
+        <% if (locals.isOwner || (locals.currentUser && update.userId.equals(locals.currentUser._id))) { %>
+            <div class="update-actions">
+                <a href="/campaign/<%= update.campaignId %>/update/<%= update._id %>/edit" class="btn btn-sm btn-secondary"><i class="fas fa-pen"></i></a>
+                <button class="btn btn-sm btn-danger delete-update-btn" data-campaign-id="<%= update.campaignId %>" data-update-id="<%= update._id %>"><i class="fas fa-trash"></i></button>
+            </div>
+        <% } %>
+    </div>
 </div>

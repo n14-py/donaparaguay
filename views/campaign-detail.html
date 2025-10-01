@@ -134,9 +134,17 @@
                 <% } %>
                 <div class="updates-list" id="updates-list-container">
                     <% updates.forEach(update => { %>
-                        <div class="update-item">
+                        <div class="update-item" id="update-<%= update._id %>">
                             <p><%- update.content %></p>
-                            <small><%= formatDate(update.createdAt) %></small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small><%= formatDate(update.createdAt) %></small>
+                                <% if (isOwner) { %>
+                                    <div class="update-actions" style="display: flex; gap: 0.5rem;">
+                                        <a href="/campaign/<%= campaign._id %>/update/<%= update._id %>/edit" class="btn btn-sm btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;"><i class="fas fa-pen"></i></a>
+                                        <button class="btn btn-sm btn-danger delete-update-btn" data-campaign-id="<%= campaign._id %>" data-update-id="<%= update._id %>" style="padding: 5px 10px; font-size: 0.8rem;"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                <% } %>
+                            </div>
                         </div>
                     <% }); %>
                 </div>
@@ -156,70 +164,68 @@
                     <p><a href="/login">Inicia sesión</a> para dejar un comentario.</p>
                 <% } %>
                 
-         <!-- REEMPLAZA LA SECCIÓN DE LA LISTA DE COMENTARIOS CON ESTA: -->
-<div class="comments-list" id="comments-list-container">
-    <% comments.forEach(comment => { %>
-        <div class="comment-item" id="comment-<%= comment._id %>">
-            <% if (comment.userId) { %>
-                <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
-                <div class="comment-content">
-                    <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
-            <% } else { %>
-                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
-                <div class="comment-content">
-                    <strong>[Usuario Eliminado]</strong>
-            <% } %>
-                <p class="comment-text"><%- comment.text %></p>
-                <small><%= formatDate(comment.createdAt) %></small>
-                
-                <% if(currentUser && comment.userId) { %>
-                    <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
-                <% } %>
-            
-                <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
-                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
-                        <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
-                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
-                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
-                    </form>
-                </div>
-            
-                <!-- Aquí se mostrarán todas las respuestas, sin anidamiento extra -->
-                <div class="comment-replies">
-                <% if (comment.replies && comment.replies.length > 0) { %>
-                    <% comment.replies.forEach(reply => { %>
-                        <div class="comment-item is-reply" id="comment-<%= reply._id %>">
-                             <% if (reply.userId) { %>
-                                <img src="<%= reply.userId.profilePic %>" alt="avatar" class="comment-avatar">
+                <div class="comments-list" id="comments-list-container">
+                    <% comments.forEach(comment => { %>
+                        <div class="comment-item" id="comment-<%= comment._id %>">
+                            <% if (comment.userId) { %>
+                                <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
                                 <div class="comment-content">
-                                    <strong><a href="/user/<%= reply.userId.username %>"><%= reply.userId.username %></a></strong>
+                                    <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
                             <% } else { %>
                                 <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
                                 <div class="comment-content">
                                     <strong>[Usuario Eliminado]</strong>
                             <% } %>
-                                <p class="comment-text"><%- reply.text %></p>
-                                <small><%= formatDate(reply.createdAt) %></small>
-                                <% if(currentUser && reply.userId) { %>
-                                    <a href="#" class="reply-btn" data-comment-id="<%= reply._id %>">Responder</a>
+                                <p class="comment-text"><%- comment.text %></p>
+                                <small><%= formatDate(comment.createdAt) %></small>
+                                
+                                <% if(currentUser && comment.userId) { %>
+                                    <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
                                 <% } %>
-                                <div class="reply-form-container" id="reply-form-<%= reply._id %>" style="display:none;">
+                            
+                                <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
                                     <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
-                                        <input type="hidden" name="parentCommentId" value="<%= reply._id %>">
+                                        <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
                                         <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
                                         <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
                                     </form>
                                 </div>
-                                 <div class="comment-replies"></div>
+                            
+                                <div class="comment-replies">
+                                <% if (comment.replies && comment.replies.length > 0) { %>
+                                    <% comment.replies.forEach(reply => { %>
+                                        <div class="comment-item is-reply" id="comment-<%= reply._id %>">
+                                             <% if (reply.userId) { %>
+                                                <img src="<%= reply.userId.profilePic %>" alt="avatar" class="comment-avatar">
+                                                <div class="comment-content">
+                                                    <strong><a href="/user/<%= reply.userId.username %>"><%= reply.userId.username %></a></strong>
+                                            <% } else { %>
+                                                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
+                                                <div class="comment-content">
+                                                    <strong>[Usuario Eliminado]</strong>
+                                            <% } %>
+                                                <p class="comment-text"><%- reply.text %></p>
+                                                <small><%= formatDate(reply.createdAt) %></small>
+                                                <% if(currentUser && reply.userId) { %>
+                                                    <a href="#" class="reply-btn" data-comment-id="<%= reply._id %>">Responder</a>
+                                                <% } %>
+                                                <div class="reply-form-container" id="reply-form-<%= reply._id %>" style="display:none;">
+                                                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
+                                                        <input type="hidden" name="parentCommentId" value="<%= reply._id %>">
+                                                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+                                                    </form>
+                                                </div>
+                                                 <div class="comment-replies"></div>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                                </div>
                             </div>
                         </div>
-                    <% }) %>
-                <% } %>
+                    <% }); %>
                 </div>
-            </div>
-        </div>
-    <% }); %>
-</div>
             </div>
         </div>
 
@@ -307,9 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (replyFormContainer) {
                 const isVisible = replyFormContainer.style.display === 'block';
-                // Oculta todos los otros formularios de respuesta abiertos
                 document.querySelectorAll('.reply-form-container').forEach(form => form.style.display = 'none');
-                // Muestra u oculta el formulario actual
                 replyFormContainer.style.display = isVisible ? 'none' : 'block';
                 if (!isVisible) {
                     replyFormContainer.querySelector('textarea').focus();
@@ -370,9 +374,40 @@ document.addEventListener('DOMContentLoaded', () => {
             shareModal.style.display = "none";
         }
     });
+
+    // --- CÓDIGO NUEVO PARA ELIMINAR ACTUALIZACIONES ---
+    const updatesContainer = document.getElementById('updates-list-container');
+    if (updatesContainer) {
+        updatesContainer.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.delete-update-btn');
+            if (!deleteButton) return;
+
+            const campaignId = deleteButton.dataset.campaignId;
+            const updateId = deleteButton.dataset.updateId;
+
+            if (confirm('¿Estás seguro de que quieres eliminar esta actualización? Esta acción no se puede deshacer.')) {
+                try {
+                    const response = await fetch(`/campaign/${campaignId}/update/${updateId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        const elementToRemove = document.getElementById(`update-${updateId}`);
+                        if (elementToRemove) {
+                            elementToRemove.remove();
+                        }
+                    } else {
+                        alert(data.message || 'No se pudo eliminar la actualización.');
+                    }
+                } catch (error) {
+                    alert('Ocurrió un error de red.');
+                }
+            }
+        });
+    }
 });
 </script>
 
 </body>
 </html>
-

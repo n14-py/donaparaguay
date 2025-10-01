@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Actualización - Dona Paraguay</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="form-container" style="max-width: 700px;">
+        <h2>Editar Actualización</h2>
+        <p>Campaña: <strong><%= campaign.title %></strong></p>
+        <hr>
+        <form action="/campaign/<%= campaign._id %>/update/<%= update._id %>/edit" method="POST">
+            <div class="form-group">
+                <label for="content">Contenido de la actualización</label>
+                <textarea name="content" id="content" rows="8" class="form-control" required><%= update.content.replace(/<br\s*\/?>/gi, '\n') %></textarea>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="/campaign/<%= campaign._id %>" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</main>
+<%- include('partials/footer.html') %>
+</body>
+</html>

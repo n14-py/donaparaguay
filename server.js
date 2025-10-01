@@ -1220,6 +1220,67 @@ app.post('/campaign/:id/donate', requireAuth, upload.single('proof'), async (req
 });
 
 
+
+
+// --- INICIO: RUTAS PARA EDITAR Y ELIMINAR ACTUALIZACIONES ---
+
+// Muestra el formulario para editar una actualización
+app.get('/campaign/:campaignId/update/:updateId/edit', requireAuth, async (req, res, next) => {
+    try {
+        const { campaignId, updateId } = req.params;
+        const campaign = await Campaign.findById(campaignId);
+        const update = await Update.findById(updateId);
+
+        // Asegurarse que el usuario es el dueño de la campaña
+        if (!campaign || !campaign.userId.equals(req.user._id) || !update || !update.campaignId.equals(campaign._id)) {
+            return res.status(403).render('error', { message: 'No tienes permiso para editar esto.' });
+        }
+
+        res.render('edit-update', { campaign, update });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Procesa la edición de una actualización
+app.post('/campaign/:campaignId/update/:updateId/edit', requireAuth, async (req, res, next) => {
+    try {
+        const { campaignId, updateId } = req.params;
+        const campaign = await Campaign.findById(campaignId);
+
+        if (!campaign || !campaign.userId.equals(req.user._id)) {
+            return res.status(403).send('No autorizado.');
+        }
+
+        const sanitizedContent = purify.sanitize(req.body.content, { USE_PROFILES: { html: true } });
+        await Update.findOneAndUpdate(
+            { _id: updateId, campaignId: campaignId },
+            { content: sanitizedContent }
+        );
+
+        res.redirect(`/campaign/${campaignId}`);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Elimina una actualización
+app.post('/campaign/:id/update/:updateId/delete', requireAuth, async (req, res, next) => {
+    try {
+        const campaign = await Campaign.findById(req.params.id);
+        if (!campaign || !campaign.userId.equals(req.user._id)) {
+            return res.status(403).json({ success: false, message: 'No tienes permiso.' });
+        }
+        await Update.findOneAndDelete({ _id: req.params.updateId, campaignId: req.params.id });
+        res.json({ success: true });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// --- FIN: RUTAS PARA EDITAR Y ELIMINAR ACTUALIZACIONES ---
+
+
 // =============================================
 // RUTAS DEL PANEL DE CONFIGURACIÓN DEL USUARIO/ORGANIZADOR
 // =============================================
@@ -1335,6 +1396,38 @@ app.post('/settings/payouts', requireAuth, async (req, res, next) => {
         next(err);
     } finally {
         await dbSession.endSession();
+    }
+});
+
+
+// Enviar código para eliminar cuenta
+app.post('/settings/send-deletion-code', requireAuth, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Si el usuario no tiene un secreto de verificación, créalo ahora.
+        if (!user.verificationSecret) {
+            const secret = speakeasy.generateSecret({ length: 20 });
+            user.verificationSecret = secret.base32;
+        }
+        // --- FIN DE LA CORRECCIÓN ---
+
+        const code = speakeasy.totp({ secret: user.verificationSecret, encoding: 'base32', step: 300 });
+
+        user.verificationCode = code;
+        user.verificationCodeExpires = Date.now() + 300000; // 5 minutos
+        await user.save(); // Guarda el nuevo secreto (si fue creado) y el código.
+
+        await transporter.sendMail({
+            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
+            to: user.email, subject: `Tu código para ELIMINAR tu cuenta es ${code}`,
+            html: `<h2>Confirmación para Eliminar Cuenta</h2><p>Usa el siguiente código para confirmar la eliminación <strong>permanente</strong> de tu cuenta: <strong>${code}</strong>. Es válido por 5 minutos.</p>`
+        });
+        res.status(200).json({ success: true, message: 'Código enviado a tu correo.' });
+    } catch (err) {
+        console.error("Error al enviar código de eliminación:", err); // Añadido para mejor depuración
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
     }
 });
 
