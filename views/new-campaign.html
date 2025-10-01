@@ -30,9 +30,17 @@
 
             <div class="form-group">
                 <label for="goalAmount">Meta de Recaudación (en Guaraníes)</label>
-                <input type="number" id="goalAmount" name="goalAmount" class="form-control" required placeholder="Ej: 5000000" min="100000">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="number" id="goalAmount" name="goalAmount" class="form-control" required placeholder="Ej: 5000000" min="100000">
+                    <button type="button" id="add-fee-btn" class="btn btn-secondary" title="Añadir 10% para cubrir la comisión de la plataforma." style="display: none;">
+                        +10%
+                    </button>
+                </div>
             </div>
 
+            <div id="fee-alert" class="alert alert-info" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 1.5rem; display: none;">
+                <i class="fas fa-info-circle"></i> <strong>Nota sobre la comisión:</strong> Para mantener la plataforma, se aplica una comisión del 10% sobre el monto retirado. Usa el botón <strong>+10%</strong> si deseas ajustar tu meta para recibir el monto inicial completo.
+            </div>
             <div class="form-group">
                 <label for="category">Categoría</label>
                 <select id="category" name="category" class="form-control" required>
@@ -68,5 +76,47 @@
 
 <%- include('partials/footer.html') %>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const goalAmountInput = document.getElementById('goalAmount');
+    const addFeeButton = document.getElementById('add-fee-btn');
+    const feeAlert = document.getElementById('fee-alert');
+
+    if (goalAmountInput && addFeeButton && feeAlert) {
+        // Muestra u oculta el botón y el aviso según el valor del input
+        goalAmountInput.addEventListener('input', () => {
+            const currentValue = parseInt(goalAmountInput.value, 10);
+            const shouldShow = !isNaN(currentValue) && currentValue >= 100000;
+
+            if (shouldShow && !addFeeButton.disabled) {
+                addFeeButton.style.display = 'inline-flex';
+                feeAlert.style.display = 'block';
+            } else {
+                addFeeButton.style.display = 'none';
+                feeAlert.style.display = 'none';
+            }
+        });
+
+        // Lógica para el botón de añadir 10%
+        addFeeButton.addEventListener('click', () => {
+            const currentValue = parseInt(goalAmountInput.value, 10);
+
+            if (!isNaN(currentValue) && currentValue >= 100000) {
+                const fee = currentValue * 0.10;
+                const newValue = Math.ceil(currentValue + fee);
+                goalAmountInput.value = newValue;
+
+                // Deshabilita el botón y ocúltalo
+                addFeeButton.disabled = true;
+                addFeeButton.style.display = 'none';
+
+                // Opcional: Cambia el texto del aviso para confirmar la acción
+                feeAlert.innerHTML = '<i class="fas fa-check-circle"></i> <strong>¡Listo!</strong> Se ha ajustado la meta para cubrir la comisión de la plataforma.';
+                feeAlert.style.backgroundColor = 'var(--primary-color-light)';
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
