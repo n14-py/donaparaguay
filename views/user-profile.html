@@ -85,36 +85,36 @@
         </div>
     </div>
 
-    <% if (userProfile.privacySettings.showDonations || (currentUser && currentUser._id.equals(userProfile._id))) { %>
-        <div id="donations-content" class="tab-content" style="display: none;">
-            <div class="table-responsive">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Campaña Apoyada</th>
-                            <th>Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% userDonations.forEach(donation => { %>
-                        <tr>
-                            <td><%= formatDate(donation.createdAt) %></td>
-                            <td>
-                                <% if (donation.campaignId) { %>
-                                    <a href="/campaign/<%= donation.campaignId._id %>"><%= donation.campaignId.title %></a>
-                                <% } else { %>
-                                    <span>Campaña eliminada</span>
-                                <% } %>
-                            </td>
-                            <td><strong><%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.</strong></td>
-                        </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
+   <% if (userProfile.privacySettings.showDonations || (currentUser && currentUser._id.equals(userProfile._id))) { %>
+    <div id="donations-content" class="tab-content" style="display: none;">
+    <% if (userDonations && userDonations.length > 0) { %>
+        <div class="donations-list-container">
+            <% userDonations.forEach(donation => { %>
+                <div class="donation-history-card">
+                    <div class="card-main-info">
+                        <% if (donation.campaignId) { %>
+                            <a href="/campaign/<%= donation.campaignId._id %>" class="campaign-title"><%= donation.campaignId.title %></a>
+                        <% } else { %>
+                            <span class="campaign-title text-muted">Campaña eliminada</span>
+                        <% } %>
+                        <div class="donation-amount">
+                            <%= new Intl.NumberFormat('es-PY').format(donation.amount) %> Gs.
+                        </div>
+                    </div>
+                    <div class="card-meta-info">
+                        <span><i class="fas fa-calendar-alt"></i> <%= formatDate(donation.createdAt) %></span>
+                        <span class="badge status-<%= donation.status.toLowerCase() %>"><%= donation.status %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="no-results-card">
+            <h3>Este usuario aún no ha realizado ninguna donación pública.</h3>
         </div>
     <% } %>
+    </div>
+<% } %>
 
     <div id="badges-content" class="tab-content" style="display: none;">
         <div class="badges-list-container">
