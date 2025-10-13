@@ -9,71 +9,100 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
-<div class="d-flex">
-    <div class="sidebar">
+
+<div class="admin-wrapper">
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header">DonaPY ADMIN</div>
         <div class="sidebar-content">
-            <div class="sidebar-header">DonaPY ADMIN</div>
             <ul class="nav flex-column">
-    <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
-    <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
-    <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
-    <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
-    <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
-    <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
-    <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
-    <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
-    <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
-    <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
-</ul>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+                <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
+                <li class="nav-item"><a href="/admin/sponsors" class="nav-link <%= path.includes('/sponsors') ? 'active' : '' %>"><i class="fa-solid fa-star fa-fw"></i> Patrocinadores</a></li>
+                <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
+            </ul>
         </div>
         <div class="sidebar-footer">
             <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
         </div>
-    </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <main class="main-content">
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-gray-800">Solicitudes de Verificación Pendientes</h1>
-            <p class="mb-4">Revisa los documentos para aprobar o rechazar la verificación de los organizadores.</p>
+    <div class="main-content-wrapper">
+        <header class="admin-header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
 
-            <% if (verifications && verifications.length > 0) { %>
-                <% verifications.forEach(v => { %>
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Solicitud de: <a href="/admin/user/<%= v.userId._id %>" target="_blank"><%= v.userId.username %></a></h6></div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 text-center mb-3">
-                                    <h5>Frente de Cédula</h5>
-                                    <a href="<%= v.frontIdPhoto %>" target="_blank"><img src="<%= v.frontIdPhoto %>" alt="Frente de Cédula" class="img-fluid rounded border"></a>
-                                </div>
-                                <div class="col-md-6 text-center mb-3">
-                                    <h5>Reverso de Cédula</h5>
-                                    <a href="<%= v.backIdPhoto %>" target="_blank"><img src="<%= v.backIdPhoto %>" alt="Reverso de Cédula" class="img-fluid rounded border"></a>
-                                </div>
+        <main class="main-content">
+            <div class="container-fluid">
+                <h1 class="h3 mb-2 text-gray-800">Solicitudes de Verificación Pendientes</h1>
+                <p class="mb-4">Revisa los documentos para aprobar o rechazar la verificación de los organizadores.</p>
+
+                <% if (verifications && verifications.length > 0) { %>
+                    <% verifications.forEach(v => { %>
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">Solicitud de: <a href="/admin/user/<%= v.userId._id %>" target="_blank"><%= v.userId.username %></a></h6>
                             </div>
-                            <hr>
-                            <div class="d-flex justify-content-end gap-2">
-                                <form action="/admin/verification/<%= v._id %>/approve" method="POST" onsubmit="return confirm('¿Aprobar la verificación para <%= v.userId.username %>?');">
-                                    <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Aprobar</button>
-                                </form>
-                                <form action="/admin/verification/<%= v._id %>/reject" method="POST" class="d-flex gap-2" onsubmit="return confirm('¿Rechazar esta solicitud?');">
-                                     <input type="text" name="reason" class="form-control form-control-sm" placeholder="Motivo del rechazo (opcional)">
-                                     <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Rechazar</button>
-                                </form>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 text-center mb-3">
+                                        <h5>Frente de Cédula</h5>
+                                        <a href="<%= v.frontIdPhoto %>" target="_blank"><img src="<%= v.frontIdPhoto.replace('/upload/', '/upload/w_400,h_300,c_limit/') %>" alt="Frente de Cédula" class="img-fluid rounded border"></a>
+                                    </div>
+                                    <div class="col-md-6 text-center mb-3">
+                                        <h5>Reverso de Cédula</h5>
+                                        <a href="<%= v.backIdPhoto %>" target="_blank"><img src="<%= v.backIdPhoto.replace('/upload/', '/upload/w_400,h_300,c_limit/') %>" alt="Reverso de Cédula" class="img-fluid rounded border"></a>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                    <form action="/admin/verification/<%= v._id %>/approve" method="POST" onsubmit="return confirm('¿Aprobar la verificación para <%= v.userId.username %>?');">
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Aprobar</button>
+                                    </form>
+                                    <form action="/admin/verification/<%= v._id %>/reject" method="POST" class="d-flex gap-2 flex-wrap" onsubmit="return confirm('¿Rechazar esta solicitud?');">
+                                         <input type="text" name="reason" class="form-control form-control-sm" placeholder="Motivo del rechazo (opcional)">
+                                         <button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Rechazar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="card shadow">
+                        <div class="card-body text-center p-5">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <h4>¡Todo en orden!</h4>
+                            <p class="text-muted">No hay solicitudes de verificación pendientes.</p>
+                        </div>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <div class="card shadow"><div class="card-body text-center p-5">
-                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                    <h4>¡Todo en orden!</h4>
-                    <p class="text-muted">No hay solicitudes de verificación pendientes.</p>
-                </div></div>
-            <% } %>
-        </div>
-    </main>
+                <% } %>
+            </div>
+        </main>
+    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+    });
+</script>
 </body>
 </html>

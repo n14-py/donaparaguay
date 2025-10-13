@@ -1,18 +1,16 @@
 /* ============================================= */
 /* --- ESTILOS PARA EL PANEL DE ADMINISTRADOR --- */
-/* v1.0 - Diseño Profesional y Responsivo      */
+/* v2.0 - Diseño "Mobile-First" y Responsivo   */
 /* ============================================= */
 
 /* --- VARIABLES Y ESTILOS BASE --- */
 :root {
     --admin-primary: #4e73df;
     --admin-secondary: #858796;
-    --admin-success: #1cc88a;
-    --admin-info: #36b9cc;
-    --admin-warning: #f6c23e;
-    --admin-danger: #e74a3b;
     --admin-light: #f8f9fc;
     --admin-dark: #5a5c69;
+    --admin-sidebar-width: 240px;
+    --admin-header-height: 60px;
     --font-family-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -20,36 +18,46 @@ body {
     font-family: var(--font-family-sans-serif);
     background-color: var(--admin-light);
     color: var(--admin-dark);
+    margin: 0;
 }
 
-/* --- LAYOUT PRINCIPAL --- */
-.d-flex {
+.admin-wrapper {
     display: flex;
-    flex-direction: column; /* Cambiado para móviles primero */
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* --- BARRA LATERAL (SIDEBAR) --- */
 .sidebar {
     background: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
     color: white;
+    width: var(--admin-sidebar-width);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1000;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    transition: all 0.3s ease;
-    width: 100%; /* Ocupa todo el ancho en móvil */
-    flex-shrink: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.active {
+    transform: translateX(0);
 }
 
 .sidebar-header {
     font-size: 1.5rem;
     font-weight: 700;
     text-align: center;
-    padding: 1.5rem 1rem;
+    padding: 1.2rem 1rem;
     color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar-content {
     flex-grow: 1;
+    overflow-y: auto;
 }
 
 .sidebar .nav-link {
@@ -59,6 +67,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    border-left: 3px solid transparent;
 }
 
 .sidebar .nav-link:hover {
@@ -69,99 +78,155 @@ body {
 .sidebar .nav-link.active {
     color: white;
     font-weight: 700;
+    border-left-color: #f6c23e;
 }
 
 .sidebar-footer {
     padding: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+/* --- HEADER SUPERIOR (MÓVIL) --- */
+.admin-header {
+    height: var(--admin-header-height);
+    background-color: #fff;
+    border-bottom: 1px solid #e3e6f0;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.menu-toggle {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--admin-dark);
 }
 
 /* --- CONTENIDO PRINCIPAL --- */
-.main-content {
+.main-content-wrapper {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
     padding: 1.5rem;
 }
 
-.text-gray-800 {
-    color: #3a3b45 !important;
+/* --- OVERLAY PARA EL MENÚ MÓVIL --- */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
 
-.h3 {
-    font-weight: 400;
+.sidebar-overlay.active {
+    display: block;
 }
 
-.card {
-    border: none;
-    border-radius: 0.5rem;
-}
-
-.card-header {
-    background-color: #f8f9fc;
-    border-bottom: 1px solid #e3e6f0;
-    padding: 1rem 1.25rem;
-}
-
-.font-weight-bold {
-    font-weight: 700 !important;
-}
-
-.text-primary {
-    color: var(--admin-primary) !important;
-}
-
-/* --- TARJETAS DEL DASHBOARD --- */
-.card.border-left-warning { border-left: 4px solid var(--admin-warning); }
-.card.border-left-info { border-left: 4px solid var(--admin-info); }
-.card.border-left-success { border-left: 4px solid var(--admin-success); }
-.card.border-left-primary { border-left: 4px solid var(--admin-primary); }
-
-.card-footer {
-    text-decoration: none;
-    background: white;
-    border-top: 1px solid #e3e6f0;
-    transition: background-color 0.2s;
-}
-.card-footer:hover {
-    background-color: #f8f9fc;
-}
-
-/* --- TABLAS --- */
-.table-responsive {
-    border: 1px solid #e3e6f0;
-    border-radius: 0.35rem;
-}
-.table {
-    margin-bottom: 0;
-}
-.table th, .table td {
-    vertical-align: middle;
-}
-
-/* --- MODALES --- */
-.modal-body img {
-    border: 3px solid #e3e6f0;
-    border-radius: 0.35rem;
-}
-
-/* ============================================= */
-/* --- DISEÑO RESPONSIVO --- */
-/* ============================================= */
-
-/* Para Tablets y Escritorios Pequeños (768px y más) */
+/* --- ESTILOS RESPONSIVOS PARA TABLET Y ESCRITORIO --- */
 @media (min-width: 768px) {
-    .d-flex {
-        flex-direction: row; /* Vuelve al layout de columnas */
+    .admin-wrapper {
+        flex-direction: row;
     }
 
     .sidebar {
-        width: 240px; /* Ancho fijo para la barra lateral */
         position: sticky;
-        top: 0;
+        transform: translateX(0);
         height: 100vh;
     }
 
+    .main-content-wrapper {
+        width: calc(100% - var(--admin-sidebar-width));
+    }
+
+    .admin-header {
+        display: none; /* Ocultamos el header con el toggle en escritorio */
+    }
+
+    .sidebar-overlay {
+        display: none !important; /* El overlay nunca es necesario en escritorio */
+    }
     .main-content {
-        width: calc(100% - 240px); /* El contenido principal ocupa el resto */
         padding: 2.5rem;
+    }
+}
+
+/* --- ESTILOS GENERALES DE COMPONENTES --- */
+.text-gray-800 { color: #3a3b45 !important; }
+.card { border: none; border-radius: 0.5rem; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); }
+.card-header { background-color: #f8f9fc; border-bottom: 1px solid #e3e6f0; padding: 1rem 1.25rem; }
+.font-weight-bold { font-weight: 700 !important; }
+.text-primary { color: var(--admin-primary) !important; }
+.table-responsive { border: none; }
+.table th, .table td { vertical-align: middle; }
+
+/* Estilos para las tarjetas del Dashboard */
+.card.border-left-warning { border-left: 4px solid #f6c23e; }
+.card.border-left-info { border-left: 4px solid #36b9cc; }
+.card.border-left-success { border-left: 4px solid #1cc88a; }
+.card.border-left-primary { border-left: 4px solid #4e73df; }
+
+
+
+/* ============================================= */
+/* --- ESTILOS PARA TABLAS RESPONSIVAS (MÓVIL) --- */
+/* ============================================= */
+
+@media (max-width: 767px) {
+    /* Ocultamos los encabezados de la tabla tradicionales */
+    .table-responsive thead {
+        display: none;
+    }
+
+    /* Hacemos que la tabla no parezca una tabla */
+    .table-responsive, .table-responsive tbody, .table-responsive tr, .table-responsive td {
+        display: block;
+        width: 100%;
+    }
+
+    /* Convertimos cada fila en una tarjeta */
+    .table-responsive tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.5rem;
+        background-color: #fff;
+    }
+
+    .table-responsive td {
+        padding-left: 50%; /* Espacio para la etiqueta */
+        position: relative;
+        text-align: right;
+        border: none;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    /* Agregamos la etiqueta usando el atributo data-label */
+    .table-responsive td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-left: 1rem;
+        font-weight: 700;
+        text-align: left;
+        color: var(--admin-primary);
+    }
+
+    /* Ajuste para la última celda para que no tenga borde inferior dentro de la tarjeta */
+    .table-responsive td:last-child {
+        border-bottom: 0;
     }
 }

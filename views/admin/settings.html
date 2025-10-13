@@ -9,39 +9,88 @@
     <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
-<div class="d-flex">
-    <div class="sidebar">
+
+<div class="admin-wrapper">
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header">DonaPY ADMIN</div>
         <div class="sidebar-content">
-            <div class="sidebar-header">DonaPY ADMIN</div>
            <ul class="nav flex-column">
-    <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
-    <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
-    <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
-    <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
-    <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
-    <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
-    <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
-    <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
-    <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
-    <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
-</ul>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+                <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
+                <li class="nav-item"><a href="/admin/sponsors" class="nav-link <%= path.includes('/sponsors') ? 'active' : '' %>"><i class="fa-solid fa-star fa-fw"></i> Patrocinadores</a></li>
+                <li class="nav-item"><a href="/admin/sponsors" class="nav-link <%= path.includes('/sponsors') ? 'active' : '' %>"><i class="fa-solid fa-star fa-fw"></i> Patrocinadores</a></li>
+                <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
+            </ul>
         </div>
         <div class="sidebar-footer">
             <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
         </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="main-content-wrapper">
+        <header class="admin-header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="container-fluid">
+                <h1 class="h3 mb-2 text-gray-800">Configuración de la Plataforma</h1>
+
+                <% if (locals.success) { %><div class="alert alert-success"><%= success %></div><% } %>
+                <% if (locals.error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Ajustes Generales</h6>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/settings" method="POST">
+                            <div class="mb-3">
+                                <label for="platformFeeRate" class="form-label">Tasa de Comisión de la Plataforma (Ej: 0.10 para 10%)</label>
+                                <input type="number" step="0.01" min="0" max="1" id="platformFeeRate" name="platformFeeRate" class="form-control" value="<%= siteConfig.platformFeeRate %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="maxSponsorSlots" class="form-label">Máximo de Espacios para Patrocinadores</label>
+                                <input type="number" id="maxSponsorSlots" name="maxSponsorSlots" class="form-control" value="<%= siteConfig.maxSponsorSlots %>">
+                            </div>
+                             <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="verificationRequired" id="verificationRequiredCheck" <%= siteConfig.verificationRequired ? 'checked' : '' %>>
+                                <label class="form-check-label" for="verificationRequiredCheck">
+                                    Requerir verificación de identidad para crear campañas
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-
-    <main class="main-content">
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-gray-800">Configuración de la Plataforma</h1>
-
-             <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
-             <% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
-
-            
-        </div>
-    </main>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+    });
+</script>
 </body>
 </html>

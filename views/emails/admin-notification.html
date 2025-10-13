@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alerta de Administrador: <%= subject %></title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="20" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td align="center" style="padding-bottom: 20px; border-bottom: 1px solid #eeeeee;">
+                            <h1 style="margin: 0; font-size: 28px; color: #4e73df; font-family: Arial, sans-serif;">Dona Paraguay</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 0;">
+                            <h1 style="color: #4e73df; font-size: 24px; margin-top: 0;"><%= subject %></h1>
+                            <p style="color: #555555; line-height: 1.6;">Hola Administrador,</p>
+                            <p style="color: #555555; line-height: 1.6;">Se ha registrado una nueva actividad en la plataforma que requiere tu atención.</p>
+                            <div style="background-color: #f8f9fc; border-left: 4px solid #4e73df; padding: 15px; margin: 20px 0; font-size: 1rem;">
+                                <%- message %>
+                            </div>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="text-align: center; margin-top: 30px;">
+                                <tr>
+                                    <td>
+                                        <a href="<%= actionUrl %>" style="background-color: #4e73df; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">Ir al Panel de Admin</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #999999;">
+                            &copy; <%= new Date().getFullYear() %> Dona Paraguay - Notificación del Sistema
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

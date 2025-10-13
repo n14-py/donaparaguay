@@ -10,101 +10,123 @@
 </head>
 <body>
 
-<div class="d-flex">
-    <div class="sidebar">
+<div class="admin-wrapper">
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header">DonaPY ADMIN</div>
         <div class="sidebar-content">
-            <div class="sidebar-header">
-                DonaPY ADMIN
-            </div>
             <ul class="nav flex-column">
-    <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
-    <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
-    <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
-    <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
-    <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
-    <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
-    <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
-    <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
-    <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
-    <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
-</ul>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+                <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
+                <li class="nav-item"><a href="/admin/sponsors" class="nav-link <%= path.includes('/sponsors') ? 'active' : '' %>"><i class="fa-solid fa-star fa-fw"></i> Patrocinadores</a></li>
+                <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
+            </ul>
         </div>
         <div class="sidebar-footer">
             <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
         </div>
-    </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <main class="main-content">
-        <div class="container-fluid">
-            <h1 class="h3 mb-2 text-gray-800">Gestión de Usuarios</h1>
-            <p class="mb-4">Busca, visualiza y modera a todos los usuarios de la plataforma.</p>
+    <div class="main-content-wrapper">
+        <header class="admin-header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
 
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Buscar Usuario</h6>
+        <main class="main-content">
+            <div class="container-fluid">
+                <h1 class="h3 mb-2 text-gray-800">Gestión de Usuarios</h1>
+                <p class="mb-4">Busca, visualiza y modera a todos los usuarios de la plataforma.</p>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Buscar Usuario</h6>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/users" method="GET">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Buscar por nombre o email..." value="<%= query.search || '' %>">
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-search fa-sm"></i></button>
+                                <a href="/admin/users" class="btn btn-secondary" title="Limpiar búsqueda"><i class="fas fa-times"></i></a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form action="/admin/users" method="GET">
-                        <div class="input-group">
-                            <input type="text" name="search" class="form-control" placeholder="Buscar por nombre de usuario o email..." value="<%= query.search || '' %>">
-                            <button class="btn btn-primary" type="submit"><i class="fas fa-search fa-sm"></i> Buscar</button>
-                            <a href="/admin/users" class="btn btn-secondary" title="Limpiar búsqueda"><i class="fas fa-times"></i></a>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Email</th>
+                                        <th>Estado</th>
+                                        <th>Rol</th>
+                                        <th>Registrado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (users && users.length > 0) { %>
+                                        <% users.forEach(user => { %>
+                                            <tr class="<%= user.isBanned ? 'table-danger' : '' %>">
+                                                <td data-label="Usuario">
+                                                    <img src="<%= user.profilePic %>" width="30" height="30" class="rounded-circle me-2" alt="Avatar">
+                                                    <strong><%= user.username %></strong>
+                                                </td>
+                                                <td data-label="Email"><%= user.email %></td>
+                                                <td data-label="Estado">
+                                                    <% if(user.isBanned) { %><span class="badge bg-danger">Baneado</span><% } %>
+                                                    <% if(user.isVerified) { %><span class="badge bg-success">Verificado</span><% } %>
+                                                    <% if(!user.isBanned && !user.isVerified) { %><span>Activo</span><% } %>
+                                                </td>
+                                                <td data-label="Rol"><span class="badge bg-info text-dark"><%= user.role %></span></td>
+                                                <td data-label="Registrado"><%= formatDate(user.createdAt) %></td>
+                                                <td data-label="Acciones">
+                                                    <a href="/admin/user/<%= user._id %>" class="btn btn-sm btn-info w-100">
+                                                        <i class="fas fa-eye fa-sm"></i> Ver Detalles
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr><td colspan="6" class="text-center">No se encontraron usuarios.</td></tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Lista de Usuarios</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Usuario</th>
-                                    <th>Email</th>
-                                    <th>Estado</th>
-                                    <th>Rol</th>
-                                    <th>Registrado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (users && users.length > 0) { %>
-                                    <% users.forEach(user => { %>
-                                        <tr class="<%= user.isBanned ? 'table-danger' : '' %>">
-                                            <td>
-                                                <img src="<%= user.profilePic %>" width="30" height="30" class="rounded-circle me-2" alt="Avatar">
-                                                <strong><%= user.username %></strong>
-                                            </td>
-                                            <td><%= user.email %></td>
-                                            <td>
-                                                <% if(user.isBanned) { %><span class="badge bg-danger">Baneado</span><% } %>
-                                                <% if(user.isVerified) { %><span class="badge bg-success">Verificado</span><% } %>
-                                            </td>
-                                            <td><span class="badge bg-info text-dark"><%= user.role %></span></td>
-                                            <td><%= formatDate(user.createdAt) %></td>
-                                            <td>
-                                                <a href="/admin/user/<%= user._id %>" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye fa-sm"></i> Ver Detalles
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <% }); %>
-                                <% } else { %>
-                                    <tr><td colspan="6" class="text-center">No se encontraron usuarios.</td></tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
-                    </div>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+    });
+</script>
 </body>
 </html>

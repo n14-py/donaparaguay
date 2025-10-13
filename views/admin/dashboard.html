@@ -7,132 +7,133 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .card-link { text-decoration: none; color: inherit; }
+        .card-link .card { transition: all 0.2s ease-in-out; }
+        .card-link .card:hover { transform: translateY(-5px); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
+        .card.border-left-danger { border-left-color: var(--admin-danger) !important; }
+        .text-danger { color: var(--admin-danger) !important; }
+    </style>
 </head>
 <body>
 
-<div class="d-flex">
-    <div class="sidebar">
+<div class="admin-wrapper">
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header">DonaPY ADMIN</div>
         <div class="sidebar-content">
-            <div class="sidebar-header">
-                DonaPY ADMIN
-            </div>
             <ul class="nav flex-column">
-    <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
-    <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
-    <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
-    <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
-    <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
-    <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
-    <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
-    <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
-    <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
-    <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
-</ul>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>"><i class="fa-solid fa-tachometer-alt fa-fw"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/pending-campaigns" class="nav-link <%= path.includes('/pending-campaigns') ? 'active' : '' %>"><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Pendientes</a></li>
+                <li class="nav-item"><a href="/admin/donations" class="nav-link <%= path.includes('/donations') ? 'active' : '' %>"><i class="fa-solid fa-hand-holding-heart fa-fw"></i> Donaciones</a></li>
+                <li class="nav-item"><a href="/admin/campaigns" class="nav-link <%= path.includes('/campaigns') ? 'active' : '' %>"><i class="fa-solid fa-bullhorn fa-fw"></i> Campañas</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link <%= path.includes('/users') || path.includes('/user/') ? 'active' : '' %>"><i class="fa-solid fa-users fa-fw"></i> Usuarios</a></li>
+                <li class="nav-item"><a href="/admin/withdrawals" class="nav-link <%= path.includes('/withdrawals') ? 'active' : '' %>"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Retiros</a></li>
+                <li class="nav-item"><a href="/admin/verifications" class="nav-link <%= path.includes('/verifications') ? 'active' : '' %>"><i class="fa-solid fa-id-card fa-fw"></i> Verificaciones</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link <%= path.includes('/reports') ? 'active' : '' %>"><i class="fa-solid fa-flag fa-fw"></i> Reportes</a></li>
+                <li class="nav-item"><a href="/admin/banks" class="nav-link <%= path.includes('/banks') ? 'active' : '' %>"><i class="fa-solid fa-building-columns fa-fw"></i> Bancos</a></li>
+                <li class="nav-item"><a href="/admin/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>"><i class="fa-solid fa-cog fa-fw"></i> Configuración</a></li>
+            </ul>
         </div>
         <div class="sidebar-footer">
-            <a href="/campaigns" class="nav-link">
-                <i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio
-            </a>
+            <a href="/campaigns" class="nav-link"><i class="fa-solid fa-arrow-left fa-fw"></i> Volver al Sitio</a>
         </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="main-content-wrapper">
+        <header class="admin-header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="container-fluid">
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-danger shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row g-0 align-items-center">
+                                    <div class="col">
+                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Usuarios Online (1 min)</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.activeNowUsers %></div>
+                                    </div>
+                                    <div class="col-auto"><i class="fas fa-bolt fa-2x text-black-50"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a href="/admin/donations" class="card-link">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row g-0 align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Donaciones Pendientes</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.pendingDonations %></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-hourglass-half fa-2x text-black-50"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a href="/admin/verifications" class="card-link">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row g-0 align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Verificaciones Pendientes</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.pendingVerifications %></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-id-card fa-2x text-black-50"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a href="/admin/withdrawals" class="card-link">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row g-0 align-items-center">
+                                        <div class="col">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Retiros Pendientes</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.pendingWithdrawals %></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-inbox fa-2x text-black-50"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-
-    <main class="main-content">
-        <div class="container-fluid">
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-            </div>
-
-            <div class="row">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Donaciones Pendientes</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.pendingDonations %></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a class="card-footer d-flex align-items-center justify-content-between" href="/admin/donations">
-                            <span class="small text-warning">Revisar Donaciones</span>
-                            <div class="small text-warning"><i class="fas fa-angle-right"></i></div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Retiros Pendientes</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.pendingWithdrawals %></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-inbox fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                         <a class="card-footer d-flex align-items-center justify-content-between" href="/admin/withdrawals">
-                            <span class="small text-info">Procesar Retiros</span>
-                            <div class="small text-info"><i class="fas fa-angle-right"></i></div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Campañas Totales</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalCampaigns %></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Usuarios Totales</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.totalUsers %></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-users fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">¡Bienvenido al Panel de Control!</h6>
-                        </div>
-                        <div class="card-body">
-                            <p>Desde aquí puedes gestionar todas las operaciones de la plataforma. Tu tarea más importante será revisar y aprobar las <strong>donaciones pendientes</strong> para que los fondos lleguen a las campañas.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
+        if (overlay) overlay.addEventListener('click', toggleSidebar);
+    });
+</script>
 </body>
 </html>

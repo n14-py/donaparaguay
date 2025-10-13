@@ -91,6 +91,8 @@ const upload = multer({ storage: storage });
 // =============================================
 // CONFIGURACIÓN DE NODEMAILER
 // =============================================
+
+// Transportador principal para correos a usuarios
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -98,6 +100,21 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS,
     },
 });
+
+// Transportador secundario para enviar notificaciones AL ADMIN
+let adminTransporter;
+if (process.env.ADMIN_EMAIL_USER && process.env.ADMIN_EMAIL_PASS) {
+    adminTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.ADMIN_EMAIL_USER,
+            pass: process.env.ADMIN_EMAIL_PASS,
+        },
+    });
+    console.log('✅ Transportador de notificaciones para admin configurado.');
+} else {
+    console.log('⚠️ ADVERTENCIA: No se configuraron las credenciales para el correo de notificaciones de admin.');
+}
 
 // =============================================
 // CONSTANTES Y MODELOS DE DATOS
@@ -196,8 +213,9 @@ const campaignSchema = new mongoose.Schema({
     amountRaised: { type: Number, default: 0 }, // Recaudado en Guaraníes
     views: { type: Number, default: 0 },
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden'], default: 'pending' },
-    // --- LÍNEA NUEVA ---
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    // --- LÍNEA NUEVA A AÑADIR ---
+    milestonesNotified: { type: Map, of: Boolean, default: {} }
 }, { timestamps: true });
 
 const verificationSchema = new mongoose.Schema({
@@ -554,7 +572,33 @@ const requireVerification = async (req, res, next) => {
     res.redirect('/verify-account');
 };
 
+// =============================================
+// HELPER PARA ENVIAR NOTIFICACIONES AL ADMIN
+// =============================================
+async function sendAdminNotificationEmail({ subject, message, actionUrl }) {
+    // Verifica si el transportador y el destinatario están configurados
+    if (!adminTransporter || !process.env.ADMIN_EMAIL_RECIPIENT) {
+        console.log('ADVERTENCIA: El correo para notificaciones de admin no está configurado. No se enviará la alerta.');
+        return;
+    }
 
+    try {
+        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'admin-notification.html'), {
+            subject,
+            message,
+            actionUrl
+        });
+
+        await adminTransporter.sendMail({
+            from: `"Alertas Dona Paraguay" <${process.env.ADMIN_EMAIL_USER}>`, // Envía DESDE notificaciones.donapy@gmail.com
+            to: process.env.ADMIN_EMAIL_RECIPIENT,                         // Envía HACIA tu correo personal
+            subject: `🔔 Alerta de Admin: ${subject}`,
+            html: emailHtml
+        });
+    } catch (error) {
+        console.error(`❌ Error al enviar correo de notificación al admin:`, error);
+    }
+}
 
 
 
@@ -675,6 +719,12 @@ app.post('/verify-account', requireAuth, upload.fields([
             },
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
+
+        await sendAdminNotificationEmail({
+        subject: 'Nueva Solicitud de Verificación',
+        message: `El usuario <strong>${req.user.username}</strong> ha subido sus documentos y está esperando la verificación de su cuenta.`,
+        actionUrl: `${process.env.BASE_URL}/admin/verifications`
+    });
 
         await new Notification({
             userId: req.user._id,
@@ -921,6 +971,14 @@ app.post('/new-campaign', requireAuth, requireVerification, upload.array('files'
         });
 
         await newCampaign.save();
+
+
+        // AÑADE ESTE BLOQUE
+    await sendAdminNotificationEmail({
+        subject: 'Nueva Campaña Pendiente',
+        message: `El usuario <strong>${req.user.username}</strong> ha creado una nueva campaña llamada <strong>"${newCampaign.title}"</strong> que necesita ser revisada.`,
+        actionUrl: `${process.env.BASE_URL}/admin/pending-campaigns`
+    });
         // Notificar al admin que hay una nueva campaña para revisar
         // (Lógica a implementar si se desea)
         res.redirect(`/campaign/${newCampaign._id}`);
@@ -1265,6 +1323,13 @@ app.post('/campaign/:id/donate', requireAuth, upload.single('proof'), async (req
             }).save();
         }
 
+
+           await sendAdminNotificationEmail({
+        subject: 'Nueva Donación Pendiente',
+        message: `El usuario <strong>${req.user.username}</strong> ha enviado una donación de <strong>${parseInt(amount).toLocaleString('es-PY')} Gs.</strong> para la campaña <strong>"${campaign.title}"</strong>.`,
+        actionUrl: `${process.env.BASE_URL}/admin/donations`
+    });
+
         res.render('donation-success.html', { campaign: campaign });
     } catch (err) {
         next(err);
@@ -1534,18 +1599,49 @@ app.get('/my-donations', requireAuth, async (req, res, next) => {
 // =============================================
 app.get('/admin', requireAdmin, (req, res) => res.redirect('/admin/dashboard'));
 
+// donaparaguay/server.js
+
 app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
     try {
-        const [totalUsers, totalCampaigns, pendingWithdrawals, pendingDonations, pendingVerifications] = await Promise.all([
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Calcula el umbral de tiempo para "activos en el último minuto"
+        const sessionTTL_in_ms = 10 * 24 * 60 * 60 * 1000; // TTL de 10 días en milisegundos
+        const activeThreshold = new Date(Date.now() + sessionTTL_in_ms - 60000); // now + TTL - 1 minuto
+
+        const [
+            totalUsers,
+            activeUsers,
+            totalCampaigns,
+            pendingWithdrawals,
+            pendingDonations,
+            pendingVerifications,
+            activeNowUsers // <-- NUEVA VARIABLE
+        ] = await Promise.all([
             User.countDocuments(),
+            User.countDocuments({ isBanned: false }),
             Campaign.countDocuments(),
             Withdrawal.countDocuments({ status: 'Pendiente' }),
             ManualDonation.countDocuments({ status: 'Pendiente' }),
-            Verification.countDocuments({ status: 'pending' })
+            Verification.countDocuments({ status: 'pending' }),
+            // Nueva consulta a la colección de sesiones de MongoDB
+            mongoose.connection.db.collection('sessions').countDocuments({ expires: { $gt: activeThreshold } })
         ]);
-        const stats = { totalUsers, totalCampaigns, pendingWithdrawals, pendingDonations, pendingVerifications };
+
+        const stats = {
+            totalUsers,
+            activeUsers,
+            totalCampaigns,
+            pendingWithdrawals,
+            pendingDonations,
+            pendingVerifications,
+            activeNowUsers // <-- NUEVO DATO AÑADIDO
+        };
+        // --- FIN DE LA MODIFICACIÓN ---
+        
         res.render('admin/dashboard.html', { stats: stats, path: req.path });
-    } catch (err) { next(err); }
+    } catch (err) {
+        next(err);
+    }
 });
 
 // --- GESTIÓN DE USUARIOS ---
@@ -1650,7 +1746,7 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                 throw new Error('Donación no encontrada o ya procesada.');
             }
 
-            const campaign = await Campaign.findById(donation.campaignId).session(session);
+            const campaign = await Campaign.findById(donation.campaignId).populate('userId', 'email username').session(session);
             if (!campaign) {
                 donation.status = 'Rechazado';
                 await donation.save({ session });
@@ -1658,43 +1754,104 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
             }
 
             if (status === 'Aprobado') {
-                // --- LÓGICA CLAVE CORREGIDA ---
-                campaign.amountRaised += donation.campaignAmount; // Acredita solo el monto destinado a la campaña
-                await campaign.save({ session });
+                const oldAmountRaised = campaign.amountRaised;
+                campaign.amountRaised += donation.campaignAmount;
+                const newAmountRaised = campaign.amountRaised;
+                const goalAmount = campaign.goalAmount;
 
                 donation.status = 'Aprobado';
                 await awardBadges(donation.userId, donation);
                 await donation.save({ session });
-
+                
                 await new Transaction({
                     type: 'donation',
                     donatorId: donation.userId,
-                    organizerId: campaign.userId,
+                    organizerId: campaign.userId._id,
                     campaignId: campaign._id,
-                    amount: donation.campaignAmount, // Registra el monto correcto
+                    amount: donation.campaignAmount,
                     platformFee: donation.platformTip,
                 }).save({ session });
 
-                // Notificar al organizador
                 await new Notification({
-                    userId: campaign.userId,
+                    userId: campaign.userId._id,
                     actorId: donation.userId,
                     type: 'donation',
                     campaignId: campaign._id,
                     message: `recibió una nueva donación de ${donation.campaignAmount.toLocaleString('es-PY')} Gs. para tu campaña "${campaign.title}".`
                 }).save({ session });
 
-                // Notificar al donante
                  await new Notification({
                     userId: donation.userId,
                     type: 'admin',
                     message: `Tu donación de ${donation.amount.toLocaleString('es-PY')} Gs. para la campaña "${campaign.title}" fue aprobada. ¡Gracias por tu generosidad!`
                 }).save({ session });
 
+
+                // --- NUEVO: Lógica de notificación por hitos con plantillas HTML ---
+                const totalDonationsCount = await ManualDonation.countDocuments({ campaignId: campaign._id, status: 'Aprobado' }).session(session);
+                
+                const sendMilestoneEmail = async (data) => {
+                    try {
+                        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'campaign-milestone.html'), data);
+                        await transporter.sendMail({
+                            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
+                            to: campaign.userId.email,
+                            subject: data.subject,
+                            html: emailHtml
+                        });
+                    } catch (emailError) {
+                        console.error(`❌ Error al enviar correo de hito (${data.subject}):`, emailError);
+                    }
+                };
+
+                // Hito 1: Primera donación
+                if (totalDonationsCount === 1 && !campaign.milestonesNotified.get('firstDonation')) {
+                    await sendMilestoneEmail({
+                        subject: '🎉 ¡Recibiste tu primera donación!',
+                        title: '¡El primer paso está dado!',
+                        username: campaign.userId.username,
+                        message: `<p>Tu campaña <strong>"${campaign.title}"</strong> ha recibido su primera donación. ¡Este es el comienzo de algo grande!</p>`,
+                        campaignUrl: `${process.env.BASE_URL}/campaign/${campaign._id}`
+                    });
+                    campaign.milestonesNotified.set('firstDonation', true);
+                }
+
+                // Hitos por porcentaje
+                if (goalAmount > 0) {
+                    const oldProgress = (oldAmountRaised / goalAmount) * 100;
+                    const newProgress = (newAmountRaised / goalAmount) * 100;
+                    const milestones = [10, 50, 100];
+
+                    for (const milestone of milestones) {
+                        const milestoneKey = `progress${milestone}`;
+                        if (newProgress >= milestone && oldProgress < milestone && !campaign.milestonesNotified.get(milestoneKey)) {
+                            let emailData = {
+                                subject: `¡Tu campaña alcanzó el ${milestone}% de la meta!`,
+                                title: '¡Siguen las buenas noticias!',
+                                username: campaign.userId.username,
+                                message: `<p>¡Vas muy bien! Tu campaña <strong>"${campaign.title}"</strong> ha alcanzado o superado el <strong>${milestone}%</strong> de su meta de recaudación.</p>`,
+                                campaignUrl: `${process.env.BASE_URL}/campaign/${campaign._id}`
+                            };
+                            
+                            if (milestone === 100) {
+                                emailData.subject = `¡META ALCANZADA! Tu campaña "${campaign.title}" lo logró`;
+                                emailData.title = '¡Lo lograron!';
+                                emailData.message = `<p>¡Felicidades! Tu campaña <strong>"${campaign.title}"</strong> ha alcanzado el 100% de su meta. Gracias a ti y a todos los donantes por hacerlo posible.</p>`;
+                                campaign.status = 'completed';
+                            }
+                            
+                            await sendMilestoneEmail(emailData);
+                            campaign.milestonesNotified.set(milestoneKey, true);
+                        }
+                    }
+                }
+                // --- FIN DEL NUEVO CÓDIGO ---
+
+                await campaign.save({ session });
+
             } else if (status === 'Rechazado') {
                 donation.status = 'Rechazado';
                 await donation.save({ session });
-
                 await new Notification({
                     userId: donation.userId,
                     type: 'admin',
@@ -1742,6 +1899,7 @@ app.post('/admin/withdrawal/:id/update', requireAdmin, async (req, res, next) =>
 });
 
 // --- GESTIÓN DE VERIFICACIONES DE IDENTIDAD ---
+// --- GESTIÓN DE VERIFICACIONES DE IDENTIDAD ---
 app.get('/admin/verifications', requireAdmin, async (req, res, next) => {
     try {
         const pendingVerifications = await Verification.find({ status: 'pending' }).populate('userId', 'username');
@@ -1751,14 +1909,33 @@ app.get('/admin/verifications', requireAdmin, async (req, res, next) => {
 
 app.post('/admin/verification/:id/approve', requireAdmin, async (req, res, next) => {
     try {
-        const verification = await Verification.findById(req.params.id);
-        if (!verification) throw new Error('Solicitud no encontrada.');
+        const verification = await Verification.findById(req.params.id).populate('userId', 'email username');
+        if (!verification || !verification.userId) throw new Error('Solicitud no encontrada o usuario no válido.');
 
-        await User.findByIdAndUpdate(verification.userId, { isVerified: true });
+        await User.findByIdAndUpdate(verification.userId._id, { isVerified: true });
         verification.status = 'approved';
         await verification.save();
 
-        await new Notification({ userId: verification.userId, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
+        await new Notification({ userId: verification.userId._id, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
+
+        // --- NUEVO: Enviar correo de bienvenida con plantilla HTML ---
+        try {
+            const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'verification-approved.html'), {
+                username: verification.userId.username,
+                newCampaignUrl: `${process.env.BASE_URL}/new-campaign`
+            });
+
+            await transporter.sendMail({
+                from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
+                to: verification.userId.email,
+                subject: '✅ ¡Tu cuenta en Dona Paraguay ha sido verificada!',
+                html: emailHtml
+            });
+        } catch (emailError) {
+            console.error('❌ Error al enviar el correo de verificación:', emailError);
+        }
+        // --- FIN DEL NUEVO CÓDIGO ---
+
         res.redirect('/admin/verifications');
     } catch (err) { next(err); }
 });
@@ -2015,22 +2192,40 @@ app.post('/admin/campaign/:id/update-status', requireAdmin, async (req, res, nex
         const { status } = req.body;
         const validStatuses = ['approved', 'rejected', 'hidden'];
         if (validStatuses.includes(status)) {
-            const campaign = await Campaign.findByIdAndUpdate(req.params.id, { status }, { new: true });
-            if (campaign) {
+            const campaign = await Campaign.findByIdAndUpdate(req.params.id, { status }, { new: true })
+                .populate('userId', 'email username');
+
+            if (campaign && campaign.userId) {
                 let message = `El estado de tu campaña "${campaign.title}" ha sido actualizado a: ${status}.`;
-                if (status === 'approved') {
-                    message = `¡Buenas noticias! Tu campaña "${campaign.title}" ha sido aprobada y ya está visible para recibir donaciones.`;
-                } else if (status === 'rejected') {
-                    message = `Tu campaña "${campaign.title}" fue rechazada. Por favor, revisa que cumpla con nuestros términos y contacta a soporte si tienes dudas.`;
-                }
+                
                 await new Notification({
-                    userId: campaign.userId,
+                    userId: campaign.userId._id,
                     type: 'admin',
                     message: message
                 }).save();
+
+                // --- NUEVO: Enviar correo de aprobación de campaña con plantilla HTML ---
+                if (status === 'approved') {
+                     try {
+                        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'campaign-approved.html'), {
+                            username: campaign.userId.username,
+                            campaignTitle: campaign.title,
+                            campaignUrl: `${process.env.BASE_URL}/campaign/${campaign._id}`
+                        });
+
+                        await transporter.sendMail({
+                            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
+                            to: campaign.userId.email,
+                            subject: `🚀 ¡Tu campaña "${campaign.title}" fue aprobada!`,
+                            html: emailHtml
+                        });
+                    } catch (emailError) {
+                        console.error('❌ Error al enviar el correo de aprobación de campaña:', emailError);
+                    }
+                }
+                // --- FIN DEL NUEVO CÓDIGO ---
             }
         }
-        // Redirección inteligente: si vienes de la página de pendientes, vuelve allí.
         if (req.query.redirect === 'pending') {
             res.redirect('/admin/pending-campaigns');
         } else {
@@ -2315,19 +2510,35 @@ app.post('/settings/security', requireAuth, async (req, res, next) => {
 app.post('/settings/send-deletion-code', requireAuth, async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id);
-        const code = speakeasy.totp({ secret: user.verificationSecret, encoding: 'base32', step: 300 });
 
+        if (!user.verificationSecret) {
+            const secret = speakeasy.generateSecret({ length: 20 });
+            user.verificationSecret = secret.base32;
+        }
+
+        const code = speakeasy.totp({ secret: user.verificationSecret, encoding: 'base32', step: 300 });
         user.verificationCode = code;
         user.verificationCodeExpires = Date.now() + 300000; // 5 minutos
         await user.save();
 
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Renderizamos y enviamos directamente la plantilla de eliminación.
+        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'delete-account-code.html'), {
+            username: user.username,
+            code: code
+        });
+
         await transporter.sendMail({
             from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
-            to: user.email, subject: `Tu código para ELIMINAR tu cuenta es ${code}`,
-            html: `<h2>Confirmación para Eliminar Cuenta</h2><p>Usa el siguiente código para confirmar la eliminación <strong>permanente</strong> de tu cuenta: <strong>${code}</strong>. Es válido por 5 minutos.</p>`
+            to: user.email,
+            subject: 'Acción Crítica Requerida: Eliminar tu cuenta',
+            html: emailHtml
         });
+        // --- FIN DE LA CORRECCIÓN ---
+
         res.status(200).json({ success: true, message: 'Código enviado a tu correo.' });
     } catch (err) {
+        console.error("Error al enviar código de eliminación:", err);
         res.status(500).json({ success: false, message: 'Error interno del servidor.' });
     }
 });
@@ -2388,17 +2599,23 @@ app.post('/forgot-password', loginLimiter, async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.email.toLowerCase() });
         if (!user) {
-            return res.render('forgot-password', { success: 'Si existe una cuenta, se ha enviado un código de recuperación.' });
+            return res.render('forgot-password', { success: 'Si existe una cuenta asociada a ese correo, hemos enviado las instrucciones para restablecer la contraseña.' });
         }
+
         const code = speakeasy.totp({ secret: user.verificationSecret, encoding: 'base32', step: 300 });
         user.verificationCode = code;
         user.verificationCodeExpires = Date.now() + 300000;
         await user.save();
-        await transporter.sendMail({
-            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
-            to: user.email, subject: `Recupera tu cuenta de Dona Paraguay`,
-            html: `<h2>Recuperación de Cuenta</h2><p>Usa el siguiente código para restablecer tu contraseña: <strong>${code}</strong>. Es válido por 5 minutos.</p>`
+
+        await sendCodeEmail({
+            email: user.email,
+            username: user.username,
+            code: code,
+            title: 'Recuperación de Contraseña',
+            subject: `Tu código para restablecer tu contraseña es ${code}`,
+            introMessage: 'Recibimos una solicitud para restablecer la contraseña de tu cuenta. Usa el siguiente código para continuar:'
         });
+
         req.session.resetEmail = user.email;
         res.redirect('/reset-with-code');
     } catch (err) {

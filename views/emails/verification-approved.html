@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>¡Cuenta Verificada!</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eeeeee; }
+        .header img { height: 60px; }
+        .content { padding: 20px 0; }
+        .content h1 { color: #333333; font-size: 24px; }
+        .content p { color: #555555; line-height: 1.6; }
+        .button-container { text-align: center; margin-top: 30px; }
+        .button { background-color: #007BFF; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; }
+        .footer { text-align: center; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #999999; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759270178/donaparaguay/assets/f2tjpl4vnnaytr7lq3y4.png" alt="Dona Paraguay Logo">
+        </div>
+        <div class="content">
+            <h1>¡Felicidades, <%= username %>! Tu cuenta ha sido verificada.</h1>
+            <p>Nuestro equipo ha revisado tus documentos y tu cuenta en Dona Paraguay ahora está oficialmente verificada.</p>
+            <p>Esto significa que ya tienes todo listo para empezar a crear campañas y recaudar fondos para las causas que te importan. La insignia de "Organizador Verificado" ya es visible en tu perfil, lo que generará más confianza en los donantes.</p>
+            <div class="button-container">
+                <a href="<%= newCampaignUrl %>" class="button">Crear mi primera campaña</a>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; <%= new Date().getFullYear() %> Dona Paraguay
+        </div>
+    </div>
+</body>
+</html>
