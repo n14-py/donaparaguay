@@ -1209,3 +1209,18 @@ body.auth-page main.container {
         font-size: 1.25rem;
    }
 }
+
+
+/* --- MEJORA VISUAL PARA META EN TARJETAS --- */
+.stats-text .amount-raised {
+    font-size: 0.9rem; /* Ajusta el tamaño general de la línea */
+}
+.stats-text .amount-raised strong {
+    font-size: 1.05rem; /* El monto recaudado sigue siendo el protagonista */
+    color: var(--text-color);
+    font-weight: 700;
+}
+.stats-text .goal-text {
+    color: var(--text-muted-color); /* Un color más suave */
+    font-size: 0.8rem; /* Texto más pequeño para la meta */
+}
