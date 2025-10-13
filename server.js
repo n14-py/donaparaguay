@@ -685,6 +685,13 @@ app.post('/verify-2fa', async (req, res, next) => {
 app.get('/verify-account', requireAuth, async (req, res, next) => {
     try {
         const existingVerification = await Verification.findOne({ userId: req.user._id });
+
+        // Si la verificación ya está pendiente, muestra la página de espera.
+        if (existingVerification && existingVerification.status === 'pending') {
+            return res.render('verify-pending.html');
+        }
+
+        // Si no está pendiente (o no existe), muestra el formulario de carga.
         res.render('verify-account', {
             status: existingVerification ? existingVerification.status : null,
             reason: existingVerification ? existingVerification.rejectionReason : null
@@ -732,7 +739,9 @@ app.post('/verify-account', requireAuth, upload.fields([
             message: 'Hemos recibido tus documentos para verificación. Te notificaremos cuando el proceso haya terminado.'
         }).save();
 
-        res.redirect('/verify-account');
+        // ...
+    res.render('verify-pending.html');
+// ...
     } catch (err) {
         next(err);
     }
