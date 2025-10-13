@@ -39,7 +39,9 @@
                 <div class="progress-bar" style="width: <%= Math.min(progress, 100) %>%"></div>
             </div>
             <div class="stats-text">
-                <span class="amount-raised"><strong><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong></span>
+                <span class="amount-raised">
+    <strong><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong> de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.
+</span>
                 <span class="card-likes"><i class="fas fa-heart"></i> <%= campaign.likes.length %></span>
             </div>
         </div>
