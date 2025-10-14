@@ -212,7 +212,7 @@ const campaignSchema = new mongoose.Schema({
     goalAmount: { type: Number, default: 0 }, // Meta en Guaraníes
     amountRaised: { type: Number, default: 0 }, // Recaudado en Guaraníes
     views: { type: Number, default: 0 },
-    status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden', 'pending_verification'], default: 'pending' },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     // --- LÍNEA NUEVA A AÑADIR ---
     milestonesNotified: { type: Map, of: Boolean, default: {} }
@@ -957,16 +957,19 @@ app.get('/api/campaign/:id/updates', async (req, res) => {
 });
 
 
-app.get('/new-campaign', requireAuth, requireVerification, (req, res) => {
+app.get('/new-campaign', requireAuth, (req, res) => {
     res.render('new-campaign');
 });
 
-app.post('/new-campaign', requireAuth, requireVerification, upload.array('files', 10), async (req, res, next) => {
+app.post('/new-campaign', requireAuth, upload.array('files', 10), async (req, res, next) => {
     try {
-        const { title, description, goalAmount, category, location, tags } = req.body;
+        const { title, description, goalAmount, category, location } = req.body;
         if (!req.files || req.files.length === 0) throw new Error("Debes subir al menos una imagen o video para la campaña.");
         if (!title || !goalAmount || !category || !location) throw new Error("Título, meta, categoría y ubicación son obligatorios.");
 
+        // --- LÓGICA MODIFICADA ---
+        const isVerified = req.user.isVerified;
+        
         const newCampaign = new Campaign({
             userId: req.user._id,
             title: purify.sanitize(title),
@@ -975,22 +978,26 @@ app.post('/new-campaign', requireAuth, requireVerification, upload.array('files'
             goalAmount: parseFloat(goalAmount),
             category,
             location,
-            tags: tags ? tags.split(',').map(t => purify.sanitize(t.trim())) : [],
-            status: 'pending'
+            // Si el usuario está verificado, va a pendiente. Si no, a pendiente de verificación.
+            status: isVerified ? 'pending' : 'pending_verification' 
         });
 
         await newCampaign.save();
 
+        if (isVerified) {
+            // Si ya estaba verificado, notificar al admin como siempre.
+            await sendAdminNotificationEmail({
+                subject: 'Nueva Campaña Pendiente',
+                message: `El usuario <strong>${req.user.username}</strong> ha creado una nueva campaña llamada <strong>"${newCampaign.title}"</strong> que necesita ser revisada.`,
+                actionUrl: `${process.env.BASE_URL}/admin/pending-campaigns`
+            });
+            // Y redirigir a la campaña.
+            res.redirect(`/campaign/${newCampaign._id}`);
+        } else {
+            // Si no está verificado, lo mandamos a verificar con un mensaje especial.
+            res.redirect('/verify-account?from=new-campaign');
+        }
 
-        // AÑADE ESTE BLOQUE
-    await sendAdminNotificationEmail({
-        subject: 'Nueva Campaña Pendiente',
-        message: `El usuario <strong>${req.user.username}</strong> ha creado una nueva campaña llamada <strong>"${newCampaign.title}"</strong> que necesita ser revisada.`,
-        actionUrl: `${process.env.BASE_URL}/admin/pending-campaigns`
-    });
-        // Notificar al admin que hay una nueva campaña para revisar
-        // (Lógica a implementar si se desea)
-        res.redirect(`/campaign/${newCampaign._id}`);
     } catch (err) {
         next(err);
     }
@@ -1925,8 +1932,11 @@ app.post('/admin/verification/:id/approve', requireAdmin, async (req, res, next)
         verification.status = 'approved';
         await verification.save();
 
-        await new Notification({ userId: verification.userId._id, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
+// --- AÑADE ESTA LÍNEA ---
+        // Busca todas las campañas del usuario que estaban esperando verificación y pásalas a "pendiente".
+        await Campaign.updateMany({ userId: verification.userId._id, status: 'pending_verification' }, { $set: { status: 'pending' } });
 
+        await new Notification({ userId: verification.userId._id, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
         // --- NUEVO: Enviar correo de bienvenida con plantilla HTML ---
         try {
             const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'verification-approved.html'), {

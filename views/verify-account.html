@@ -13,8 +13,15 @@
 
 <main class="container">
     <div class="form-container auth-form">
-        <h2>Verificación de Identidad del Organizador</h2>
+        <h2>Verificación de Identidad</h2>
         
+        <% if (locals.query && locals.query.from === 'new-campaign') { %>
+            <div class="alert alert-success">
+                <h4>¡Excelente! Tu campaña ha sido guardada.</h4>
+                <p>El último paso para que podamos revisarla y publicarla es verificar tu identidad. ¡Ya casi está!</p>
+            </div>
+        <% } %>
+
         <% if (locals.status === 'rejected') { %>
             <div class="alert alert-danger">
                 <h4>Tu verificación fue rechazada</h4>
@@ -25,11 +32,10 @@
 
         <div class="verification-benefits" style="background-color: var(--primary-color-light); padding: 1.5rem; border-radius: var(--border-radius-soft); margin-bottom: 2rem;">
             <h4 style="text-align: center; color: var(--primary-color);">¡Obtén la insignia de Organizador Verificado!</h4>
-            <p style="text-align: center; font-size: 0.9rem; margin-top: 1rem;">Verificar tu perfil genera confianza en los donantes y es un requisito para poder crear campañas y recaudar fondos en nuestra plataforma.</p>
-            <ul style="font-size: 0.9rem; padding-left: 20px; margin-top: 1rem;">
-                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Aumenta la <strong>confianza y seguridad</strong> de los donantes.</li>
-                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Reduce el riesgo de <strong>fraudes y perfiles falsos</strong>.</li>
-                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Habilita la creación de <strong>campañas de recaudación</strong>.</li>
+             <ul style="font-size: 0.9rem; padding-left: 20px; margin-top: 1rem;">
+                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Aumenta la <strong>confianza</strong> de los donantes.</li>
+                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Habilita la <strong>publicación</strong> de tus campañas.</li>
+                <li><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Ayuda a mantener una <strong>comunidad segura</strong>.</li>
             </ul>
         </div>
 
@@ -45,7 +51,7 @@
             </div>
 
             <div class="alert alert-info" style="font-size: 0.9rem;">
-                <i class="fas fa-shield-alt"></i> <strong>Tu privacidad es importante.</strong> Al verificarte, aceptas nuestros términos sobre la retención segura de tus documentos para validar tu identidad.
+                <i class="fas fa-shield-alt"></i> <strong>Tu privacidad es importante.</strong> Tus documentos se usan únicamente para validar tu identidad.
             </div>
             <button type="submit" id="submit-btn" class="btn btn-primary btn-block">Enviar para Verificación</button>
         </form>
