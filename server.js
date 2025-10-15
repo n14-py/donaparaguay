@@ -2562,6 +2562,8 @@ app.post('/settings/send-deletion-code', requireAuth, async (req, res, next) => 
     }
 });
 
+// donaparaguay/server.js
+
 // Eliminar cuenta permanentemente
 app.post('/settings/delete-account', requireAuth, async (req, res, next) => {
     const dbSession = await mongoose.startSession();
@@ -2580,19 +2582,31 @@ app.post('/settings/delete-account', requireAuth, async (req, res, next) => {
                 throw new Error('El código de verificación es incorrecto o ha expirado.');
             }
 
-            // Proceso de eliminación
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Proceso de eliminación robusto
             const userCampaigns = await Campaign.find({ userId: userId }).session(session);
             for (const campaign of userCampaigns) {
                 for (const fileUrl of campaign.files) {
                     const publicId = getPublicId(fileUrl);
-                    if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+                    if (publicId) {
+                        // Determinamos el tipo de recurso desde la URL
+                        const resourceType = fileUrl.includes('/video/') ? 'video' : 'image';
+                        await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                    }
                 }
             }
             await Campaign.deleteMany({ userId: userId }).session(session);
+
             if (user.profilePic && !user.profilePic.includes('default')) {
                 const publicId = getPublicId(user.profilePic);
-                if (publicId) await cloudinary.uploader.destroy(publicId);
+                if (publicId) {
+                    // Aplicamos la misma lógica para la foto de perfil
+                    const resourceType = user.profilePic.includes('/video/') ? 'video' : 'image';
+                    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                }
             }
+            // --- FIN DE LA CORRECCIÓN ---
+
             await Verification.deleteOne({ userId: userId }).session(session);
             await Transaction.deleteMany({ $or: [{ donatorId: userId }, { organizerId: userId }] }).session(session);
             await Withdrawal.deleteMany({ userId: userId }).session(session);
@@ -2803,6 +2817,63 @@ app.post('/admin/report/:id/update', requireAdmin, async (req, res, next) => {
     }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// donaparaguay/server.js
+
+// =============================================
+// RUTA PARA GENERAR SITEMAP DINÁMICO
+// =============================================
+app.get('/sitemap.xml', async (req, res, next) => {
+    try {
+        const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+        // 1. Añadir páginas estáticas importantes
+        const staticPages = ['/campaigns', '/faq', '/terms', '/privacy', '/login', '/register'];
+        staticPages.forEach(page => {
+            xml += `
+                <url>
+                    <loc>${baseUrl}${page}</loc>
+                    <changefreq>weekly</changefreq>
+                    <priority>0.8</priority>
+                </url>`;
+        });
+
+        // 2. Añadir todas las campañas activas dinámicamente
+        const campaigns = await Campaign.find({ status: 'approved' }).select('_id updatedAt');
+        campaigns.forEach(campaign => {
+            xml += `
+                <url>
+                    <loc>${baseUrl}/campaign/${campaign._id}</loc>
+                    <lastmod>${new Date(campaign.updatedAt).toISOString()}</lastmod>
+                    <changefreq>daily</changefreq>
+                    <priority>1.0</priority>
+                </url>`;
+        });
+
+        xml += `</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        res.send(xml);
+
+    } catch (err) {
+        next(err);
+    }
+});
 
 // =============================================
 // MANEJADORES DE ERRORES Y ARRANQUE DEL SERVIDOR
