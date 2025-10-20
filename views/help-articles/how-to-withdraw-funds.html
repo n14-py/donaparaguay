@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cómo Retirar los Fondos Recaudados - Centro de Ayuda</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<%- include('../partials/header.html') %>
+<main class="container">
+    <div class="static-page-container">
+        <h1>Cómo Retirar los Fondos Recaudados</h1>
+        <p class="lead">¡Felicidades por recaudar fondos para tu causa! Aquí te explicamos paso a paso cómo solicitar el dinero para poder utilizarlo.</p>
+        <hr>
+
+        <h3>1. Requisitos Previos</h3>
+        <ul>
+            <li>Tu campaña debe haber recaudado al menos <strong>30.000 Gs.</strong> para poder solicitar un retiro.</li>
+            <li>Debes tener una cuenta bancaria o un número de teléfono habilitado para giros a tu nombre.</li>
+        </ul>
+
+        <h3>2. Ve a tu Panel de Organizador</h3>
+        <p>Inicia sesión en tu cuenta y dirígete a la sección <strong>"Panel de Organizador"</strong> (puedes encontrar el enlace en el menú desplegable de tu perfil). Una vez dentro, haz clic en la opción <strong>"Retiros"</strong> del menú lateral.</p>
+
+        <h3>3. Completa el Formulario de Solicitud</h3>
+        <p>En la página de Retiros, encontrarás un formulario:</p>
+        <ul>
+            <li><strong>Selecciona la Campaña:</strong> Elige la campaña de la cual deseas retirar los fondos. Solo aparecerán las que cumplan el requisito de monto mínimo.</li>
+            <li><strong>Monto a retirar:</strong> Ingresa la cantidad exacta que deseas retirar (en Guaraníes), asegurándote de que sea igual o menor al monto disponible en la campaña y como mínimo 30.000 Gs.</li>
+            <li><strong>Desglose de Comisión:</strong> Al ingresar el monto, verás un cálculo automático que te mostrará la comisión del 10% de la plataforma y el monto neto que recibirás. Esta comisión nos ayuda a mantener Dona Paraguay funcionando.</li>
+            <li><strong>Método de Retiro:</strong> Elige entre "Transferencia Bancaria" o "Giro".</li>
+            <li><strong>Completa los Datos:</strong>
+                <ul>
+                    <li><strong>Para Transferencia:</strong> Necesitarás ingresar tu Nombre Completo (como figura en el banco), Cédula de Identidad, Nombre del Banco y Número de Cuenta.</li>
+                    <li><strong>Para Giro:</strong> Necesitarás ingresar tu Nombre Completo, Cédula de Identidad y Número de Teléfono habilitado para recibir el giro.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Revisa que todos los datos sean correctos antes de enviar.</p>
+
+        <h3>4. Envía la Solicitud y Espera la Aprobación</h3>
+        <p>Una vez que envíes el formulario, tu solicitud pasará al estado <strong>"Pendiente"</strong>. Nuestro equipo administrativo revisará la solicitud.</p>
+        <p>El proceso de revisión y transferencia suele tardar entre <strong>3 a 5 días hábiles</strong>.</p>
+
+        <h3>5. Seguimiento del Estado</h3>
+        <p>En la misma página de "Retiros", debajo del formulario, encontrarás tu <strong>"Historial de Retiros"</strong>. Allí podrás ver el estado de tus solicitudes:</p>
+        <ul>
+            <li><strong>Pendiente:</strong> Hemos recibido tu solicitud y está en proceso de revisión.</li>
+            <li><strong>Procesado:</strong> ¡Listo! Hemos realizado la transferencia o el giro a los datos que proporcionaste.</li>
+            <li><strong>Rechazado:</strong> Hubo un problema con tu solicitud (ej. datos incorrectos, fondos insuficientes). En este caso, los fondos se devuelven al saldo de tu campaña para que puedas intentar de nuevo.</li>
+        </ul>
+
+        <div class="text-center" style="margin-top: 3rem;">
+            <a href="/help-center" class="btn btn-secondary">Volver al Centro de Ayuda</a>
+        </div>
+    </div>
+</main>
+<%- include('../partials/footer.html') %>
+</body>
+</html>

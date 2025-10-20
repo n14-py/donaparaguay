@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Centro de Ayuda - Dona Paraguay</title>
+    <meta name="description" content="Encuentra guías, consejos y respuestas a tus preguntas sobre cómo usar Dona Paraguay para recaudar fondos o donar de forma segura.">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .hero-help {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: var(--primary-color-light);
+            border-radius: var(--border-radius);
+        }
+        .help-section {
+            margin: 3rem 0;
+        }
+        .help-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+        .article-list {
+            list-style: none;
+            padding: 0;
+        }
+        .article-list li a {
+            display: block;
+            padding: 1.25rem 1.5rem;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-soft);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+        .article-list li a:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-sm);
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+<%- include('partials/header.html') %>
+<main class="container">
+    <div class="hero-help">
+        <h1>Centro de Ayuda</h1>
+        <p>Tu guía completa para donar y recaudar fondos con éxito y seguridad.</p>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-bullhorn"></i> Para Organizadores de Campañas</h2>
+        <ul class="article-list">
+        <li><a href="/help/article/understanding-verification">Entendiendo la Verificación de Identidad</a></li> 
+            <li><a href="/help/article/tips-for-a-great-story">Consejos para Escribir una Historia que Conecte</a></li>
+            <li><a href="/help/article/how-to-share-campaign">La Guía Definitiva para Compartir tu Campaña</a></li>
+            <li><a href="/help/article/how-to-withdraw-funds">Cómo Retirar los Fondos Recaudados</a></li> </ul>
+    </div>
+
+    <div class="help-section">
+        <h2><i class="fas fa-heart"></i> Para Donantes</h2>
+        <ul class="article-list">
+            <li><a href="/help/article/how-to-identify-a-trusted-campaign">Cómo Identificar una Campaña Confiable</a></li>
+            <li><a href="/help/article/what-happens-to-my-donation">El Viaje de tu Donación: ¿Qué Pasa Después de que Envías el Comprobante?</a></li>
+        </ul>
+    </div>
+    
+    <div class="help-section">
+        <h2><i class="fas fa-question-circle"></i> Preguntas Generales</h2>
+         <ul class="article-list">
+            <li><a href="/faq">Ver todas las Preguntas Frecuentes (FAQ)</a></li>
+        </ul>
+    </div>
+
+</main>
+<%- include('partials/footer.html') %>
+</body>
+</html>

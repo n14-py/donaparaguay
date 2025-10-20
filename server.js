@@ -603,12 +603,72 @@ async function sendAdminNotificationEmail({ subject, message, actionUrl }) {
 
 
 // =============================================
+// HELPER PARA ENVIAR CORREOS CON CÓDIGO (NUEVO)
+// =============================================
+async function sendCodeEmail({ email, username, code, title, subject, introMessage }) {
+    try {
+        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'recovery-code.html'), {
+            username,
+            code,
+            title,
+            subject, // Asegúrate de que la plantilla use estas variables si es necesario
+            introMessage
+        });
+
+        await transporter.sendMail({
+            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`, // Usamos el correo principal
+            to: email,
+            subject: subject, // El asunto que pasaste como parámetro
+            html: emailHtml
+        });
+        console.log(`✅ Correo de código enviado a ${email}`);
+    } catch (error) {
+        console.error(`❌ Error al enviar correo de código a ${email}:`, error);
+        // Podrías querer lanzar el error aquí o manejarlo de otra forma
+        // throw error; 
+    }
+}
+
+
+
+// =============================================
 // RUTAS DE AUTENTICACIÓN Y PÁGINAS BÁSICAS
 // =============================================
 app.get('/', (req, res) => res.redirect('/campaigns'));
 app.get('/privacy', (req, res) => res.render('privacy'));
 app.get('/terms', (req, res) => res.render('terms'));
 app.get('/faq', (req, res) => res.render('faq'));
+
+// --- NUEVAS RUTAS DE CONTENIDO ---
+app.get('/about', (req, res) => res.render('about'));
+app.get('/trust', (req, res) => res.render('trust'));
+app.get('/how-it-works', (req, res) => res.render('how-it-works'));
+
+// --- NUEVAS RUTAS DEL CENTRO DE AYUDA ---
+app.get('/help-center', (req, res) => res.render('help-center'));
+
+// Esta ruta manejará todos los artículos de forma dinámica y segura
+const helpArticlesPath = path.join(__dirname, 'views', 'help-articles');
+app.get('/help/article/:slug', (req, res, next) => {
+    const slug = req.params.slug;
+    // Sanitiza el slug para prevenir ataques de seguridad
+    const safeSlug = path.normalize(slug).replace(/^(\.\.[\/\\])+/, '');
+    const articlePath = path.join(helpArticlesPath, `${safeSlug}.html`);
+
+    // Verifica si el archivo existe antes de intentar mostrarlo
+    fs.access(articlePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            // Si el archivo no se encuentra, pasa al manejador de errores 404
+            console.error(`Artículo de ayuda no encontrado: ${articlePath}`);
+            return next(); 
+        }
+        
+        // Si el archivo existe, lo renderiza
+        res.render(`help-articles/${safeSlug}.html`);
+    });
+});
+// --- FIN DE NUEVAS RUTAS ---
+
 
 app.get('/register', (req, res) => res.render('register', { error: null }));
 // REEMPLAZAR la ruta app.post('/register', ...) con este nuevo código:
@@ -2831,10 +2891,8 @@ app.post('/admin/report/:id/update', requireAdmin, async (req, res, next) => {
 
 
 
-// donaparaguay/server.js
-
 // =============================================
-// RUTA PARA GENERAR SITEMAP DINÁMICO
+// RUTA PARA GENERAR SITEMAP DINÁMICO (ACTUALIZADA)
 // =============================================
 app.get('/sitemap.xml', async (req, res, next) => {
     try {
@@ -2842,18 +2900,61 @@ app.get('/sitemap.xml', async (req, res, next) => {
         let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-        // 1. Añadir páginas estáticas importantes
-        const staticPages = ['/campaigns', '/faq', '/terms', '/privacy', '/login', '/register'];
+        // --- 1. Añadir páginas estáticas importantes ---
+        // (Nota: '/' redirige a '/campaigns', así que listamos '/campaigns' directamente)
+        const staticPages = [
+            { path: '/campaigns', changefreq: 'daily', priority: '1.0' },
+            { path: '/how-it-works', changefreq: 'monthly', priority: '0.8' },
+            { path: '/about', changefreq: 'monthly', priority: '0.7' },
+            { path: '/trust', changefreq: 'monthly', priority: '0.8' },
+            { path: '/faq', changefreq: 'monthly', priority: '0.7' },
+            { path: '/terms', changefreq: 'yearly', priority: '0.5' },
+            { path: '/privacy', changefreq: 'yearly', priority: '0.5' },
+            { path: '/login', changefreq: 'yearly', priority: '0.6' },
+            { path: '/register', changefreq: 'yearly', priority: '0.6' },
+            { path: '/forgot-password', changefreq: 'yearly', priority: '0.4' },
+            { path: '/sponsors/apply', changefreq: 'monthly', priority: '0.7' }
+        ];
+
         staticPages.forEach(page => {
             xml += `
                 <url>
-                    <loc>${baseUrl}${page}</loc>
-                    <changefreq>weekly</changefreq>
-                    <priority>0.8</priority>
+                    <loc>${baseUrl}${page.path}</loc>
+                    <changefreq>${page.changefreq}</changefreq>
+                    <priority>${page.priority}</priority>
                 </url>`;
         });
 
-        // 2. Añadir todas las campañas activas dinámicamente
+        // --- 2. Añadir páginas del Centro de Ayuda ---
+        xml += `
+            <url>
+                <loc>${baseUrl}/help-center</loc>
+                <changefreq>weekly</changefreq>
+                <priority>0.7</priority>
+            </url>`;
+
+        // Lee los nombres de archivo de la carpeta help-articles para listarlos
+        const helpArticlesDir = path.join(__dirname, 'views', 'help-articles');
+        try { // Usamos try-catch por si la carpeta no existe o hay problemas de lectura
+            const articleFiles = fs.readdirSync(helpArticlesDir);
+            articleFiles.forEach(file => {
+                if (file.endsWith('.html')) {
+                    const slug = file.replace('.html', '');
+                    xml += `
+                        <url>
+                            <loc>${baseUrl}/help/article/${slug}</loc>
+                            <changefreq>monthly</changefreq>
+                            <priority>0.6</priority>
+                        </url>`;
+                }
+            });
+        } catch (readErr) {
+            console.error("Error leyendo directorio de artículos de ayuda:", readErr);
+            // Continuamos sin los artículos si hay error, pero registramos el problema.
+        }
+
+
+        // --- 3. Añadir todas las campañas activas dinámicamente ---
         const campaigns = await Campaign.find({ status: 'approved' }).select('_id updatedAt');
         campaigns.forEach(campaign => {
             xml += `
@@ -2861,7 +2962,7 @@ app.get('/sitemap.xml', async (req, res, next) => {
                     <loc>${baseUrl}/campaign/${campaign._id}</loc>
                     <lastmod>${new Date(campaign.updatedAt).toISOString()}</lastmod>
                     <changefreq>daily</changefreq>
-                    <priority>1.0</priority>
+                    <priority>0.9</priority> {/* */}
                 </url>`;
         });
 
@@ -2874,7 +2975,6 @@ app.get('/sitemap.xml', async (req, res, next) => {
         next(err);
     }
 });
-
 // =============================================
 // MANEJADORES DE ERRORES Y ARRANQUE DEL SERVIDOR
 // =============================================

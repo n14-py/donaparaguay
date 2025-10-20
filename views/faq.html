@@ -3,54 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preguntas Frecuentes - Dona Paraguay</title>
+    <title>Preguntas Frecuentes (FAQ) - Dona Paraguay | Donaciones en Paraguay</title> 
+    <meta name="description" content="Encuentra respuestas a tus dudas sobre Dona Paraguay: cómo hacer donaciones seguras en Paraguay, crear campañas de recaudación, verificar tu cuenta, retirar fondos y más."> 
     <link rel="stylesheet" href="/css/style.css">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-14PSV7R8YT');
-</script>
-
+      gtag('config', 'G-14PSV7R8YT');
+    </script>
 </head>
 <body>
 <%- include('partials/header.html') %>
 <main class="container">
     <div class="static-page-container">
-        <h1>Preguntas Frecuentes</h1>
-        <p>Encuentra respuestas a las dudas más comunes sobre cómo funciona Dona Paraguay.</p>
-        <hr>
-        <h2>Para Donantes</h2>
-        <h4>¿Es seguro donar a través de la plataforma?</h4>
-        <p>Sí. Priorizamos la seguridad exigiendo un proceso de verificación de identidad para todos los organizadores de campañas. Esto nos ayuda a asegurar que las campañas son legítimas. Sin embargo, siempre recomendamos a los donantes leer bien cada causa, revisar las actualizaciones y donar a campañas que les generen confianza.</p>
-        <h4>¿Cómo funciona el proceso de donación?</h4>
-        <p>Es un proceso manual y transparente. Eliges una campaña, vas a "Donar", y sigues las instrucciones para realizar una transferencia o giro a la cuenta bancaria activa de la plataforma. Luego, subes tu comprobante en el mismo formulario. Nuestro equipo administrativo revisa el comprobante y, una vez aprobado, el monto se refleja en la campaña.</p>
-        <h4>¿La plataforma cobra alguna comisión al donante?</h4>
-        <p>No. Si donas 50.000 Gs., ese es el monto que se registra en la campaña. La plataforma aplica una pequeña comisión sobre el total recaudado que recibe el organizador, no sobre tu donación.</p>
+        <h1>Preguntas Frecuentes sobre Dona Paraguay</h1>
+        <p>Encuentra respuestas claras a las dudas más comunes sobre nuestra plataforma de <strong>donaciones en Paraguay</strong>.</p>
 
         <hr>
-        <h2>Para Organizadores de Campañas</h2>
-        <h4>¿Quién puede crear una campaña?</h4>
-        <p>Cualquier persona mayor de 18 años que haya completado exitosamente nuestro proceso de verificación de identidad puede crear una campaña para una causa legítima.</p>
-        <h4>¿Qué costo tiene usar la plataforma?</h4>
-        <p>Crear una campaña y recibir donaciones es completamente gratis. Nuestra plataforma se financia aplicando una <strong>comisión del 10% únicamente sobre el monto que el organizador retira</strong>, no sobre la donación.</p>
-        <p><strong>Ejemplo práctico:</strong> Si tu campaña recauda 1.000.000 Gs. y solicitas un retiro, recibirás 900.000 Gs. Los 100.000 Gs. restantes (el 10%) se destinan a DonaParaguay.com.</p>
-        <p><strong>¿Para qué usamos esa comisión?</strong> Somos 100% transparentes. Esos fondos son vitales para que la plataforma siga funcionando y son invertidos en:</p>
+        <h2><i class="fas fa-globe"></i> Sobre la Plataforma Dona Paraguay</h2>
+
+        <h4>¿Qué es exactamente Dona Paraguay?</h4>
+        <p>Dona Paraguay es una <strong>plataforma online de crowdfunding</strong> (financiamiento colectivo) creada en Paraguay. Nuestro objetivo es ser el principal punto de encuentro digital para conectar a personas que necesitan ayuda económica para diversas causas (salud, educación, emergencias comunitarias, etc.) con individuos y empresas que desean realizar <strong>donaciones en Paraguay</strong> de forma segura y transparente. Facilitamos todo el proceso, desde la creación de campañas hasta la recepción de fondos.</p>
+
+        <h4>¿Cómo se financia Dona Paraguay? ¿Tengo que pagar para usarla?</h4>
+        <p>Usar <strong>Dona Paraguay</strong> es <strong>gratis</strong> tanto para donantes como para quienes crean una campaña. Nos financiamos aplicando una <strong>comisión transparente del 10%</strong>, pero esta se calcula <strong>únicamente sobre el monto que el organizador retira</strong> de su campaña una vez finalizada o alcanzado el mínimo. Esta comisión es fundamental para cubrir los costos operativos: servidores, bases de datos, almacenamiento seguro de imágenes y documentos, el personal administrativo que verifica cada donación y cuenta, y las mejoras constantes de la plataforma para ofrecer un mejor servicio de <strong>recaudación de fondos en Paraguay</strong>.</p>
+
+        <h4>¿Puedo registrarme o iniciar sesión con redes sociales?</h4>
+        <p>Sí, puedes crear tu cuenta o iniciar sesión de forma rápida y segura utilizando tu cuenta de <strong>Google</strong>. También puedes registrarte usando tu correo electrónico y una contraseña.</p>
+
+        <h4>¿Cómo protege Dona Paraguay mi información personal?</h4>
+        <p>Tu privacidad es muy importante. Utilizamos conexiones seguras (HTTPS), almacenamos contraseñas de forma cifrada (hashing bcrypt), y la información sensible como tus documentos de identidad se maneja con estricta confidencialidad por personal autorizado, usándose únicamente para la verificación. No vendemos tus datos. Puedes leer más en nuestra <strong>Política de Privacidad</strong>.</p>
+
+        <hr>
+        <h2><i class="fas fa-heart"></i> Para Donantes</h2>
+
+        <h4>¿Es seguro realizar donaciones en Paraguay a través de esta plataforma?</h4>
+        <p>Sí, la seguridad es un pilar fundamental de <strong>Dona Paraguay</strong>. Nuestro principal mecanismo es exigir un proceso de <strong>verificación de identidad</strong> (<i class="fas fa-check-circle verification-badge"></i>) a todos los organizadores antes de que puedan publicar sus campañas. Esto ayuda enormemente a asegurar que las campañas sean legítimas y reduce el riesgo de fraude, haciendo más seguras las <strong>donaciones en Paraguay</strong> a través de nuestra plataforma.</p>
+
+        <h4>¿Cómo es el proceso exacto para hacer una donación?</h4>
+        <p>El proceso está diseñado para ser simple y transparente:</p>
+        <ol>
+            <li><strong>Elige la Campaña:</strong> Explora las causas y selecciona la que deseas apoyar.</li>
+            <li><strong>Define tu Monto:</strong> En la página de donación, selecciona o ingresa cuánto deseas donar (mínimo 5.000 Gs).</li>
+            <li><strong>Realiza la Transferencia/Giro:</strong> Te mostraremos los datos de la cuenta bancaria activa de <strong>Dona Paraguay</strong>. Realiza la transferencia o giro desde tu aplicación bancaria o punto de pago.</li>
+            <li><strong>Sube tu Comprobante:</strong> Este es el paso <strong>crucial</strong>. Vuelve al formulario de donación en nuestra web y sube una foto clara o captura de pantalla de tu comprobante de pago.</li>
+            <li><strong>Espera la Confirmación:</strong> Nuestro equipo revisará manualmente tu comprobante para validar la <strong>donación</strong>.</li>
+        </ol>
+
+        <h4>Subí mi comprobante, ¿cuánto tarda en aparecer mi donación en la campaña?</h4>
+        <p>Validamos <strong>manualmente cada comprobante</strong> para máxima seguridad y asegurar que los fondos realmente ingresaron. Este proceso suele tomar solo unas <strong>pocas horas durante días y horarios hábiles</strong>. Tan pronto se aprueba, el monto se refleja en la barra de progreso de la campaña, recibirás una notificación en la plataforma y tu nombre de usuario aparecerá en la lista de donantes.</p>
+
+        <h4>¿Me cobran algo extra por donar? ¿Hay alguna comisión oculta?</h4>
+        <p><strong>Absolutamente no.</strong> Para ti como donante, el proceso es <strong>100% gratuito</strong>. Si decides donar 50.000 Gs, ese es el monto exacto que se acreditará a la campaña. Al finalizar el proceso de donación, te damos la <strong>opción voluntaria</strong> de añadir una pequeña propina extra destinada a cubrir los costos operativos de <strong>Dona Paraguay</strong>, pero esto es completamente opcional y no afecta tu donación a la causa. La comisión del 10% se aplica después, sobre el monto total que retira el organizador.</p>
+
+        <h4>¿Puedo donar si no tengo cuenta en Dona Paraguay?</h4>
+        <p>No, para poder subir tu comprobante y que podamos validar tu donación correctamente, necesitas estar registrado e iniciar sesión. Esto también nos permite notificarte cuando tu donación es aprobada y llevar un registro seguro de todos los aportes. Puedes registrarte fácilmente con Google o tu correo.</p>
+
+        <h4>¿Cuál es el monto mínimo para donar a una campaña?</h4>
+        <p>El monto mínimo que puedes seleccionar para donar directamente a una campaña es de <strong>5.000 Gs</strong>. Puedes añadir una propina opcional para la plataforma si lo deseas.</p>
+
+        <h4>¿Puedo donar desde fuera de Paraguay?</h4>
+        <p>Actualmente, el método principal de donación requiere una transferencia bancaria o giro dentro del sistema paraguayo, utilizando los datos de la cuenta de <strong>Dona Paraguay</strong>. Sin embargo, estamos trabajando activamente para integrar pasarelas de pago internacionales que faciliten las <strong>donaciones desde el exterior</strong> en el futuro. ¡Mantente atento a las actualizaciones!</p>
+
+        <h4>¿Recibiré un recibo deducible de impuestos por mi donación?</h4>
+        <p><strong>Dona Paraguay</strong> actúa como una plataforma tecnológica intermediaria para facilitar las <strong>donaciones</strong> directas a las causas presentadas por los organizadores. No somos una entidad benéfica registrada formalmente para emitir recibos deducibles de impuestos. Las donaciones se realizan como un acto de generosidad directa hacia la campaña.</p>
+
+        <h4>¿Cómo identifico una campaña confiable para mi donación?</h4>
+        <p>Además de buscar la insignia de verificación (<i class="fas fa-check-circle verification-badge"></i>), fíjate en estos detalles:</p>
         <ul>
-            <li><strong>Costos de Servidor y Base de Datos:</strong> Pagar por la infraestructura que mantiene el sitio web en línea, rápido y seguro.</li>
-            <li><strong>Almacenamiento de Archivos:</strong> Cubrir los costos del servicio en la nube (Cloudinary) donde se guardan de forma segura todas las imágenes y documentos.</li>
-            <li><strong>Gastos Administrativos:</strong> Pagar al personal que revisa y aprueba cada donación, verifica a los organizadores y brinda soporte.</li>
-            <li><strong>Mejoras y Mantenimiento:</strong> Invertir en el desarrollo de nuevas funciones y en la seguridad constante de la plataforma.</li>
+            <li><strong>Historia Clara y Detallada:</strong> Busca explicaciones específicas sobre la necesidad y el uso de los fondos.</li>
+            <li><strong>Fotos/Videos Auténticos:</strong> El material multimedia debe ser coherente y personal.</li>
+            <li><strong>Actualizaciones Frecuentes:</strong> Un organizador comprometido mantiene informados a sus donantes a través de la pestaña "Actualizaciones".</li>
+            <li><strong>Interacción en Comentarios:</strong> Revisa si hay comentarios de apoyo y si el organizador responde.</li>
+            <li><strong>Perfil del Organizador Completo:</strong> Un perfil con biografía o redes sociales enlazadas puede generar más confianza.</li>
         </ul>
-        <h4>¿Qué pasa si una campaña no alcanza su meta?</h4>
-        <p>No te preocupes. Incluso si una campaña no alcanza el 100% de su meta, el organizador puede retirar los fondos recaudados (siempre que supere el mínimo de 30.000 Gs.) para destinarlos a la causa. Creemos que toda ayuda, grande o pequeña, suma.</p>
-        <h4>¿Cuánto tiempo tarda en aprobarse mi campaña?</h4>
-        <p>Para garantizar la seguridad de nuestra comunidad, nuestro equipo administrativo revisa cada nueva campaña. Este proceso suele tardar menos de 24 horas hábiles. Recibirás una notificación por correo electrónico una vez que tu campaña sea aprobada y publicada.</p>
-        <h4>¿Cuándo puedo retirar los fondos recaudados?</h4>
-        <p>Puedes solicitar un retiro de los fondos de tu campaña una vez que hayas alcanzado un mínimo recaudado de 30.000 Gs. Las solicitudes se procesan en un plazo de 3 a 5 días hábiles.</p>
+        <p>Si tienes dudas, es mejor no donar y puedes usar el botón "Reportar" en la campaña para que investiguemos.</p>
+
+        <h4>¿Qué pasa si dono a una campaña y luego resulta ser fraudulenta?</h4>
+        <p>Las donaciones se consideran finales y no reembolsables a través de la plataforma. Sin embargo, si reportas una campaña como fraudulenta y nuestra investigación lo confirma, tomaremos medidas como eliminar la campaña y banear al usuario. Trabajamos continuamente para prevenir el fraude mediante la verificación de identidad.</p>
+
+        <h4>¿Qué pasa si me equivoqué al subir el comprobante o ingresé mal un dato?</h4>
+        <p>Si subiste un comprobante incorrecto o te das cuenta de un error después de enviar tu donación, por favor, contacta a nuestro equipo de soporte lo antes posible a través del correo electrónico que figura en el pie de página. Indica el nombre de la campaña, la fecha aproximada y el monto, y adjunta el comprobante correcto si es necesario. Haremos lo posible por ayudarte a corregirlo antes de que la donación sea procesada.</p>
+
+        <hr>
+        <h2><i class="fas fa-bullhorn"></i> Para Organizadores de Campañas</h2>
+
+        <h4>¿Quién puede crear una campaña de recaudación de fondos en Paraguay?</h4>
+        <p>Cualquier persona mayor de 18 años, residente en Paraguay, que complete nuestro **proceso de verificación de identidad** subiendo fotos de su cédula, puede crear una campaña para una causa legítima y verificable.</p>
+
+        <h4>¿Por qué debo verificar mi identidad para crear una campaña?</h4>
+        <p>Es un paso **obligatorio y fundamental** para la **seguridad y confianza** de toda la comunidad <strong>Dona Paraguay</strong>. Al hacerlo:</p>
+        <ul>
+            <li>Ayudas a **prevenir fraudes**, asegurando que hay una persona real detrás de cada pedido de <strong>donaciones</strong>.</li>
+            <li>Ganas la **confianza de los donantes** al obtener la insignia de Verificado (<i class="fas fa-check-circle verification-badge"></i>).</li>
+            <li>**Habilitas tu cuenta** para poder publicar campañas y empezar a recibir apoyo.</li>
+        </ul>
+
+        <h4>¿Cómo es el proceso de verificación y cuánto tiempo toma?</h4>
+        <p>El proceso es directo:</p>
+        <ol>
+            <li>Ve a la página "Verificar Identidad" (desde tu perfil o al intentar crear una campaña).</li>
+            <li>Sube fotos **claras y completas** del **frente y reverso de tu Cédula de Identidad** paraguaya vigente.</li>
+            <li>Envía la solicitud.</li>
+        </ol>
+        <p>Nuestro equipo la revisa manualmente para asegurar la validez. Esto normalmente toma **menos de 24 horas hábiles**. Te notificaremos por correo si fue aprobada o rechazada (y el motivo).</p>
+
+        <h4>¿Qué costo tiene usar la plataforma para recaudar fondos?</h4>
+        <p>Crear tu campaña y recibir <strong>donaciones</strong> en <strong>Dona Paraguay</strong> es **completamente gratis**. No hay costos iniciales ni tarifas por recibir aportes. La única comisión es del <strong>10% y se aplica solo sobre el monto total que decides retirar</strong> de los fondos recaudados.</p>
+
+        <h4>¿Cuánto tiempo tarda en aprobarse mi campaña una vez creada?</h4>
+        <p>Primero, debes estar verificado. Una vez que tu cuenta está verificada y creas una campaña, nuestro equipo la revisa para asegurarse de que cumple con nuestros términos y es clara para los donantes. Esta revisión de contenido también suele tardar **menos de 24 horas hábiles**. Recibirás un correo cuando esté aprobada y publicada.</p>
+
+        <h4>Mi campaña fue aprobada, ¿cómo consigo donaciones?</h4>
+        <p>¡La clave es la **difusión activa**!</p>
+        <ul>
+            <li><strong>Contacta a tu círculo cercano:</strong> Pide a familiares y amigos que sean los primeros en donar y compartir. Un mensaje personal por WhatsApp funciona muy bien.</li>
+            <li><strong>Usa Redes Sociales:</strong> Comparte el enlace de tu campaña en Facebook, Instagram (feed, stories con enlace), TikTok, grupos de WhatsApp, etc. Pide a la gente que comparta.</li>
+            <li><strong>Publica Actualizaciones:</strong> Usa la pestaña "Actualizaciones" en tu campaña para contar cómo va todo, agradecer a los donantes y mostrar el impacto. Esto mantiene el interés.</li>
+        </ul>
+
+        <h4>¿Qué pasa si mi campaña no alcanza la meta de recaudación?</h4>
+        <p>¡No hay problema! A diferencia de otras plataformas, en <strong>Dona Paraguay</strong> puedes **retirar los fondos recaudados aunque no hayas alcanzado el 100% de la meta**. El único requisito es que el monto acumulado en la campaña sea de al menos 30.000 Gs. para poder solicitar el retiro. Creemos que toda ayuda suma.</p>
+
+        <h4>¿Qué pasa si una campaña recauda MÁS dinero que su meta?</h4>
+        <p>¡Eso es genial! El organizador recibirá todos los fondos recaudados, incluso si superan la meta inicial. El dinero extra puede ser utilizado para ampliar el alcance de la ayuda, cubrir gastos imprevistos relacionados con la causa, o iniciar una nueva fase del proyecto.</p>
+
+        <h4>¿Cuándo y cómo puedo retirar el dinero recaudado?</h4>
+        <p>Puedes solicitar un retiro en cualquier momento, siempre que hayas recaudado **al menos 30.000 Gs.** en la campaña. El proceso es:</p>
+        <ol>
+            <li>Ve a tu **Panel de Organizador > Retiros**.</li>
+            <li>Selecciona la campaña y el **monto a retirar**.</li>
+            <li>Verás el cálculo de la **comisión del 10%** y el total neto que recibirás.</li>
+            <li>Elige **Transferencia Bancaria** (necesitas N° de Cuenta, Banco, Nombre Titular, CI) o **Giro** (Nombre, CI, N° de Teléfono) y completa los datos.</li>
+            <li>Envía la solicitud. Nuestro equipo la procesará en **3 a 5 días hábiles**. Puedes ver el estado en tu historial de retiros.</li>
+        </ol>
+
+        <h4>¿Puedo tener más de una campaña activa al mismo tiempo?</h4>
+        <p>Sí, una vez que tu cuenta está verificada, puedes crear y gestionar múltiples campañas de <strong>recaudación de fondos</strong> simultáneamente, siempre que cada una represente una causa legítima y cumpla con nuestros Términos y Condiciones. Puedes ver todas tus campañas en tu "Panel de Organizador".</p>
+
+        <h4>¿Qué tipo de campañas NO están permitidas en Dona Paraguay?</h4>
+        <p>No se permiten campañas para fines ilegales, fraudulentos, que inciten al odio, discriminación, violencia, o que violen nuestros Términos y Condiciones. Tampoco se permiten campañas con fines puramente comerciales o personales que no representen una necesidad genuina o causa solidaria. Nuestro equipo revisa cada campaña para asegurar que se alinee con el propósito de la plataforma.</p>
+
+        <h4>¿Puedo editar mi campaña después de que esté publicada?</h4>
+        <p>Sí, puedes modificar el <strong>título, la descripción, la meta de recaudación, la categoría y la ubicación</strong>. Para hacerlo, ve a tu "Panel de Organizador", busca la campaña que quieres cambiar y haz clic en el icono de editar (<i class="fas fa-pen"></i>). Ten en cuenta que las imágenes y videos subidos inicialmente no se pueden cambiar desde esta opción para mantener la consistencia.</p>
+
+        <h4>¿Puedo extender la duración de mi campaña si no he alcanzado la meta?</h4>
+        <p>Las campañas en <strong>Dona Paraguay</strong> no tienen una duración fija predeterminada. Permanecen activas mientras el organizador las mantenga así y continúe publicando actualizaciones. Puedes seguir recaudando fondos hasta que decidas que has alcanzado tu objetivo o ya no necesitas más ayuda.</p>
+
+        <h4>¿Qué son las "Actualizaciones" y por qué son importantes?</h4>
+        <p>Las "Actualizaciones" son publicaciones que puedes hacer directamente en la página de tu campaña para informar a tus donantes y seguidores sobre el progreso de tu causa, agradecerles por su apoyo, o compartir noticias relevantes. Son <strong>muy importantes</strong> porque generan confianza, mantienen el interés en tu campaña y animan a más personas a donar y compartir. Puedes publicarlas desde la pestaña "Actualizaciones" en la página de tu campaña.</p>
+
+        <h4>¿Cómo funcionan los comentarios y las respuestas en las campañas?</h4>
+        <p>Los usuarios registrados pueden dejar comentarios de apoyo en las campañas. Los organizadores y otros usuarios también pueden responder directamente a comentarios específicos, creando hilos de conversación. Es una excelente manera de interactuar con la comunidad y agradecer a los donantes.</p>
+
+        <hr>
+        <h2><i class="fas fa-cogs"></i> Sobre Funcionalidades y Cuenta</h2>
+
+        <h4>¿Puedo cambiar mi nombre de usuario o correo electrónico después de registrarme?</h4>
+        <p>Puedes cambiar tu <strong>nombre de usuario</strong> y otra información de tu perfil (como biografía, foto, teléfono, enlaces sociales) desde la sección "Editar Perfil" en tu Panel de Organizador. Sin embargo, el <strong>correo electrónico</strong> asociado a tu cuenta generalmente no se puede cambiar directamente por razones de seguridad. Si necesitas cambiar tu correo, por favor contacta a soporte.</p>
+
+        <h4>Olvidé mi contraseña, ¿cómo la recupero?</h4>
+        <p>¡No te preocupes! Haz clic en "¿Olvidaste tu contraseña?" en la página de inicio de sesión. Te pediremos tu correo electrónico. Luego, podrás elegir entre recibir un código de verificación por correo o responder tus preguntas de seguridad (si las configuraste) para establecer una nueva contraseña.</p>
+
+        <h4>¿Qué son las insignias (badges) que aparecen en los perfiles?</h4>
+        <p>Las insignias son reconocimientos visuales que otorgamos automáticamente a los usuarios (principalmente donantes) por alcanzar ciertos hitos o realizar acciones específicas en la plataforma, como hacer su primera donación, donar a ciertas categorías de campañas, o alcanzar un monto total donado. Sirven para reconocer y celebrar la generosidad y el compromiso dentro de la comunidad <strong>Dona Paraguay</strong>.</p>
+
+        <h4>¿Para qué sirve seguir a otros usuarios?</h4>
+        <p>Al seguir a un organizador (haciendo clic en "Seguir" en su perfil), podrás ver fácilmente sus nuevas campañas o actualizaciones importantes en futuras secciones de la plataforma (aunque esta función está en desarrollo). Es una forma de mantenerte conectado con las causas y personas que te importan.</p>
+
+        <h4>Reporté una campaña/usuario. ¿Qué sucede ahora?</h4>
+        <p>Agradecemos tu ayuda para mantener la plataforma segura. Cuando recibimos un reporte, nuestro equipo administrativo lo revisa. Investigaremos la situación y, si se confirma una violación de nuestros términos (fraude, contenido inapropiado, etc.), tomaremos las medidas correspondientes, que pueden incluir la eliminación de contenido, la suspensión de la campaña o el baneo del usuario. Por razones de privacidad, no siempre podemos compartir el resultado específico de la investigación contigo, pero ten la seguridad de que todos los reportes son tomados en serio.</p>
+
+        <h4>¿Cómo elimino mi cuenta de Dona Paraguay?</h4>
+        <p>Si deseas eliminar tu cuenta permanentemente, puedes hacerlo desde tu panel de configuración, en la sección de <strong>Seguridad</strong>. Encontrarás una "Zona de Peligro" donde, por seguridad, deberás confirmar tu contraseña y usar un código de verificación que enviaremos a tu correo. Ten en cuenta que esta acción es <strong>irreversible</strong> y eliminará todos tus datos, campañas y donaciones asociadas.</p>
+
+        <h4>¿Qué hago si tengo problemas técnicos o necesito ayuda?</h4>
+        <p>Si encuentras algún error en la plataforma, tienes problemas para subir un archivo o necesitas asistencia, por favor contáctanos directamente a través del <strong>correo electrónico de soporte</strong> que encontrarás en el pie de página del sitio web. Describe tu problema con el mayor detalle posible para que podamos ayudarte rápidamente.</p>
+
+        <h4>¿Cómo puede mi empresa convertirse en patrocinadora?</h4>
+        <p>¡Agradecemos tu interés en apoyar <strong>Dona Paraguay</strong>! Las empresas pueden convertirse en patrocinadoras y tener su logo visible en la página principal y otras secciones. Visita nuestra sección <strong>"Suma tu Apoyo Aquí"</strong> (enlace usualmente cerca del carrusel de sponsors en la página principal) para ver la información sobre los planes disponibles, costos y el formulario de solicitud.</p>
+
+        
+        <div class="text-center" style="margin-top: 3rem;">
+            <a href="/campaigns" class="btn btn-primary"><i class="fas fa-home"></i> Volver al Inicio</a>
+        </div>
+
     </div>
 </main>
 <%- include('partials/footer.html') %>
