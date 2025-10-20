@@ -1248,3 +1248,71 @@ body.auth-page main.container {
 .file-input-label {
     cursor: pointer;
 }
+
+
+
+
+/* --- ESTILOS PARA AVISO DE ESTADO (OVERLAY SOBRE IMAGEN) --- */
+
+.campaign-card {
+    position: relative; /* Necesario para posicionar el overlay */
+    overflow: hidden;
+}
+
+/* El contenedor del overlay, posicionado sobre la imagen */
+.campaign-status-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 220px; /* IMPORTANTE: Ajusta esto a la altura exacta de tu .campaign-card-image */
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 2; /* Encima de la imagen */
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* No interfiere con clics */
+    box-sizing: border-box;
+    /* Mantiene bordes redondeados si la tarjeta los tiene arriba */
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+/* Mostrar overlay solo si la tarjeta tiene la clase de estado */
+.campaign-card.status-pending_verification .campaign-status-overlay,
+.campaign-card.status-pending .campaign-status-overlay,
+.campaign-card.status-rejected .campaign-status-overlay {
+    opacity: 1; /* Hacer visible */
+}
+
+.campaign-status-overlay .badge {
+    font-size: 0.9rem;
+    padding: .4em .9em;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    color: white; /* Color texto blanco por defecto */
+}
+
+/* Colores específicos de badges sobre fondo oscuro */
+.campaign-status-overlay .badge.status-pending_verification { background-color: #36b9cc; }
+.campaign-status-overlay .badge.status-pending { background-color: #f6c23e; color: #5a5c69; } /* Amarillo con texto oscuro */
+.campaign-status-overlay .badge.status-rejected { background-color: #e74a3b; }
+
+.campaign-status-overlay p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.95); /* Texto blanco casi opaco */
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.campaign-status-overlay i {
+    margin-right: 0.4em;
+}
+
+/* --- Fin de estilos para overlay --- */

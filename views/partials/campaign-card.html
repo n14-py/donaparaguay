@@ -1,21 +1,47 @@
 <% if (campaign && campaign.userId) { %>
-<div class="campaign-card">
+
+<div class="campaign-card status-<%= campaign.status %>">
+
+    <div class="campaign-status-overlay">
+        <% if (campaign.status === 'pending_verification') { %>
+            <span class="badge status-pending_verification">
+                <i class="fas fa-exclamation-circle"></i> Esperando Verificación
+            </span>
+            <p>Así se verá tu campaña.<br>Se publicará al verificar tu cuenta.</p> {/**/}
+        <% } else if (campaign.status === 'pending') { %>
+            <span class="badge status-pending">
+                <i class="fas fa-hourglass-half"></i> Pendiente de Revisión
+            </span>
+            <p>Nuestro equipo está revisando tu campaña.</p>
+        <% } else if (campaign.status === 'rejected') { %>
+            <span class="badge status-rejected">
+                <i class="fas fa-times-circle"></i> Rechazada
+            </span>
+            <p>Revisa tus notificaciones para detalles.</p>
+        <% } %>
+       
+    </div>
+ 
+
     <a href="/campaign/<%= campaign._id %>" class="card-image-link">
-        <% 
-            let thumbnailUrl = '/img/placeholder.png'; // Imagen por defecto
+        <%
+            let thumbnailUrl = '/img/placeholder.png';
             if (campaign.files && campaign.files.length > 0) {
                 thumbnailUrl = campaign.files[0];
                 if (thumbnailUrl.includes('.mp4') || thumbnailUrl.includes('.mov')) {
                     thumbnailUrl = thumbnailUrl.replace(/\.(mp4|mov|avi)$/i, '.jpg');
                 }
             }
+            // Asegúrate que las transformaciones incluyan la altura correcta
             const thumbnailTransforms = 'w_400,h_220,c_fill,g_auto,q_auto,f_auto';
             thumbnailUrl = thumbnailUrl.replace('/upload/', `/upload/${thumbnailTransforms}/`);
         %>
-        <img 
-            src="<%= thumbnailUrl %>" 
-            alt="Campaña: <%= campaign.title %>" 
+        
+        <img
+            src="<%= thumbnailUrl %>"
+            alt="Campaña: <%= campaign.title %>"
             class="campaign-card-image"
+            style="height: 220px;" {/**/}
             loading="lazy">
         <span class="campaign-card-category"><%= campaign.category %></span>
     </a>
@@ -24,7 +50,7 @@
         <h3 class="card-title">
             <a href="/campaign/<%= campaign._id %>"><%= campaign.title %></a>
         </h3>
-        
+
         <div class="card-organizer">
             <img src="<%= campaign.userId.profilePic %>" alt="Organizador" class="organizer-avatar">
             <span>Por <a href="/user/<%= campaign.userId.username %>" class="organizer-link"><%= campaign.userId.username %></a></span>
@@ -40,9 +66,9 @@
             </div>
             <div class="stats-text">
                 <span class="amount-raised" style="font-size: 1rem;">
-    <strong style="color: var(--text-color);"><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong>
-    <span style="color: var(--text-muted-color); font-size: 0.9em;">de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.</span>
-</span>
+                    <strong style="color: var(--text-color);"><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong>
+                    <span style="color: var(--text-muted-color); font-size: 0.9em;">de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.</span>
+                </span>
                 <span class="card-likes"><i class="fas fa-heart"></i> <%= campaign.likes.length %></span>
             </div>
         </div>
