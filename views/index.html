@@ -106,11 +106,7 @@
 </main>
 
 <% if (currentUser) { %>
-    <% if (currentUser.isVerified) { %>
-        <a href="/new-campaign" class="site-fab" title="Crear Campaña"><i class="fas fa-plus"></i></a>
-    <% } else { %>
-        <a href="/verify-account" class="site-fab" title="Verifica tu cuenta para crear una campaña"><i class="fas fa-plus"></i></a>
-    <% } %>
+    <a href="/new-campaign" class="site-fab" title="Crear Campaña"><i class="fas fa-plus"></i></a>
 <% } else { %>
     <a href="/login" class="site-fab" title="Inicia sesión para crear una campaña"><i class="fas fa-plus"></i></a>
 <% } %>
