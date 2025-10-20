@@ -1017,8 +1017,32 @@ app.get('/api/campaign/:id/updates', async (req, res) => {
 });
 
 
-app.get('/new-campaign', requireAuth, (req, res) => {
-    res.render('new-campaign');
+app.get('/new-campaign', requireAuth, async (req, res, next) => { // Añadimos async y next
+    try {
+        // Si el usuario ya está verificado, siempre puede crear nuevas campañas.
+        if (req.user.isVerified) {
+            return res.render('new-campaign');
+        }
+
+        // Si NO está verificado, buscamos si ya tiene una campaña pendiente de verificación.
+        const existingPendingVerification = await Campaign.findOne({ 
+            userId: req.user._id, 
+            status: 'pending_verification' 
+        });
+
+        // Si ya tiene una esperando verificación, lo mandamos a verificar.
+        if (existingPendingVerification) {
+            // Podríamos añadir un mensaje flash aquí si usaras connect-flash
+            // req.flash('info', 'Ya tienes una campaña esperando verificación. Por favor, verifica tu identidad para continuar.');
+            return res.redirect('/verify-account?reason=existing_pending'); 
+        }
+
+        // Si no está verificado Y NO tiene campañas pendientes de verificación, le mostramos el formulario.
+        res.render('new-campaign');
+
+    } catch (err) {
+        next(err); // Manejo de errores
+    }
 });
 
 app.post('/new-campaign', requireAuth, upload.array('files', 10), async (req, res, next) => {
