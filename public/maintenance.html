@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dona Paraguay - En Mantenimiento</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Estilos básicos inspirados en tu style.css */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #007BFF;
+            --primary-color-dark: #0056b3;
+            --text-color: #212529;
+            --text-muted-color: #6c757d;
+            --background-color: #f8f9fa;
+            --surface-color: #FFFFFF;
+            --border-color: #dee2e6;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.07);
+            --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .maintenance-container {
+            background-color: var(--surface-color);
+            padding: 2rem 1.5rem; /* Ajuste para móviles */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .maintenance-container img.logo {
+            max-height: 60px; /* Tamaño reducido para el logo */
+            margin-bottom: 1.5rem;
+        }
+        
+        .maintenance-container i.icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        p {
+            color: var(--text-muted-color);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        p.emphasized {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-top: 1.5rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 2rem 0;
+        }
+
+        .social-links {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            font-size: 1.8rem;
+            color: var(--text-muted-color);
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .social-links a:hover {
+            transform: translateY(-3px);
+        }
+        .social-links a.whatsapp:hover { color: #25D366; }
+        .social-links a.instagram:hover { color: #E4405F; }
+        .social-links a.tiktok:hover { color: #000000; }
+        .social-links a.email:hover { color: #c71610; }
+
+        @media (min-width: 876px) {
+            .maintenance-container {
+                padding: 3rem;
+            }
+            .maintenance-container img.logo {
+                 max-height: 380px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+             p {
+                font-size: 1.1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="maintenance-container">
+        <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759270178/donaparaguay/assets/f2tjpl4vnnaytr7lq3y4.png" alt="Logo Dona Paraguay" class="logo">
+        
+         <h1>Sitio en Mantenimiento</h1>
+        
+        <p>
+            ¡Estamos trabajando para mejorar <strong>Dona Paraguay</strong>! 🛠️
+            Realizando algunas actualizaciones importantes para ofrecerte una mejor experiencia.
+        </p>
+        
+        <p>
+            El sitio no estará disponible por un corto período. Agradecemos tu comprensión.
+        </p>
+
+        <p class="emphasized">
+            Volveremos a estar en línea lo antes posible. ¡Gracias por tu paciencia! 🙏
+        </p>
+
+        <hr>
+
+        <p style="font-size: 0.9rem;">Si necesitas algo urgente o quieres seguirnos:</p>
+        <div class="social-links">
+             <a href="https://wa.me/595986534932" target="_blank" title="WhatsApp" class="whatsapp"><i class="fab fa-whatsapp"></i></a>
+             <a href="https://instagram.com/donaparaguay" target="_blank" title="Instagram" class="instagram"><i class="fab fa-instagram"></i></a>
+             <a href="https://tiktok.com/@dona.paraguay" target="_blank" title="TikTok" class="tiktok"><i class="fab fa-tiktok"></i></a>
+             <a href="mailto:donaparaguay@gmail.com" title="Correo Electrónico" class="email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </div>
+</body>
+</html>
