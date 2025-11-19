@@ -1316,3 +1316,42 @@ body.auth-page main.container {
 }
 
 /* --- Fin de estilos para overlay --- */
+
+
+/* Estilos para Insignias */
+.badges-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+.badge-card-item {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+.badge-card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border-color: var(--primary-color);
+}
+.badge-icon-circle {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #FFD700, #FFA500); /* Dorado */
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.8rem; color: white;
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+}
+.badge-card-item h4 { font-size: 0.95rem; margin-bottom: 0.5rem; font-weight: 700; }
+.badge-card-item p { font-size: 0.8rem; color: #777; line-height: 1.4; margin: 0; }
+
+.no-badges-state {
+    text-align: center; padding: 3rem;
+    background: #f9f9f9; border-radius: 12px;
+    grid-column: 1 / -1;
+}

@@ -210,7 +210,7 @@ const userSchema = new mongoose.Schema({
     googleId: { type: String },
     phone: { type: String },
     bio: String,
-    profilePic: { type: String, default: 'https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278332/donaparaguay/proofs/s6fyqpxu1njlf2eajpve.png' },
+    profilePic: { type: String, default: 'https://res.cloudinary.com/dmedd6w1q/image/upload/v1760503254/jdb01r30behkffswtrqu_zzcqdy.png' },
     isVerified: { type: Boolean, default: false },
     isBanned: { type: Boolean, default: false },
     role: { type: String, enum: ['User', 'Admin', 'Moderator'], default: 'User' },

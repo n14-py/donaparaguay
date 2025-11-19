@@ -124,24 +124,24 @@
     <% } %>
 </div>
 
-    <div id="badges-content" class="tab-content" style="display: none;">
-        <div class="badges-list-container">
+ <div id="badges-content" class="tab-content" style="display: none;">
+        <div class="badges-grid-container">
             <% if (userProfile.badges && userProfile.badges.length > 0) { %>
                 <% userProfile.badges.forEach(badge => { %>
-                    <div class="badge-list-item">
-                        <div class="badge-list-icon">
+                    <div class="badge-card-item" title="<%= badge.description %>">
+                        <div class="badge-icon-circle">
                             <i class="fas <%= badge.icon %>"></i>
                         </div>
-                        <div class="badge-list-info">
-                            <h4><%= badge.name %></h4>
-                            <p><%= badge.description %></p>
-                        </div>
+                        <h4><%= badge.name %></h4>
+                        <p><%= badge.description %></p>
                     </div>
                 <% }); %>
             <% } else { %>
-                <div class="no-results-card">
-                    <h3>Aún no has ganado ninguna insignia</h3>
-                    <p>Tu próxima donación podría desbloquear tu primer logro. ¡Anímate!</p>
+                <div class="no-badges-state">
+                    <i class="fas fa-medal fa-3x" style="color: #ddd; margin-bottom: 1rem;"></i>
+                    <h3>Aún no tienes insignias</h3>
+                    <p>¡Dona a tu primera campaña para ganar tu medalla de "Primer Donativo"!</p>
+                    <a href="/campaigns" class="btn btn-sm btn-primary mt-2">Explorar Campañas</a>
                 </div>
             <% } %>
         </div>

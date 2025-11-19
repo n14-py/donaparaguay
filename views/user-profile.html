@@ -6,6 +6,8 @@
     <title>Perfil de <%= userProfile.username %> - Dona Paraguay</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5461370198299696"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -116,23 +118,23 @@
     </div>
 <% } %>
 
-    <div id="badges-content" class="tab-content" style="display: none;">
-        <div class="badges-list-container">
+<div id="badges-content" class="tab-content" style="display: none;">
+        <div class="badges-grid-container">
             <% if (userProfile.badges && userProfile.badges.length > 0) { %>
                 <% userProfile.badges.forEach(badge => { %>
-                    <div class="badge-list-item">
-                        <div class="badge-list-icon">
+                    <div class="badge-card-item" title="<%= badge.description %>">
+                        <div class="badge-icon-circle">
                             <i class="fas <%= badge.icon %>"></i>
                         </div>
-                        <div class="badge-list-info">
-                            <h4><%= badge.name %></h4>
-                            <p><%= badge.description %></p>
-                        </div>
+                        <h4><%= badge.name %></h4>
+                        <p><%= badge.description %></p>
                     </div>
                 <% }); %>
             <% } else { %>
-                <div class="no-results-card">
-                    <h3>Este usuario aún no ha ganado insignias.</h3>
+                <div class="no-badges-state">
+                    <i class="fas fa-medal fa-3x" style="color: #ddd; margin-bottom: 1rem;"></i>
+                    <h3>Sin insignias aún</h3>
+                    <p>Este usuario está comenzando su camino solidario.</p>
                 </div>
             <% } %>
         </div>
