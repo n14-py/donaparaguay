@@ -3,106 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dona Paraguay - Plataforma de Crowdfunding para Causas Solidarias</title>
-    <meta name="description" content="Dona Paraguay es la plataforma de crowdfunding para causas solidarias en Paraguay. Encuentra, dona y apoya campañas de salud, educación, animales y proyectos comunitarios. ¡Tu ayuda transforma vidas!">
+    <title>Dona Paraguay - Conectando Corazones</title>
+    <meta name="description" content="La plataforma de crowdfunding de Paraguay. Apoya causas, cumple sueños y transforma vidas con total transparencia.">
     <link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-   
-   
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-  gtag('config', 'G-14PSV7R8YT');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-14PSV7R8YT');
+    </script>
 
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA LA LANDING PAGE */
+        
+        /* Hero Section */
+        .hero-landing {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+            color: white;
+            padding: 6rem 1rem;
+            text-align: center;
+            border-radius: 0 0 50% 50% / 20px;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-landing::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.1;
+        }
+        .hero-title { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2; }
+        .hero-subtitle { font-size: 1.25rem; opacity: 0.9; max-width: 700px; margin: 0 auto 2.5rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-hero { padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px; font-weight: 600; transition: transform 0.3s; }
+        .btn-hero-primary { background: white; color: var(--primary-color); }
+        .btn-hero-outline { border: 2px solid white; color: white; background: transparent; }
+        .btn-hero:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        /* Info Section */
+        .info-section { padding: 4rem 1rem; text-align: center; }
+        .section-title { font-size: 2.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 3rem; position: relative; display: inline-block; }
+        .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: var(--primary-color); margin: 10px auto 0; border-radius: 2px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+        .feature-card { background: var(--surface-color); padding: 2rem; border-radius: 15px; box-shadow: var(--shadow-sm); transition: transform 0.3s; border: 1px solid var(--border-color); }
+        .feature-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+        .feature-icon { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem; }
+        .feature-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+
+        /* Categories Section */
+        .categories-landing { background-color: #f8f9fc; padding: 5rem 1rem; }
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+        .category-card { 
+            background: white; padding: 2rem 1rem; border-radius: 12px; text-align: center; 
+            text-decoration: none; color: var(--text-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            transition: all 0.3s ease; border: 1px solid transparent;
+            display: flex; flex-direction: column; align-items: center; height: 100%;
+        }
+        .category-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        .cat-icon-circle { 
+            width: 70px; height: 70px; background: var(--primary-color-light); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+            color: var(--primary-color); font-size: 1.8rem; transition: background 0.3s, color 0.3s;
+        }
+        .category-card:hover .cat-icon-circle { background: var(--primary-color); color: white; }
+        .cat-title { font-weight: 700; font-size: 1rem; margin: 0; }
+
+        /* RANKING SECTION (NUEVO) */
+        .ranking-section { padding: 4rem 1rem; background: white; }
+        .ranking-container { max-width: 800px; margin: 0 auto; }
+        .ranking-card {
+            display: flex; align-items: center; padding: 1rem 1.5rem;
+            background: white; border-radius: 50px; margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+            transition: transform 0.2s;
+        }
+        .ranking-card:hover { transform: scale(1.02); }
+        
+        /* Estilos para el Top 3 */
+        .rank-1 { border: 2px solid #FFD700; background: linear-gradient(to right, #fff, #fff9e6); }
+        .rank-2 { border: 2px solid #C0C0C0; background: linear-gradient(to right, #fff, #f8f9fa); }
+        .rank-3 { border: 2px solid #CD7F32; background: linear-gradient(to right, #fff, #fff5eb); }
+
+        .rank-position {
+            font-size: 1.5rem; font-weight: 900; width: 40px; text-align: center; margin-right: 1rem;
+            color: var(--text-muted-color);
+        }
+        .rank-1 .rank-position { color: #FFD700; text-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 2rem; }
+        .rank-2 .rank-position { color: #C0C0C0; font-size: 1.8rem; }
+        .rank-3 .rank-position { color: #CD7F32; font-size: 1.8rem; }
+
+        .rank-avatar {
+            width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 1rem;
+            border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .rank-info { flex-grow: 1; }
+        .rank-name { font-weight: 700; font-size: 1.1rem; color: var(--text-color); display: block; }
+        .rank-amount { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
+        .rank-medal { font-size: 1.5rem; margin-left: auto; }
+
+        /* How it works */
+        .steps-section { padding: 5rem 1rem; max-width: 1000px; margin: 0 auto; }
+        .step-item { display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; }
+        .step-number { font-size: 4rem; font-weight: 900; color: #e9ecef; line-height: 1; flex-shrink: 0; }
+        .step-text h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .step-item { flex-direction: column; text-align: center; gap: 1rem; }
+        }
+
+        /* Search Results Style Fixes */
+        .search-header { text-align: center; margin-bottom: 2rem; }
+        .active-filters { margin-bottom: 2rem; text-align: center; }
+        .filter-tag { background: var(--primary-color); color: white; padding: 0.5rem 1rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+        .filter-tag a { color: white; }
+    </style>
 </head>
 
 <body>
 
-
 <%- include('partials/header.html') %>
 
+<main>
+    <% 
+    // LÓGICA PRINCIPAL: ¿Mostramos Portada o Resultados?
+    const isSearch = (typeof query.q !== 'undefined' || query.category || query.location || (currentPage && currentPage > 1));
+    %>
 
-
-
-<main class="container">
-    <div class="hero-section">
-        <h1>Tu Donación, Su Esperanza</h1>
-        <p>Encuentra y apoya causas que transforman vidas en todo Paraguay.</p>
-        <div class="search-filter-container">
-    <div class="search-input-wrapper">
-        <i class="fas fa-search"></i>
-        <form action="/campaigns" method="GET">
-            <input type="text" name="q" id="search-input" class="form-control" placeholder="Buscar una campaña..." value="<%= query.q || '' %>">
-        </form>
-    </div>
-    <button id="filter-toggle-btn" class="btn btn-secondary">
-        <i class="fas fa-filter"></i>
-        Filtros
-    </button>
-</div>
-
-<div class="filter-bar" id="filter-bar">
-    <form action="/campaigns" method="GET" id="filter-form">
-         <div class="filter-group">
-            <label for="category">Categoría</label>
-            <select name="category" id="category" class="form-control">
-                <option value="">Todas</option>
-                <% CATEGORIES.forEach(cat => { %>
-                    <option value="<%= cat %>" <%= (query.category === cat) ? 'selected' : '' %>><%= cat %></option>
-                <% }); %>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="location">Ubicación</label>
-            <select name="location" id="location" class="form-control">
-                <option value="">Todas</option>
-                <% CITIES.forEach(city => { %>
-                    <option value="<%= city %>" <%= (query.location === city) ? 'selected' : '' %>><%= city %></option>
-                <% }); %>
-            </select>
-        </div>
-         <a href="/campaigns" class="btn btn-secondary">Limpiar Filtros</a>
-    </form>
-</div>
-
-    <div class="post-grid">
-        <% if (results && results.length > 0) { %>
-            <% results.forEach(campaign => { %>
-                <%- include('partials/campaign-card.html', { campaign: campaign }) %>
-            <% }); %>
-        <% } else { %>
-            <div class="no-results-card">
-                <h3>No se encontraron campañas</h3>
-                <p>Prueba con otros filtros de búsqueda o explora todas las causas.</p>
+    <% if (isSearch) { %>
+        <div class="container">
+            <div class="search-header">
+                <h2>Explorando Causas</h2>
+                <p class="text-muted">Encuentra a quién ayudar hoy</p>
             </div>
-        <% } %>
-    </div>
 
-    <% if (totalPages > 1) { %>
-        <nav class="pagination-container">
-            <ul class="pagination">
-                <% const urlParams = new URLSearchParams(query); %>
-                <% if (currentPage > 1) { %>
-                    <% urlParams.set('page', currentPage - 1); %>
-                    <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Anterior</a></li>
+            <div class="search-filter-container">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <form action="/campaigns" method="GET">
+                        <input type="text" name="q" id="search-input" class="form-control" placeholder="Buscar por nombre, historia..." value="<%= query.q || '' %>">
+                        <% if (query.category) { %><input type="hidden" name="category" value="<%= query.category %>"><% } %>
+                        <% if (query.location) { %><input type="hidden" name="location" value="<%= query.location %>"><% } %>
+                    </form>
+                </div>
+                <a href="/campaigns" class="btn btn-secondary" title="Limpiar filtros"><i class="fas fa-times"></i> Limpiar</a>
+            </div>
+
+            <% if (query.category || query.location) { %>
+                <div class="active-filters">
+                    <% if (query.category) { %>
+                        <span class="filter-tag">Categoría: <%= query.category %> <a href="/campaigns?q=<%= query.q || '' %>&location=<%= query.location || '' %>"><i class="fas fa-times"></i></a></span>
+                    <% } %>
+                    <% if (query.location) { %>
+                        <span class="filter-tag"><i class="fas fa-map-marker-alt"></i> <%= query.location %> <a href="/campaigns?q=<%= query.q || '' %>&category=<%= query.category || '' %>"><i class="fas fa-times"></i></a></span>
+                    <% } %>
+                </div>
+            <% } %>
+
+            <div class="post-grid">
+                <% if (results && results.length > 0) { %>
+                    <% results.forEach(campaign => { %>
+                        <%- include('partials/campaign-card.html', { campaign: campaign }) %>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-results-card">
+                        <i class="fas fa-search fa-3x" style="color: var(--text-muted-color); margin-bottom: 1rem;"></i>
+                        <h3>No encontramos campañas con ese criterio</h3>
+                        <p>Intenta buscar con otras palabras o <a href="/campaigns">mira todas las causas</a>.</p>
+                    </div>
                 <% } %>
-                <% for(let i = 1; i <= totalPages; i++) { %>
-                    <% urlParams.set('page', i); %>
-                    <li class="page-item <%= i === currentPage ? 'active' : '' %>"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><%= i %></a></li>
-                <% } %>
-                <% if (currentPage < totalPages) { %>
-                    <% urlParams.set('page', currentPage + 1); %>
-                    <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Siguiente</a></li>
-                <% } %>
-            </ul>
-        </nav>
+            </div>
+
+            <% if (totalPages > 1) { %>
+                <nav class="pagination-container">
+                    <ul class="pagination">
+                        <% const urlParams = new URLSearchParams(query); %>
+                        <% if (currentPage > 1) { %>
+                            <% urlParams.set('page', currentPage - 1); %>
+                            <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Anterior</a></li>
+                        <% } %>
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <% urlParams.set('page', i); %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><%= i %></a></li>
+                        <% } %>
+                        <% if (currentPage < totalPages) { %>
+                            <% urlParams.set('page', currentPage + 1); %>
+                            <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>">Siguiente</a></li>
+                        <% } %>
+                    </ul>
+                </nav>
+            <% } %>
+        </div>
+
+    <% } else { %>
+        
+        <header class="hero-landing">
+            <div class="container" data-aos="fade-up">
+                <h1 class="hero-title">Tu Donación,<br>Su Esperanza</h1>
+                <p class="hero-subtitle">La plataforma de crowdfunding solidario de Paraguay. Conecta, apoya y transforma realidades con total seguridad.</p>
+                <div class="hero-buttons">
+                    <a href="#categorias" class="btn btn-hero btn-hero-primary"><i class="fas fa-heart"></i> Quiero Ayudar</a>
+                    <a href="/new-campaign" class="btn btn-hero btn-hero-outline"><i class="fas fa-plus"></i> Crear Campaña</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="info-section container">
+            <h2 class="section-title" data-aos="fade-up">¿Qué es Dona Paraguay?</h2>
+            <div class="features-grid">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3 class="feature-title">Seguridad Total</h3>
+                    <p>Verificamos la identidad de cada organizador con Cédula de Identidad. Tu ayuda va a personas reales.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3 class="feature-title">Sin Burocracia</h3>
+                    <p>Un puente directo. Publicas tu necesidad, la gente dona, y recibes el apoyo sin vueltas.</p>
+                </div>
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Comunidad Solidaria</h3>
+                    <p>Miles de paraguayos están listos para extenderte la mano. Juntos somos más fuertes.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="categorias" class="categories-landing">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 3rem;">
+                    <h2 class="section-title" data-aos="fade-up">Explora por Causa</h2>
+                    <p data-aos="fade-up">Elige una categoría que te mueva y encuentra a quién ayudar hoy.</p>
+                </div>
+
+                <div class="categories-grid">
+                    <% 
+                    const iconMap = {
+                        "🚨 URGENCIAS / NECESIDADES": "fa-ambulance",
+                        "🎓 EDUCACIÓN / FUTURO": "fa-graduation-cap",
+                        "🏠 HOGAR / VIDA DIARIA": "fa-home",
+                        "🐶 ANIMALES / MASCOTAS": "fa-paw",
+                        "💼 NEGOCIOS / CREACIÓN": "fa-briefcase",
+                        "🚀 SUEÑOS / METAS": "fa-rocket",
+                        "📱 TECNOLOGÍA / GUSTOS": "fa-mobile-alt",
+                        "💎 DESEOS / CAPRICHOS": "fa-gem",
+                        "❤️ CAUSAS SOCIALES": "fa-hands-helping"
+                    };
+                    %>
+
+                    <% if (locals.CATEGORY_GROUPS) { %>
+                        <% Object.keys(CATEGORY_GROUPS).forEach((group, index) => { %>
+                            <% const firstSubCat = CATEGORY_GROUPS[group][0]; %>
+                            <a href="/campaigns?category=<%= firstSubCat %>" class="category-card" data-aos="zoom-in" data-aos-delay="<%= index * 50 %>">
+                                <div class="cat-icon-circle">
+                                    <i class="fas <%= iconMap[group] || 'fa-star' %>"></i>
+                                </div>
+                                <h4 class="cat-title"><%= group.replace(/^[^\s]+\s/, '') %></h4>
+                            </a>
+                        <% }); %>
+                    <% } %>
+                </div>
+                
+                <div style="text-align: center; margin-top: 3rem;">
+                    <a href="/campaigns?q=" class="btn btn-primary btn-lg">Ver Todas las Campañas</a>
+                </div>
+            </div>
+        </section>
+
+        <% if (locals.topDonors && topDonors.length > 0) { %>
+        <section class="ranking-section" data-aos="fade-up">
+            <div class="ranking-container">
+                <h2 class="section-title" style="text-align: center;">🏆 Héroes de la Solidaridad</h2>
+                <p style="text-align: center; margin-bottom: 2rem; color: #6c757d;">Nuestro reconocimiento a quienes más han aportado a la comunidad.</p>
+                
+                <% topDonors.forEach((donor, index) => { %>
+                    <div class="ranking-card rank-<%= index + 1 %>">
+                        <div class="rank-position"><%= index + 1 %></div>
+                        <img src="<%= donor.profilePic %>" alt="Avatar" class="rank-avatar">
+                        <div class="rank-info">
+                            <span class="rank-name"><%= donor.username %></span>
+                            <span class="rank-amount"><i class="fas fa-heart"></i> Donó <%= new Intl.NumberFormat('es-PY').format(donor.totalDonated) %> Gs.</span>
+                        </div>
+                        <% if (index === 0) { %> <div class="rank-medal">🥇</div> <% } %>
+                        <% if (index === 1) { %> <div class="rank-medal">🥈</div> <% } %>
+                        <% if (index === 2) { %> <div class="rank-medal">🥉</div> <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+        <% } %>
+
+        <section class="steps-section">
+            <h2 class="section-title" style="text-align: center;" data-aos="fade-up">¿Cómo funciona?</h2>
+            
+            <div class="step-item" data-aos="fade-right">
+                <div class="step-number">1</div>
+                <div class="step-text">
+                    <h3>Crea tu Cuenta y Verifícate</h3>
+                    <p>Sube tu Cédula. Es un proceso rápido que garantiza la seguridad. Una vez verificado, tienes luz verde.</p>
+                </div>
+            </div>
+            
+            <div class="step-item" data-aos="fade-left">
+                <div class="step-number">2</div>
+                <div class="step-text">
+                    <h3>Cuenta tu Historia</h3>
+                    <p>Crea tu campaña. Define tu meta y explica tu causa. Sé sincero y directo.</p>
+                </div>
+            </div>
+            
+            <div class="step-item" data-aos="fade-right">
+                <div class="step-number">3</div>
+                <div class="step-text">
+                    <h3>Comparte y Recibe</h3>
+                    <p>Tu campaña es pública. Compártela en WhatsApp. Los donantes envían sus aportes directamente.</p>
+                </div>
+            </div>
+        </section>
+
     <% } %>
+
 </main>
 
 <% if (currentUser) { %>
@@ -112,32 +338,14 @@
 <% } %>
 
 <%- include('partials/sponsors.html') %>
-
 <%- include('partials/footer.html') %>
 
-
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // ESTE ES EL NUEVO CÓDIGO PARA LOS FILTROS
-    const filterToggleButton = document.getElementById('filter-toggle-btn');
-    const filterBar = document.getElementById('filter-bar');
-
-    if (filterToggleButton && filterBar) {
-        filterToggleButton.addEventListener('click', () => {
-            filterBar.classList.toggle('active');
-        });
-    }
-
-    // Este es el código que ya tenías, lo mantenemos
-    const filterForm = document.getElementById('filter-form');
-    if(filterForm) {
-        filterForm.querySelectorAll('select').forEach(select => {
-            select.addEventListener('change', () => {
-                filterForm.submit();
-            });
-        });
-    }
-});
+    AOS.init({
+        duration: 800,
+        once: true
+    });
 </script>
 
 </body>

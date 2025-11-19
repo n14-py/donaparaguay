@@ -40,9 +40,21 @@
             <div class="form-group">
                 <label for="category">Categoría</label>
                 <select id="category" name="category" class="form-control" required>
-                    <% CATEGORIES.forEach(cat => { %>
-                        <option value="<%= cat %>"><%= cat %></option>
-                    <% }); %>
+                    <option value="">Selecciona una opción...</option>
+                    <% if (locals.CATEGORY_GROUPS) { %>
+                        <% Object.keys(CATEGORY_GROUPS).forEach(group => { %>
+                            <optgroup label="<%= group %>">
+                                <% CATEGORY_GROUPS[group].forEach(cat => { %>
+                                    <option value="<%= cat %>"><%= cat %></option>
+                                <% }); %>
+                            </optgroup>
+                        <% }); %>
+                    <% } else { %>
+                        <% /* Fallback por si algo falla */ %>
+                        <% CATEGORIES.forEach(cat => { %>
+                            <option value="<%= cat %>"><%= cat %></option>
+                        <% }); %>
+                    <% } %>
                 </select>
             </div>
 

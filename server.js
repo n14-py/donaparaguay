@@ -46,7 +46,25 @@ app.engine('html', ejs.renderFile);
 // CONEXIÓN A MONGODB
 // =============================================
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/donaparaguay_db')
-  .then(() => console.log('✅ Conectado a MongoDB para Dona Paraguay'))
+  .then(async () => {
+      console.log('✅ Conectado a MongoDB para Dona Paraguay');
+      
+      // --- ROBOT DE MIGRACIÓN DE CATEGORÍAS (CEO UPDATE) ---
+      try {
+          console.log('🔄 Ejecutando migración de categorías...');
+          // Mapeo: Vieja -> Nueva
+          await Campaign.updateMany({ category: 'Educación' }, { category: 'Universidad y Colegios' });
+          await Campaign.updateMany({ category: 'Animales' }, { category: 'Rescate y Adopción' });
+          await Campaign.updateMany({ category: 'Comunitario' }, { category: 'Ayuda Comunitaria' });
+          await Campaign.updateMany({ category: 'Arte y Cultura' }, { category: 'Proyectos Personales' });
+          await Campaign.updateMany({ category: 'Deportes' }, { category: 'Hobbies y Pasatiempos' });
+          await Campaign.updateMany({ category: 'Otro' }, { category: 'Ayuda Comunitaria' }); // "Otro" va a Comunitario por seguridad
+          console.log('✅ Migración de categorías completada con éxito.');
+      } catch (error) {
+          console.error('⚠️ Error en la migración automática:', error);
+      }
+      // ----------------------------------------------------
+  })
   .catch(err => console.error('❌ Error de conexión a MongoDB:', err));
 
 // =============================================
@@ -119,12 +137,50 @@ if (process.env.ADMIN_EMAIL_USER && process.env.ADMIN_EMAIL_PASS) {
 // =============================================
 // CONSTANTES Y MODELOS DE DATOS
 // =============================================
-const CATEGORIES = [
-    'Salud y Medicina', 'Educación', 'Animales', 'Comunitario',
-    'Emergencias', 'Medio Ambiente', 'Arte y Cultura', 'Deportes', 'Otro'
-];
-const CITIES = ['Asunción', 'Central', 'Ciudad del Este', 'Encarnación', 'Villarrica', 'Coronel Oviedo', 'Pedro Juan Caballero', 'Otra'];
+// --- NUEVAS CATEGORÍAS ORGANIZADAS ---
+const CATEGORY_GROUPS = {
+    "🚨 URGENCIAS / NECESIDADES": [
+        "Salud y Medicina", "Emergencias", "Accidentes y Tratamientos",
+        "Medicamentos y Terapias", "Desastres (Incendio, robo, inundación)",
+        "Mascotas y Veterinaria (urgente)", "Funerales y Ayuda Familiar"
+    ],
+    "🎓 EDUCACIÓN / FUTURO": [
+        "Útiles y Materiales Escolares", "Universidad y Colegios",
+        "Cursos y Certificaciones", "Becas y Oportunidades",
+        "Tecnología para estudiar"
+    ],
+    "🏠 HOGAR / VIDA DIARIA": [
+        "Alimentos y Despensa", "Alquiler y Vivienda",
+        "Electrodomésticos", "Muebles y Hogar", "Facturas y Servicios"
+    ],
+    "🐶 ANIMALES / MASCOTAS": [
+        "Rescate y Adopción", "Tratamientos Veterinarios",
+        "Comida para Mascotas", "Esterilización / Vacunas"
+    ],
+    "💼 NEGOCIOS / CREACIÓN": [
+        "Emprendimientos", "Capital Semilla", "Herramientas de Trabajo",
+        "Equipos para emprender"
+    ],
+    "🚀 SUEÑOS / METAS": [
+        "Viajes", "Cumpleaños / Fiestas", "Sueños de Vida",
+        "Proyectos Personales", "Hobbies y Pasatiempos"
+    ],
+    "📱 TECNOLOGÍA / GUSTOS": [
+        "Celulares", "Computadoras / Laptops", "Consolas / Videojuegos",
+        "Accesorios tecnológicos"
+    ],
+    "💎 DESEOS / CAPRICHOS": [
+        "Autoregalo", "Gustos Personales", "Moda y Ropa", "Cosméticos y Belleza"
+    ],
+    "❤️ CAUSAS SOCIALES": [
+        "Ayuda Comunitaria", "Organizaciones y ONG",
+        "Protección Animal", "Eventos Solidarios", "Medio Ambiente"
+    ]
+};
 
+// Generamos la lista plana para validación de Mongoose
+const CATEGORIES = Object.values(CATEGORY_GROUPS).flat();
+const CITIES = ['Asunción', 'Central', 'Ciudad del Este', 'Encarnación', 'Villarrica', 'Coronel Oviedo', 'Pedro Juan Caballero', 'Otra'];
 
 const BADGES = [
     { name: 'Primer Donativo', description: '¡Gracias por dar el primer paso y realizar tu primera donación!', icon: 'fa-hand-holding-heart', criteria: { type: 'donations_count', value: 1 } },
@@ -417,6 +473,7 @@ app.use(async (req, res, next) => {
         res.locals.siteConfig = config;
         res.locals.CITIES = config.cities;
         res.locals.CATEGORIES = config.categories;
+        res.locals.CATEGORY_GROUPS = CATEGORY_GROUPS;
 
         // --- CÓDIGO AÑADIDO PARA BANCO ACTIVO ---
         if (config.activeBankAccountId) {
@@ -634,7 +691,21 @@ async function sendCodeEmail({ email, username, code, title, subject, introMessa
 // =============================================
 // RUTAS DE AUTENTICACIÓN Y PÁGINAS BÁSICAS
 // =============================================
-app.get('/', (req, res) => res.redirect('/campaigns'));
+app.get('/', async (req, res, next) => {
+    try {
+        // Solo necesitamos datos para la portada (Sponsors y tal vez categorías)
+        const activeSponsors = await Sponsor.find({ status: 'active', expiresAt: { $gt: new Date() } }).sort({ createdAt: 1 });
+        
+        // Renderizamos la vista nueva 'home.html'
+        res.render('home', {
+            activeSponsors,
+            pageTitle: 'Dona Paraguay - Conectando Corazones',
+            pageDescription: 'La plataforma de crowdfunding de Paraguay.'
+        });
+    } catch (err) {
+        next(err);
+    }
+});
 app.get('/privacy', (req, res) => res.render('privacy'));
 app.get('/terms', (req, res) => res.render('terms'));
 app.get('/faq', (req, res) => res.render('faq'));
@@ -932,7 +1003,17 @@ app.get('/campaigns', async (req, res, next) => {
                 { userId: { $in: matchingUsers.map(u => u._id) } }
             ];
         }
-        if (category) query.category = category;
+        // Lógica Avanzada de Filtros
+        if (category) {
+            // ¿Es una categoría padre (Grupo)?
+            if (CATEGORY_GROUPS[category]) {
+                // Si es grupo, busca CUALQUIERA de las subcategorías de ese grupo
+                query.category = { $in: CATEGORY_GROUPS[category] };
+            } else {
+                // Si es una subcategoría específica, busca exacto
+                query.category = category;
+            }
+        }
         if (location) query.location = location;
 
         const totalCampaigns = await Campaign.countDocuments(query);
@@ -943,13 +1024,29 @@ app.get('/campaigns', async (req, res, next) => {
             .skip((page - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
-            // Buscamos los patrocinadores activos y vigentes
-const activeSponsors = await Sponsor.find({ status: 'active', expiresAt: { $gt: new Date() } }).sort({ createdAt: 1 });
+        const activeSponsors = await Sponsor.find({ status: 'active', expiresAt: { $gt: new Date() } }).sort({ createdAt: 1 });
 
-        res.render('index', {
-    results: campaigns, resultType: 'campaigns',
-    currentPage: page, totalPages, query: req.query,
-    activeSponsors
+        // Ranking de donantes (Opcional mostrarlo aquí también o solo en home)
+        const topDonors = await ManualDonation.aggregate([
+            { $match: { status: 'Aprobado' } },
+            { $group: { _id: "$userId", totalDonated: { $sum: "$campaignAmount" } } },
+            { $sort: { totalDonated: -1 } },
+            { $limit: 5 },
+            { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "user" } },
+            { $unwind: "$user" },
+            { $project: { username: "$user.username", profilePic: "$user.profilePic", totalDonated: 1 } }
+        ]);
+
+        // Renderizamos la vista dedicada 'campaigns.html'
+        res.render('campaigns', {
+            results: campaigns,
+            currentPage: page, 
+            totalPages, 
+            query: req.query,
+            activeSponsors,
+            topDonors,
+            pageTitle: 'Explorar Campañas - Dona Paraguay',
+            pageDescription: 'Busca y apoya las causas que más te importan.'
         });
     } catch (err) {
         next(err);
@@ -1048,42 +1145,45 @@ app.get('/new-campaign', requireAuth, async (req, res, next) => { // Añadimos a
 app.post('/new-campaign', requireAuth, upload.array('files', 10), async (req, res, next) => {
     try {
         const { title, description, goalAmount, category, location } = req.body;
-        if (!req.files || req.files.length === 0) throw new Error("Debes subir al menos una imagen o video para la campaña.");
-        if (!title || !goalAmount || !category || !location) throw new Error("Título, meta, categoría y ubicación son obligatorios.");
+        
+        // Validaciones básicas
+        if (!req.files || req.files.length === 0) throw new Error("Debes subir al menos una imagen o video.");
+        if (!title || !goalAmount || !category || !location) throw new Error("Todos los campos son obligatorios.");
 
-        // --- LÓGICA MODIFICADA ---
         const isVerified = req.user.isVerified;
         
+        // --- CAMBIO CLAVE: Publicación directa para verificados ---
         const newCampaign = new Campaign({
             userId: req.user._id,
             title: purify.sanitize(title),
             description: purify.sanitize(description),
             files: req.files.map(f => f.path),
-            goalAmount: parseFloat(goalAmount),
+            goalAmount: parseFloat(goalAmount.replace(/\./g, '')), // Asegura limpiar puntos de miles si vienen
             category,
             location,
-            // Si el usuario está verificado, va a pendiente. Si no, a pendiente de verificación.
-            status: isVerified ? 'pending' : 'pending_verification' 
+            status: isVerified ? 'approved' : 'pending_verification' 
         });
 
         await newCampaign.save();
 
         if (isVerified) {
-            // Si ya estaba verificado, notificar al admin como siempre.
+            // Notificar al admin solo como aviso (Vigilancia)
             await sendAdminNotificationEmail({
-                subject: 'Nueva Campaña Pendiente',
-                message: `El usuario <strong>${req.user.username}</strong> ha creado una nueva campaña llamada <strong>"${newCampaign.title}"</strong> que necesita ser revisada.`,
-                actionUrl: `${process.env.BASE_URL}/admin/pending-campaigns`
+                subject: '🚀 Nueva Campaña Publicada Automáticamente',
+                message: `El usuario verificado <strong>${req.user.username}</strong> publicó: <strong>"${newCampaign.title}"</strong>.<br><a href="${process.env.BASE_URL}/campaign/${newCampaign._id}">Revisar ahora</a>`,
+                actionUrl: `${process.env.BASE_URL}/campaign/${newCampaign._id}`
             });
-            // Y redirigir a la campaña.
-            res.redirect(`/campaign/${newCampaign._id}`);
+            
+            // Redirigir con parámetro ?new=true para mostrar el modal de compartir
+            res.redirect(`/campaign/${newCampaign._id}?new=true`);
         } else {
-            // Si no está verificado, lo mandamos a verificar con un mensaje especial.
+            // Si no está verificado, mandarlo a verificar
             res.redirect('/verify-account?from=new-campaign');
         }
 
     } catch (err) {
-        next(err);
+        // Si falla, renderizar de nuevo (puedes mejorar esto luego pasando el error)
+        res.status(400).render('error', { message: err.message });
     }
 });
 
@@ -1198,6 +1298,11 @@ app.post('/campaign/:id/edit', requireAuth, async (req, res, next) => {
 app.post('/campaign/:id/delete', requireAuth, async (req, res, next) => {
     try {
         const campaign = await Campaign.findById(req.params.id);
+        
+        if (!campaign) {
+            return res.status(404).json({ success: false, message: "Campaña no encontrada." });
+        }
+
         const isOwner = campaign.userId.equals(req.user._id);
         const isAdmin = req.user.role === 'Admin';
 
@@ -1205,15 +1310,30 @@ app.post('/campaign/:id/delete', requireAuth, async (req, res, next) => {
             return res.status(403).json({ success: false, message: "No tienes permiso para eliminar esto." });
         }
 
+        // --- CORRECCIÓN DE CLOUDINARY ---
         for (const fileUrl of campaign.files) {
             const publicId = getPublicId(fileUrl);
-            if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' }).catch(err => console.error("Fallo al eliminar de Cloudinary:", err));
+            if (publicId) {
+                // Determinamos si es video o imagen antes de borrar
+                // Buscamos extensiones de video o la palabra '/video/' en la URL de Cloudinary
+                const isVideo = fileUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) || fileUrl.includes('/video/');
+                const resourceType = isVideo ? 'video' : 'image';
+
+                await cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
+                    .catch(err => console.error("Fallo al eliminar de Cloudinary:", err));
+            }
         }
+        // -------------------------------
+
         await Campaign.findByIdAndDelete(req.params.id);
 
-        const redirectUrl = isAdmin ? '/admin/campaigns' : '/profile'; // Ruta a crear: /admin/campaigns
+        // Redirigir al panel de control
+        const redirectUrl = isAdmin ? '/admin/campaigns' : '/settings/dashboard'; 
         res.json({ success: true, redirectUrl });
-    } catch (err) { next(err); }
+    } catch (err) { 
+        console.error("Error al eliminar campaña:", err);
+        next(err); 
+    }
 });
 
 
@@ -2918,16 +3038,19 @@ app.post('/admin/report/:id/update', requireAdmin, async (req, res, next) => {
 // =============================================
 // RUTA PARA GENERAR SITEMAP DINÁMICO (ACTUALIZADA)
 // =============================================
+// =============================================
+// RUTA SITEMAP MAESTRO (CEO EDITION)
+// =============================================
 app.get('/sitemap.xml', async (req, res, next) => {
     try {
         const baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
         let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-        // --- 1. Añadir páginas estáticas importantes ---
-        // (Nota: '/' redirige a '/campaigns', así que listamos '/campaigns' directamente)
+        // 1. PÁGINAS ESTÁTICAS PRINCIPALES
         const staticPages = [
             { path: '/campaigns', changefreq: 'daily', priority: '1.0' },
+            { path: '/', changefreq: 'daily', priority: '1.0' }, // La raíz también es importante
             { path: '/how-it-works', changefreq: 'monthly', priority: '0.8' },
             { path: '/about', changefreq: 'monthly', priority: '0.7' },
             { path: '/trust', changefreq: 'monthly', priority: '0.8' },
@@ -2936,8 +3059,8 @@ app.get('/sitemap.xml', async (req, res, next) => {
             { path: '/privacy', changefreq: 'yearly', priority: '0.5' },
             { path: '/login', changefreq: 'yearly', priority: '0.6' },
             { path: '/register', changefreq: 'yearly', priority: '0.6' },
-            { path: '/forgot-password', changefreq: 'yearly', priority: '0.4' },
-            { path: '/sponsors/apply', changefreq: 'monthly', priority: '0.7' }
+            { path: '/sponsors/apply', changefreq: 'monthly', priority: '0.7' },
+            { path: '/help-center', changefreq: 'weekly', priority: '0.8' }
         ];
 
         staticPages.forEach(page => {
@@ -2949,17 +3072,9 @@ app.get('/sitemap.xml', async (req, res, next) => {
                 </url>`;
         });
 
-        // --- 2. Añadir páginas del Centro de Ayuda ---
-        xml += `
-            <url>
-                <loc>${baseUrl}/help-center</loc>
-                <changefreq>weekly</changefreq>
-                <priority>0.7</priority>
-            </url>`;
-
-        // Lee los nombres de archivo de la carpeta help-articles para listarlos
+        // 2. ARTÍCULOS DEL CENTRO DE AYUDA (Escaneo Dinámico)
         const helpArticlesDir = path.join(__dirname, 'views', 'help-articles');
-        try { // Usamos try-catch por si la carpeta no existe o hay problemas de lectura
+        if (fs.existsSync(helpArticlesDir)) {
             const articleFiles = fs.readdirSync(helpArticlesDir);
             articleFiles.forEach(file => {
                 if (file.endsWith('.html')) {
@@ -2968,17 +3083,13 @@ app.get('/sitemap.xml', async (req, res, next) => {
                         <url>
                             <loc>${baseUrl}/help/article/${slug}</loc>
                             <changefreq>monthly</changefreq>
-                            <priority>0.6</priority>
+                            <priority>0.7</priority>
                         </url>`;
                 }
             });
-        } catch (readErr) {
-            console.error("Error leyendo directorio de artículos de ayuda:", readErr);
-            // Continuamos sin los artículos si hay error, pero registramos el problema.
         }
 
-
-        // --- 3. Añadir todas las campañas activas dinámicamente ---
+        // 3. TODAS LAS CAMPAÑAS APROBADAS
         const campaigns = await Campaign.find({ status: 'approved' }).select('_id updatedAt');
         campaigns.forEach(campaign => {
             xml += `
@@ -2986,8 +3097,26 @@ app.get('/sitemap.xml', async (req, res, next) => {
                     <loc>${baseUrl}/campaign/${campaign._id}</loc>
                     <lastmod>${new Date(campaign.updatedAt).toISOString()}</lastmod>
                     <changefreq>daily</changefreq>
-                    <priority>0.9</priority> {/* */}
+                    <priority>0.9</priority>
                 </url>`;
+        });
+
+        // 4. PERFILES DE USUARIOS (SEO Masivo)
+        // Excluimos baneados para no indexar contenido malo.
+        // Excluimos roles Admin para seguridad (aunque el perfil sea público, es mejor priorizar usuarios reales).
+        const users = await User.find({ isBanned: false, role: 'User' }).select('username updatedAt');
+        users.forEach(user => {
+            // Nos aseguramos de que el usuario tenga un username válido
+            if (user.username) {
+                const safeUsername = encodeURIComponent(user.username);
+                xml += `
+                    <url>
+                        <loc>${baseUrl}/user/${safeUsername}</loc>
+                        <lastmod>${new Date(user.updatedAt).toISOString()}</lastmod>
+                        <changefreq>weekly</changefreq>
+                        <priority>0.8</priority>
+                    </url>`;
+            }
         });
 
         xml += `</urlset>`;
@@ -2996,6 +3125,7 @@ app.get('/sitemap.xml', async (req, res, next) => {
         res.send(xml);
 
     } catch (err) {
+        console.error("Error generando sitemap:", err);
         next(err);
     }
 });

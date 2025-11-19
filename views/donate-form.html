@@ -5,72 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donar a: <%= campaign.title %> - Dona Paraguay</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Estilos específicos para la experiencia de donación simplificada */
+        .donation-step-container {
+            transition: all 0.3s ease;
+        }
+        
+        .alias-card {
+            background: #f0f8ff;
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alias-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .alias-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            display: block;
+            margin-bottom: 1rem;
+            font-family: monospace; /* Para que los números se vean claros */
+        }
+        
+        .btn-copy {
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-copy:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .btn-copy.copied {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .bank-details-toggle {
+            color: var(--primary-color);
+            text-decoration: underline;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .full-bank-details {
+            display: none;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        
+        .ad-placeholder-mini {
+            margin: 2rem auto;
+            text-align: center;
+            max-width: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
 
 <%- include('partials/header.html') %>
 
 <main class="container">
-    <div class="form-container auth-form">
-        <h2>Vas a donar a:</h2>
-        <h3 style="color: var(--primary-color);"><%= campaign.title %></h3>
-        <p>Organizado por <strong><%= campaign.userId.username %></strong></p>
+    <div class="form-container auth-form" style="max-width: 500px;">
+        <div class="text-center mb-4">
+            <p class="text-muted mb-1">Vas a donar a:</p>
+            <h3 style="color: var(--primary-color); margin: 0;"><%= campaign.title %></h3>
+        </div>
         <hr>
 
-        <div id="step-1-amount">
-            <div class="form-group">
-                <label for="amount-slider" style="font-size: 1.2rem; text-align: center; margin-bottom: 1.5rem;"><strong>Desliza para elegir el monto</strong></label>
+        <div id="step-1-amount" class="donation-step-container">
+            <div class="form-group text-center">
+                <label for="amount-slider" style="font-size: 1.1rem; margin-bottom: 1.5rem;">
+                    ¿Con cuánto quieres ayudar?
+                </label>
+                
                 <div id="amount-display" class="donation-amount-display">50.000 Gs.</div>
+                
                 <input type="range" id="amount-slider" class="form-control-range" min="5000" max="1000000" step="1000" value="50000">
+                
                 <div class="donation-presets">
                     <button type="button" class="btn btn-secondary amount-btn" data-amount="20000">20.000</button>
                     <button type="button" class="btn btn-secondary amount-btn" data-amount="50000">50.000</button>
                     <button type="button" class="btn btn-secondary amount-btn" data-amount="100000">100.000</button>
                 </div>
             </div>
-            <button id="confirm-amount-btn" class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.2rem;">Continuar</button>
+            
+            <button id="confirm-amount-btn" class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.2rem; margin-top: 2rem;">
+                Siguiente <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
 
-        <div id="step-2-transfer" style="display: none;">
+        <div id="step-2-transfer" class="donation-step-container" style="display: none;">
             <form action="/campaign/<%= campaign._id %>/donate" method="POST" enctype="multipart/form-data">
-                <div class="alert alert-info">
-                    <h4><i class="fas fa-info-circle"></i> Tu próximo paso</h4>
-                    <p>Vas a transferir un <strong>total de <span id="total-amount-display" style="font-size: 1.2em;"></span> Gs.</strong></p>
-                    <div id="donation-breakdown" style="font-size: 0.9em; color: #555;"></div>
-                    <hr>
-                    <p><strong>Datos para la transferencia/giro:</strong><br>
-                    <% if (activeBankAccount) { %>
-    <strong>Banco:</strong> <%= activeBankAccount.bankName %><br>
-    <strong>A nombre de:</strong> <%= activeBankAccount.accountHolderName %><br>
-    <strong>N° de Cuenta:</strong> <%= activeBankAccount.accountNumber %><br>
-    <strong>CI:</strong> <%= activeBankAccount.ci %><br>
-    <% if (activeBankAccount.details) { %>
-        <strong><%= activeBankAccount.details %></strong>
-    <% } %>
-<% } else { %>
-    <strong>Administrador: Por favor, activa una cuenta bancaria en el panel de configuración.</strong>
-<% } %>
+                
+                <div class="text-center mb-4">
+                    <p>Estás donando: <strong id="total-amount-display" style="font-size: 1.2em;"></strong></p>
                 </div>
+
+                <div class="alias-card">
+                    <span class="alias-label">Transferir Vía SIPAP / ALIAS</span>
+                    
+                    <% 
+                        // Lógica inteligente: Si la cuenta activa tiene un "detalle" que parece un alias, úsalo.
+                        // Si no, usa el valor por defecto que pediste "6692796".
+                        let displayAlias = "6692796";
+                        if (activeBankAccount && activeBankAccount.details && activeBankAccount.details.length < 15) {
+                            displayAlias = activeBankAccount.details; 
+                        }
+                    %>
+                    
+                    <span class="alias-value" id="alias-text"><%= displayAlias %></span>
+                    
+                    <button type="button" class="btn-copy" id="copy-alias-btn">
+                        <i class="far fa-copy"></i> Copiar Alias
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <span class="bank-details-toggle" id="toggle-bank-details">
+                        ¿No usas Alias? Ver datos de cuenta completos
+                    </span>
+                </div>
+
+                <div id="full-bank-details" class="full-bank-details">
+                    <% if (activeBankAccount) { %>
+                        <p style="margin-bottom: 0.5rem;"><strong>Banco:</strong> <%= activeBankAccount.bankName %></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Titular:</strong> <%= activeBankAccount.accountHolderName %></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>C.I.:</strong> <%= activeBankAccount.ci %></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Cuenta N°:</strong> <%= activeBankAccount.accountNumber %></p>
+                    <% } else { %>
+                        <p>Contacta al administrador para obtener los datos bancarios.</p>
+                    <% } %>
+                </div>
+
+                <hr>
 
                 <input type="hidden" id="amount" name="amount" value="">
                 <input type="hidden" id="campaignAmount" name="campaignAmount" value="">
                 <input type="hidden" id="platformTip" name="platformTip" value="0">
 
                 <div class="form-group">
-                    <label for="proof-input"><strong>Sube tu comprobante de pago</strong></label>
+                    <label for="proof-input" style="text-align: center;">
+                        <i class="fas fa-camera"></i> Sube la foto de tu comprobante
+                    </label>
                     <input type="file" name="proof" id="proof-input" class="file-input-hidden" required accept="image/*">
-                    <label for="proof-input" class="btn btn-secondary file-input-label"><i class="fas fa-upload"></i> Seleccionar archivo...</label>
-                    <span id="file-name-display" class="file-name-display"></span>
+                    <label for="proof-input" class="btn btn-secondary btn-block file-input-label">
+                        <i class="fas fa-upload"></i> Seleccionar Imagen...
+                    </label>
+                    <span id="file-name-display" class="file-name-display" style="display: block; text-align: center; margin-top: 0.5rem; color: var(--success-color); font-weight: 600;"></span>
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
-                    <label for="comment">Mensaje de apoyo (opcional)</label>
-                    <textarea id="comment" name="comment" rows="3" class="form-control" placeholder="Ej: ¡Mucha fuerza! Estamos con ustedes."></textarea>
+                    <textarea id="comment" name="comment" rows="2" class="form-control" placeholder="Escribe un mensaje de aliento (opcional)..."></textarea>
+                </div>
+
+                <div class="ad-placeholder-mini">
+                    <small style="color: #ccc;">Publicidad</small>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">Hecho, enviar mi donación</button>
-                <button type="button" id="back-to-amount" class="btn btn-link" style="display: block; margin: 1rem auto;">Cambiar monto</button>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Confirmar Donación
+                </button>
+                
+                <button type="button" id="back-to-amount" class="btn btn-link" style="display: block; margin: 1rem auto;">
+                    Cambiar monto
+                </button>
             </form>
         </div>
     </div>
@@ -81,21 +214,18 @@
         <button class="close-button" id="modalCloseBtn">&times;</button>
         <div style="text-align: center;">
             <i class="fas fa-hands-helping fa-2x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
-            <h3>Un último paso...</h3>
+            <h3>Un pequeño gesto...</h3>
         </div>
-        <p>¡Gracias por querer donar <strong id="campaign-amount-modal-display"></strong> a esta causa!</p>
-        <p>Para ti como donante, usar la plataforma es 100% gratis. Si lo deseas, puedes añadir una pequeña propina voluntaria para que <strong>DonaParaguay.com siga con vida</strong>.</p>
-        <div class="transparency-details">
-            <strong>¿Para qué la usamos?</strong> Para pagar los costos de servidores, bases de datos, almacenamiento de imágenes y el equipo administrativo que revisa cada donación. ¡Tu propina nos ayuda a seguir ayudando!
-        </div>
+        <p>Dona Paraguay es gratis para los donantes. ¿Te gustaría dejar una propina opcional para ayudarnos a mantener el sitio?</p>
+        
         <div class="donation-presets" style="margin-top: 1.5rem;">
              <button class="btn btn-secondary tip-btn" data-tip="1000">1.000 Gs.</button>
              <button class="btn btn-secondary tip-btn" data-tip="3000">3.000 Gs.</button>
              <button class="btn btn-secondary tip-btn" data-tip="5000">5.000 Gs.</button>
         </div>
         <div class="modal-actions" style="margin-top: 1.5rem;">
-            <button id="skip-tip-btn" class="btn btn-secondary">Omitir</button>
-            <button id="add-tip-btn" class="btn btn-primary" disabled>Añadir 0 Gs. y Continuar</button>
+            <button id="skip-tip-btn" class="btn btn-secondary">No, gracias</button>
+            <button id="add-tip-btn" class="btn btn-primary" disabled>Añadir y Continuar</button>
         </div>
     </div>
 </div>
@@ -104,6 +234,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- VARIABLES ---
     const step1 = document.getElementById('step-1-amount');
     const step2 = document.getElementById('step-2-transfer');
     const slider = document.getElementById('amount-slider');
@@ -114,20 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalAmountInput = document.getElementById('amount');
     const campaignAmountInput = document.getElementById('campaignAmount');
     const platformTipInput = document.getElementById('platformTip');
-
     const totalAmountDisplay = document.getElementById('total-amount-display');
-    const donationBreakdown = document.getElementById('donation-breakdown');
 
     const modal = document.getElementById('platform-support-modal');
     const closeBtn = document.getElementById('modalCloseBtn');
     const skipBtn = document.getElementById('skip-tip-btn');
     const addTipBtn = document.getElementById('add-tip-btn');
     const tipButtons = document.querySelectorAll('.tip-btn');
-    const campaignAmountModalDisplay = document.getElementById('campaign-amount-modal-display');
     
     let selectedTip = 0;
     const formatter = new Intl.NumberFormat('es-PY');
 
+    // --- LÓGICA DE SLIDER ---
     function updateDisplay(value) {
         amountDisplay.textContent = formatter.format(value) + ' Gs.';
     }
@@ -139,16 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- TRANSICIÓN DE PASOS ---
     function showStep2(campaignAmount, tipAmount) {
         const totalAmount = campaignAmount + tipAmount;
+        totalAmountDisplay.textContent = formatter.format(totalAmount) + ' Gs.';
         
-        totalAmountDisplay.textContent = formatter.format(totalAmount);
-        if (tipAmount > 0) {
-            donationBreakdown.innerHTML = `(${formatter.format(campaignAmount)} Gs. para la campaña + ${formatter.format(tipAmount)} Gs. para la plataforma)`;
-        } else {
-            donationBreakdown.innerHTML = `(${formatter.format(campaignAmount)} Gs. para la campaña)`;
-        }
-
         totalAmountInput.value = totalAmount;
         campaignAmountInput.value = campaignAmount;
         platformTipInput.value = tipAmount;
@@ -161,13 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmBtn.addEventListener('click', () => {
         const amount = parseInt(slider.value);
         if (isNaN(amount) || amount < 5000) {
-            alert('Por favor, selecciona un monto de 5.000 Gs. o más.');
+            alert('El monto mínimo es 5.000 Gs.');
             return;
         }
-        campaignAmountModalDisplay.textContent = formatter.format(amount) + " Gs.";
         modal.style.display = 'flex';
     });
 
+    // --- LÓGICA DE PROPINA ---
     tipButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             selectedTip = parseInt(btn.dataset.tip);
@@ -187,14 +311,54 @@ document.addEventListener('DOMContentLoaded', () => {
         step2.style.display = 'none';
         selectedTip = 0;
         tipButtons.forEach(b => b.classList.remove('active-amount'));
-        addTipBtn.textContent = 'Añadir 0 Gs. y Continuar';
+        addTipBtn.textContent = 'Añadir y Continuar';
         addTipBtn.disabled = true;
     });
 
+    // --- SUBIDA DE ARCHIVO ---
     document.getElementById('proof-input').addEventListener('change', (e) => {
         const display = document.getElementById('file-name-display');
-        display.textContent = e.target.files.length > 0 ? e.target.files[0].name : '';
+        if(e.target.files.length > 0) {
+            display.innerHTML = '<i class="fas fa-check"></i> ' + e.target.files[0].name;
+        } else {
+            display.textContent = '';
+        }
     });
+
+    // --- COPIAR ALIAS (NUEVO) ---
+    const copyBtn = document.getElementById('copy-alias-btn');
+    const aliasText = document.getElementById('alias-text');
+
+    if(copyBtn && aliasText) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(aliasText.textContent.trim()).then(() => {
+                const originalHTML = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalHTML;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => console.error('Error al copiar', err));
+        });
+    }
+
+    // --- TOGGLE DATOS COMPLETOS ---
+    const toggleBankBtn = document.getElementById('toggle-bank-details');
+    const fullBankDetails = document.getElementById('full-bank-details');
+    
+    if(toggleBankBtn && fullBankDetails) {
+        toggleBankBtn.addEventListener('click', () => {
+            if(fullBankDetails.style.display === 'block') {
+                fullBankDetails.style.display = 'none';
+                toggleBankBtn.textContent = '¿No usas Alias? Ver datos de cuenta completos';
+            } else {
+                fullBankDetails.style.display = 'block';
+                toggleBankBtn.textContent = 'Ocultar datos completos';
+            }
+        });
+    }
 });
 </script>
 

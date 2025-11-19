@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <meta name="description" content="<%= pageDescription %>">
+    <link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        /* Estilos exclusivos de la portada */
+        .hero-landing {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+            color: white;
+            padding: 6rem 1rem;
+            text-align: center;
+            border-radius: 0 0 50% 50% / 20px;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-landing::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.1;
+        }
+        .hero-title { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2; }
+        .hero-subtitle { font-size: 1.25rem; opacity: 0.9; max-width: 700px; margin: 0 auto 2.5rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-hero { padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px; font-weight: 600; transition: transform 0.3s; }
+        .btn-hero-primary { background: white; color: var(--primary-color); }
+        .btn-hero-outline { border: 2px solid white; color: white; background: transparent; }
+        .btn-hero:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        /* Categorías */
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+        .category-card { 
+            background: white; padding: 2rem 1rem; border-radius: 12px; text-align: center; 
+            text-decoration: none; color: var(--text-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            transition: all 0.3s ease; border: 1px solid transparent;
+            display: flex; flex-direction: column; align-items: center; height: 100%;
+        }
+        .category-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        .cat-icon-circle { 
+            width: 70px; height: 70px; background: #f0f8ff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+            color: var(--primary-color); font-size: 1.8rem; transition: background 0.3s, color 0.3s;
+        }
+        .category-card:hover .cat-icon-circle { background: var(--primary-color); color: white; }
+        .cat-title { font-weight: 700; font-size: 1rem; margin: 0; }
+
+        .section-title { font-size: 2.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 3rem; position: relative; display: inline-block; }
+        .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: var(--primary-color); margin: 10px auto 0; border-radius: 2px; }
+        
+        /* Info Cards */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+        .feature-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eee; }
+        .feature-icon { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem; }
+        .feature-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+        
+        @media (max-width: 768px) { .hero-title { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main>
+    <header class="hero-landing">
+        <div class="container" data-aos="fade-up">
+            <h1 class="hero-title">Tu Donación,<br>Su Esperanza</h1>
+            <p class="hero-subtitle">La plataforma de crowdfunding solidario de Paraguay. Conecta, apoya y transforma realidades.</p>
+            <div class="hero-buttons">
+                <a href="/campaigns" class="btn btn-hero btn-hero-primary"><i class="fas fa-search"></i> Explorar Campañas</a>
+                <a href="/new-campaign" class="btn btn-hero btn-hero-outline"><i class="fas fa-plus"></i> Crear Campaña</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="container" style="padding: 4rem 1rem; text-align: center;">
+        <h2 class="section-title" data-aos="fade-up">¿Por qué Dona Paraguay?</h2>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3 class="feature-title">Seguridad Total</h3>
+                <p>Verificamos la identidad de cada organizador con Cédula de Identidad.</p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3 class="feature-title">Sin Burocracia</h3>
+                <p>Un puente directo. Publicas tu necesidad, la gente dona, y recibes el apoyo.</p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon"><i class="fas fa-users"></i></div>
+                <h3 class="feature-title">Comunidad Solidaria</h3>
+                <p>Miles de paraguayos están listos para extenderte la mano.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: #f8f9fc; padding: 5rem 1rem;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <h2 class="section-title" data-aos="fade-up">Explora por Causa</h2>
+            </div>
+
+            <div class="categories-grid">
+                <% 
+                const iconMap = {
+                    "🚨 URGENCIAS / NECESIDADES": "fa-ambulance",
+                    "🎓 EDUCACIÓN / FUTURO": "fa-graduation-cap",
+                    "🏠 HOGAR / VIDA DIARIA": "fa-home",
+                    "🐶 ANIMALES / MASCOTAS": "fa-paw",
+                    "💼 NEGOCIOS / CREACIÓN": "fa-briefcase",
+                    "🚀 SUEÑOS / METAS": "fa-rocket",
+                    "📱 TECNOLOGÍA / GUSTOS": "fa-mobile-alt",
+                    "💎 DESEOS / CAPRICHOS": "fa-gem",
+                    "❤️ CAUSAS SOCIALES": "fa-hands-helping"
+                };
+                %>
+                <% if (locals.CATEGORY_GROUPS) { %>
+                    <% Object.keys(CATEGORY_GROUPS).forEach((group, index) => { %>
+                        <% const firstSubCat = CATEGORY_GROUPS[group][0]; %>
+                        <a href="/campaigns?category=<%= firstSubCat %>" class="category-card" data-aos="zoom-in" data-aos-delay="<%= index * 50 %>">
+                            <div class="cat-icon-circle">
+                                <i class="fas <%= iconMap[group] || 'fa-star' %>"></i>
+                            </div>
+                            <h4 class="cat-title"><%= group.replace(/^[^\s]+\s/, '') %></h4>
+                        </a>
+                    <% }); %>
+                <% } %>
+            </div>
+            
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="/campaigns" class="btn btn-primary btn-lg">Ver Todas las Campañas</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include('partials/sponsors.html') %>
+<%- include('partials/footer.html') %>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({ duration: 800, once: true });</script>
+</body>
+</html>

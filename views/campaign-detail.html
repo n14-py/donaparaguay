@@ -10,26 +10,54 @@
     <meta property="og:url" content="<%= baseUrl %>/campaign/<%= campaign._id %>">
     <meta property="og:title" content="<%= campaign.title %>">
     <meta property="og:description" content="<%= pageDescription %>">
-    <meta property="og:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
+    <% if (campaign.files && campaign.files.length > 0) { %>
+        <meta property="og:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
+    <% } %>
+
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="<%= baseUrl %>/campaign/<%= campaign._id %>">
     <meta property="twitter:title" content="<%= campaign.title %>">
     <meta property="twitter:description" content="<%= pageDescription %>">
-    <meta property="twitter:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
-<link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
+    <% if (campaign.files && campaign.files.length > 0) { %>
+        <meta property="twitter:image" content="<%= campaign.files[0].replace('/upload/', '/upload/w_600,h_315,c_fill,g_auto/') %>">
+    <% } %>
+
+    <link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  gtag('config', 'G-14PSV7R8YT');
-</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-14PSV7R8YT');
+    </script>
 
+    <style>
+        /* Estilos extra para el detalle */
+        .ad-sidebar-slot {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        .ad-sidebar-slot small {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #999;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        /* Ocultar anuncios en móviles muy pequeños si es necesario */
+        @media (max-width: 400px) {
+            .ad-sidebar-slot { display: none; }
+        }
+    </style>
 </head>
 <body>
 
@@ -38,6 +66,7 @@
 <main class="container">
     <% if (locals.campaign && campaign.userId) { %>
         <div class="anuncio-container">
+            
             <div class="anuncio-main-content">
                 <% if (campaign.files && campaign.files.length > 0) { %>
                     <div class="image-slider-container">
@@ -58,7 +87,7 @@
                 <% } %>
                 
                 <div class="campaign-story">
-                     <h3>Nuestra Historia</h3>
+                     <h3><i class="fas fa-book-open"></i> Nuestra Historia</h3>
                      <%- campaign.description %>
                 </div>
             </div>
@@ -105,6 +134,13 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="ad-sidebar-slot">
+                    <small>Publicidad</small>
+                    <div style="background: #e9ecef; height: 250px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                        Espacio para Anuncio
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -145,23 +181,9 @@
                 <% } %>
                 <div class="updates-list" id="updates-list-container">
                     <% updates.forEach(update => { %>
-                        <div class="update-item" id="update-<%= update._id %>">
-                            <p><%- update.content %></p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small><%= formatDate(update.createdAt) %></small>
-                                <% if (isOwner) { %>
-                                    <div class="update-actions" style="display: flex; gap: 0.5rem;">
-                                        <a href="/campaign/<%= campaign._id %>/update/<%= update._id %>/edit" class="btn btn-sm btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;"><i class="fas fa-pen"></i></a>
-                                        <button class="btn btn-sm btn-danger delete-update-btn" data-campaign-id="<%= campaign._id %>" data-update-id="<%= update._id %>" style="padding: 5px 10px; font-size: 0.8rem;"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                <% } %>
-                            </div>
-                        </div>
+                        <%- include('partials/update-partial.html', { update: update }) %>
                     <% }); %>
                 </div>
-                <% if (totalUpdates > updates.length) { %>
-                    <button id="load-more-updates" class="btn btn-secondary btn-block">Cargar más actualizaciones</button>
-                <% } %>
             </div>
 
             <div id="comments-content" class="tab-content" style="display: none;">
@@ -177,64 +199,7 @@
                 
                 <div class="comments-list" id="comments-list-container">
                     <% comments.forEach(comment => { %>
-                        <div class="comment-item" id="comment-<%= comment._id %>">
-                            <% if (comment.userId) { %>
-                                <img src="<%= comment.userId.profilePic %>" alt="avatar" class="comment-avatar">
-                                <div class="comment-content">
-                                    <strong><a href="/user/<%= comment.userId.username %>"><%= comment.userId.username %></a></strong>
-                            <% } else { %>
-                                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
-                                <div class="comment-content">
-                                    <strong>[Usuario Eliminado]</strong>
-                            <% } %>
-                                <p class="comment-text"><%- comment.text %></p>
-                                <small><%= formatDate(comment.createdAt) %></small>
-                                
-                                <% if(currentUser && comment.userId) { %>
-                                    <a href="#" class="reply-btn" data-comment-id="<%= comment._id %>">Responder</a>
-                                <% } %>
-                            
-                                <div class="reply-form-container" id="reply-form-<%= comment._id %>" style="display:none;">
-                                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
-                                        <input type="hidden" name="parentCommentId" value="<%= comment._id %>">
-                                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
-                                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
-                                    </form>
-                                </div>
-                            
-                                <div class="comment-replies">
-                                <% if (comment.replies && comment.replies.length > 0) { %>
-                                    <% comment.replies.forEach(reply => { %>
-                                        <div class="comment-item is-reply" id="comment-<%= reply._id %>">
-                                             <% if (reply.userId) { %>
-                                                <img src="<%= reply.userId.profilePic %>" alt="avatar" class="comment-avatar">
-                                                <div class="comment-content">
-                                                    <strong><a href="/user/<%= reply.userId.username %>"><%= reply.userId.username %></a></strong>
-                                            <% } else { %>
-                                                <img src="https://res.cloudinary.com/dmedd6w1q/image/upload/v1752519015/Gemini_Generated_Image_jafmcpjafmcpjafm_i5ptpl.png" alt="avatar" class="comment-avatar">
-                                                <div class="comment-content">
-                                                    <strong>[Usuario Eliminado]</strong>
-                                            <% } %>
-                                                <p class="comment-text"><%- reply.text %></p>
-                                                <small><%= formatDate(reply.createdAt) %></small>
-                                                <% if(currentUser && reply.userId) { %>
-                                                    <a href="#" class="reply-btn" data-comment-id="<%= reply._id %>">Responder</a>
-                                                <% } %>
-                                                <div class="reply-form-container" id="reply-form-<%= reply._id %>" style="display:none;">
-                                                    <form action="/campaign/<%= campaign._id %>/comment" method="POST" class="ajax-form" data-append-target="#comment-<%= comment._id %> .comment-replies">
-                                                        <input type="hidden" name="parentCommentId" value="<%= reply._id %>">
-                                                        <textarea name="text" rows="2" class="form-control" placeholder="Escribe tu respuesta..." required></textarea>
-                                                        <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
-                                                    </form>
-                                                </div>
-                                                 <div class="comment-replies"></div>
-                                            </div>
-                                        </div>
-                                    <% }) %>
-                                <% } %>
-                                </div>
-                            </div>
-                        </div>
+                        <%- include('partials/reply-partial.html', { comment: comment, campaign: campaign }) %>
                     <% }); %>
                 </div>
             </div>
@@ -262,7 +227,42 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- LÓGICA DE INTERFAZ GENERAL (SLIDER, LIKE, ETC.) ---
+    
+    // --- 1. LÓGICA DE NUEVA CAMPAÑA (CELEBRACIÓN) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('new') === 'true') {
+        const shareModal = document.getElementById('shareModal');
+        
+        if (shareModal) {
+            // Personalizar el título para la celebración
+            const modalTitle = document.getElementById('shareModalTitle');
+            const modalMsg = document.querySelector('#shareModal p');
+            
+            if(modalTitle) modalTitle.innerText = "🎉 ¡Campaña Publicada con Éxito!";
+            if(modalMsg) modalMsg.innerText = "Tu campaña ya está en línea. ¡Ahora compártela para empezar a recibir donaciones!";
+            
+            // Abrir Modal
+            shareModal.style.display = 'flex';
+
+            // Lanzar Confeti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 3000 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    }
+    // ------------------------------------------------
+
+    // --- SLIDER DE IMÁGENES ---
     const slider = document.querySelector('.image-slider-container');
     if (slider) {
         let currentSlideIndex = 0;
@@ -275,24 +275,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- BOTÓN ME GUSTA ---
     const likeButton = document.getElementById('like-button');
     if(likeButton) {
         likeButton.addEventListener('click', async () => {
             <% if (currentUser) { %>
-                const response = await fetch('/campaign/<%= campaign._id %>/like', { method: 'POST' });
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('like-count').textContent = data.likes;
-                    likeButton.classList.toggle('btn-danger', data.liked);
-                    likeButton.classList.toggle('btn-secondary', !data.liked);
-                }
+                try {
+                    const response = await fetch('/campaign/<%= campaign._id %>/like', { method: 'POST' });
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('like-count').textContent = data.likes;
+                        likeButton.classList.toggle('btn-danger', data.liked);
+                        likeButton.classList.toggle('btn-secondary', !data.liked);
+                    }
+                } catch (e) { console.error("Error giving like", e); }
             <% } else { %>
                 window.location.href = '/login';
             <% } %>
         });
     }
 
-    // --- SCRIPT PARA PESTAÑAS (TABS) ---
+    // --- PESTAÑAS (TABS) ---
     const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => {
@@ -313,27 +316,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- SCRIPT CORREGIDO PARA COMENTARIOS (SOLO MANEJA EL BOTÓN DE RESPONDER) ---
-    document.getElementById('comments-content').addEventListener('click', (event) => {
-        const target = event.target;
-
-        if (target.matches('.reply-btn')) {
-            event.preventDefault();
-            const commentId = target.dataset.commentId;
-            const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
-            
-            if (replyFormContainer) {
-                const isVisible = replyFormContainer.style.display === 'block';
-                document.querySelectorAll('.reply-form-container').forEach(form => form.style.display = 'none');
-                replyFormContainer.style.display = isVisible ? 'none' : 'block';
-                if (!isVisible) {
-                    replyFormContainer.querySelector('textarea').focus();
+    // --- INTERACCIÓN COMENTARIOS (RESPONDER) ---
+    const commentsContent = document.getElementById('comments-content');
+    if (commentsContent) {
+        commentsContent.addEventListener('click', (event) => {
+            if (event.target.matches('.reply-btn')) {
+                event.preventDefault();
+                const commentId = event.target.dataset.commentId;
+                const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
+                
+                if (replyFormContainer) {
+                    // Cerrar otros formularios abiertos para limpieza visual
+                    document.querySelectorAll('.reply-form-container').forEach(form => {
+                        if (form !== replyFormContainer) form.style.display = 'none';
+                    });
+                    
+                    const isVisible = replyFormContainer.style.display === 'block';
+                    replyFormContainer.style.display = isVisible ? 'none' : 'block';
+                    if (!isVisible) {
+                        const textarea = replyFormContainer.querySelector('textarea');
+                        if(textarea) textarea.focus();
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
-    // --- LÓGICA COMPLETA PARA MODAL DE COMPARTIR ---
+    // --- MODAL DE COMPARTIR (MANUAL) ---
     const shareModal = document.getElementById('shareModal');
     const openShareBtn = document.getElementById('open-share-modal-btn');
     const closeShareBtn = document.getElementById('shareModalCloseBtn');
@@ -341,17 +350,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (openShareBtn && shareModal) {
         openShareBtn.addEventListener('click', () => {
-            const campaignUrl = window.location.href;
-            const campaignTitle = `<%= campaign.title.replace(/'/g, "\\'") %>`;
-            const shareText = `¡Apoya la campaña "${campaignTitle}" en Dona Paraguay!`;
-            const encodedUrl = encodeURIComponent(campaignUrl);
-            const encodedText = encodeURIComponent(shareText);
-            const fullEncodedText = encodeURIComponent(`${shareText} ${campaignUrl}`);
-
-            document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${fullEncodedText}`;
-            document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-            document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
+            // Restaurar textos por defecto si venían de "Celebración"
+            const modalTitle = document.getElementById('shareModalTitle');
+            const modalMsg = document.querySelector('#shareModal p');
+            if(modalTitle) modalTitle.innerText = "Compartir esta causa";
+            if(modalMsg) modalMsg.innerText = "¡Gracias por ayudar a difundir la palabra!";
             
+            setupShareLinks();
             shareModal.style.display = 'flex';
         });
     }
@@ -359,24 +364,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if(closeShareBtn) {
         closeShareBtn.addEventListener('click', () => {
             shareModal.style.display = 'none';
+            // Limpiar parámetros URL si veníamos de nueva campaña para no reabrir al refrescar
+            if (window.history.replaceState && urlParams.get('new') === 'true') {
+                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                 window.history.replaceState({path:newUrl},'',newUrl);
+            }
         });
     }
 
+    function setupShareLinks() {
+        const campaignUrl = window.location.href.split('?')[0]; // Limpia parámetros
+        const campaignTitle = `<%= campaign.title.replace(/'/g, "\\'") %>`;
+        const shareText = `¡Apoya la campaña "${campaignTitle}" en Dona Paraguay!`;
+        const fullEncodedText = encodeURIComponent(`${shareText} ${campaignUrl}`);
+
+        document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${fullEncodedText}`;
+        document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}`;
+        document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(campaignUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+
+    // Inicializar links al cargar por si se abre automático
+    setupShareLinks();
+
     if (copyLinkBtn) {
         copyLinkBtn.addEventListener('click', () => {
-            const campaignUrl = window.location.href;
+            const campaignUrl = window.location.href.split('?')[0];
             navigator.clipboard.writeText(campaignUrl).then(() => {
                 const originalText = copyLinkBtn.innerHTML;
-                copyLinkBtn.innerHTML = '¡Copiado!';
-                copyLinkBtn.classList.add('copied');
+                copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                copyLinkBtn.classList.add('btn-success');
                 setTimeout(() => {
                     copyLinkBtn.innerHTML = originalText;
-                    copyLinkBtn.classList.remove('copied');
+                    copyLinkBtn.classList.remove('btn-success');
                 }, 2000);
-            }).catch(err => {
-                console.error('Error al copiar el enlace: ', err);
-                alert('No se pudo copiar el enlace.');
-            });
+            }).catch(err => alert('No se pudo copiar el enlace.'));
         });
     }
 
@@ -385,35 +406,22 @@ document.addEventListener('DOMContentLoaded', () => {
             shareModal.style.display = "none";
         }
     });
-
-    // --- CÓDIGO NUEVO PARA ELIMINAR ACTUALIZACIONES ---
+    
+    // --- ELIMINAR ACTUALIZACIONES ---
     const updatesContainer = document.getElementById('updates-list-container');
     if (updatesContainer) {
         updatesContainer.addEventListener('click', async (e) => {
             const deleteButton = e.target.closest('.delete-update-btn');
             if (!deleteButton) return;
-
-            const campaignId = deleteButton.dataset.campaignId;
-            const updateId = deleteButton.dataset.updateId;
-
-            if (confirm('¿Estás seguro de que quieres eliminar esta actualización? Esta acción no se puede deshacer.')) {
+            if (confirm('¿Eliminar actualización?')) {
                 try {
-                    const response = await fetch(`/campaign/${campaignId}/update/${updateId}/delete`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                    const response = await fetch(`/campaign/${deleteButton.dataset.campaignId}/update/${deleteButton.dataset.updateId}/delete`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }
                     });
                     const data = await response.json();
-                    if (data.success) {
-                        const elementToRemove = document.getElementById(`update-${updateId}`);
-                        if (elementToRemove) {
-                            elementToRemove.remove();
-                        }
-                    } else {
-                        alert(data.message || 'No se pudo eliminar la actualización.');
-                    }
-                } catch (error) {
-                    alert('Ocurrió un error de red.');
-                }
+                    if (data.success) document.getElementById(`update-${deleteButton.dataset.updateId}`).remove();
+                    else alert(data.message);
+                } catch (error) { alert('Error de red.'); }
             }
         });
     }

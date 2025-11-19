@@ -2,49 +2,104 @@
 <html lang="es">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre Nosotros - La Historia de Dona Paraguay</title>
-    <meta name="description" content="Conoce la misión, visión y los valores que impulsan a Dona Paraguay. Nacimos de la empatía para ser el puente digital de la solidaridad en Paraguay.">
+    <title>Sobre Nosotros - El Nuevo Dona Paraguay</title>
+    <meta name="description" content="Descubre la evolución de Dona Paraguay. Más que una plataforma solidaria, somos el motor de sueños, emprendimientos y soluciones de todo un país.">
+    <link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        /* Estilos para la nueva página About */
+        .about-hero {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(to bottom, #f8f9fa, white);
+        }
+        .about-hero h1 { font-size: 2.5rem; font-weight: 800; color: var(--primary-color-dark); margin-bottom: 1rem; }
+        .about-hero p { font-size: 1.2rem; color: var(--text-muted-color); max-width: 700px; margin: 0 auto; }
+        
+        .story-section { padding: 3rem 0; }
+        .story-card { 
+            background: white; padding: 2.5rem; border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eee; margin-bottom: 2rem; 
+        }
+        .story-card h3 { color: var(--text-color); font-size: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .story-card h3 i { color: var(--primary-color); }
+        
+        .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .value-item { text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 12px; transition: transform 0.3s; }
+        .value-item:hover { transform: translateY(-5px); background: white; box-shadow: var(--shadow-md); }
+        .value-icon { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1rem; }
+        .value-item h4 { font-weight: 700; margin-bottom: 0.5rem; }
+
+        .highlight-box { 
+            background: var(--primary-color-light); border-left: 5px solid var(--primary-color); 
+            padding: 2rem; border-radius: 8px; margin: 3rem 0; 
+        }
+    </style>
 </head>
 <body>
 <%- include('partials/header.html') %>
-<main class="container">
-    <div class="static-page-container">
-        <h1>Nuestra Historia</h1>
-         <p class="lead" style="font-size: 1.2rem; color: var(--text-muted-color);">Somos una comunidad unida por una idea: que la tecnología puede ser el puente más poderoso para canalizar la increíble solidaridad del pueblo paraguayo.</p>
-        
-        <hr>
 
-        <h2>La Chispa: De Espectador a Creador</h2>
-        <p>Dona Paraguay no nació en una sala de juntas, sino en el scroll infinito de un smartphone. Como joven universitario, pasaba horas en TikTok, consumiendo contenido como cualquiera. Pero entre videos de humor y tendencias, empecé a notar un patrón recurrente y profundamente paraguayo: gente pidiendo ayuda. Casos de salud, emergencias familiares, sueños educativos truncados... todo expuesto con una vulnerabilidad cruda y honesta.</p>
-        <p>Lo que me impactó no fue solo la necesidad, sino la respuesta. En los comentarios de esos videos, veía a cientos de extraños ofreciendo su granito de arena, compartiendo números de cuenta y dejando mensajes de aliento. Yo mismo me encontré haciendo transferencias, sintiendo esa conexión instantánea. Vi la solidaridad innata de nuestra gente en acción, desorganizada pero potente. Y fue ahí, en medio de ese caos de generosidad, donde surgió la pregunta que lo cambió todo: <strong>"Con mi talento y mi pasión por la tecnología, ¿por qué no puedo construir un lugar mejor para esto?"</strong>.</p>
-        <p>Me di cuenta de que no se trataba de dar pena. Se trataba de empoderar. De canalizar esa energía solidaria en un flujo constante, transparente y accesible para todos. Dona Paraguay nació de esa convicción: tomar la increíble voluntad de ayudar que ya existe en nuestro país y darle un hogar digital.</p>
-        
-        
+<main>
+    <section class="about-hero">
+        <div class="container" data-aos="fade-down">
+            <h1>La Evolución de la Solidaridad</h1>
+            <p>De un simple gesto de ayuda a una plataforma integral para cumplir sueños, impulsar negocios y salvar vidas.</p>
+        </div>
+    </section>
 
-        <h2>Nuestra Misión: Conectar para Transformar</h2>
-        <p><strong>Nuestra misión es simple y directa: conectar a personas que necesitan ayuda con personas que pueden y quieren ayudar.</strong></p>
-        <p>Somos el punto de encuentro. Eliminamos las barreras geográficas y simplificamos el proceso para que cualquier paraguayo, sin importar dónde se encuentre, pueda presentar su caso y encontrar apoyo. Para el donante, ofrecemos un catálogo de causas reales y verificadas, con la seguridad de que su contribución llega a donde tiene que llegar. Aspiramos a ser una plataforma internacional, buscando constantemente nuevas alternativas de pago para que un paraguayo en el exterior o un amigo del mundo pueda sumarse a esta red de solidaridad con la misma facilidad que alguien en Asunción.</p>
+    <div class="container">
+        <section class="story-section">
+            <div class="story-card" data-aos="fade-up">
+                <h3><i class="fas fa-bolt"></i> El Origen</h3>
+                <p>Dona Paraguay nació de la observación. En redes sociales veíamos miles de pedidos de ayuda dispersos, desorganizados y a veces, dudosos. Entendimos que la generosidad del paraguayo es inmensa, pero necesitaba un canal seguro y moderno.</p>
+                <p>Lo que comenzó como una respuesta a emergencias médicas, hoy ha evolucionado. Nos dimos cuenta de que la necesidad no es solo salud; también es educación, es el sueño de un emprendedor, es el viaje de estudios o el rescate de una mascota.</p>
+            </div>
 
-        <h2>Nuestra Visión: Ser la Primera Solución</h2>
-        <p><strong>Soñamos que, ante una necesidad, el primer pensamiento de un paraguayo sea "Dona Paraguay".</strong></p>
-        <p>Queremos construir más que una plataforma; queremos construir un sinónimo de solución y esperanza. Nuestra visión es ser el referente de confianza número uno en el país. Un lugar donde la gente acuda sin dudar, sabiendo que encontrarán una comunidad dispuesta a escuchar y a actuar. Queremos que cada historia publicada sea un testimonio de que nadie está solo, y que cada meta alcanzada sea una prueba de que, juntos, somos imparables. El objetivo final es que Dona Paraguay se convierta en una herramienta fundamental para el progreso social, demostrando que la solidaridad organizada puede cambiar vidas a gran escala.</p>
+            <div class="story-card" data-aos="fade-up" data-aos-delay="100">
+                <h3><i class="fas fa-rocket"></i> Nuestra Nueva Misión</h3>
+                <p><strong>Democratizar el financiamiento colectivo en Paraguay.</strong></p>
+                <p>Queremos romper el estigma de que "pedir ayuda es solo para tragedias". En Dona Paraguay, creemos que está bien pedir apoyo para cumplir un sueño, lanzar una marca o celebrar un logro. Hemos ampliado nuestras categorías para abrazar todas las facetas de la vida: desde <strong>Urgencias</strong> hasta <strong>Caprichos y Metas Personales</strong>.</p>
+            </div>
+        </section>
 
-        <h2>Nuestros Valores: El ADN de Dona Paraguay</h2>
-        <p>Nuestras acciones y nuestra tecnología se construyen sobre cuatro pilares innegociables. Son nuestra promesa para ti.</p>
-        <ul>
-            <li><strong>Transparencia:</strong> La confianza no se pide, se gana. Desde la verificación de cada organizador hasta el seguimiento público de cada guaraní recaudado, operamos con total claridad. Creemos que la honestidad absoluta es el único camino para fomentar la generosidad.</li>
-            <li><strong>Solidaridad:</strong> Este es nuestro motor. No vemos a los usuarios como meros participantes, sino como miembros de un movimiento. Fomentamos una cultura de apoyo mutuo que va más allá del dinero, construida sobre el respeto y la empatía.</li>
-            <li><strong>Comunidad:</strong> Dona Paraguay es el espacio donde las historias individuales se convierten en causas colectivas. Somos una red de personas unidas por un propósito común: construir un Paraguay más fuerte y compasivo, una donación a la vez.</li>
-            <li><strong>Confianza:</strong> Cada función que desarrollamos, desde la seguridad de los datos hasta la revisión de las campañas, está diseñada para proteger a nuestra comunidad. Trabajamos incansablemente para ser la plataforma más fiable y segura, porque entendemos que tu tranquilidad es esencial para que la ayuda fluya.</li>
-        </ul>
+        <div class="highlight-box" data-aos="zoom-in">
+            <h3><i class="fas fa-user-check"></i> Confianza en la Persona, Libertad en la Causa</h3>
+            <p>Hemos transformado nuestro modelo de seguridad. Antes, revisábamos cada campaña manualmente, lo que generaba demoras.</p>
+            <p><strong>Ahora, confiamos en ti.</strong> Implementamos un sistema de verificación de identidad riguroso al registrarse. Una vez que sabemos quién eres (validación de Cédula), te damos la libertad de publicar tus campañas al instante. Creemos en una comunidad de adultos responsables y empoderados.</p>
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: 2rem;">Nuestros Pilares</h2>
+        <div class="values-grid">
+            <div class="value-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="value-icon"><i class="fas fa-globe-americas"></i></div>
+                <h4>Inclusión Total</h4>
+                <p>Todas las causas son válidas. Desde una cirugía compleja hasta la compra de una PlayStation. Si es importante para ti, es importante para nosotros.</p>
+            </div>
+            <div class="value-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="value-icon"><i class="fas fa-shipping-fast"></i></div>
+                <h4>Agilidad Extrema</h4>
+                <p>La ayuda no puede esperar. Eliminamos la burocracia de aprobación por campaña. Publicas, compartes y recibes.</p>
+            </div>
+            <div class="value-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="value-icon"><i class="fas fa-search-dollar"></i></div>
+                <h4>Transparencia</h4>
+                <p>Mantenemos nuestra política clara: el uso es gratuito para crear, y solo aplicamos una pequeña comisión operativa al momento de retirar los fondos exitosos.</p>
+            </div>
+        </div>
         
-        <div class="text-center" style="margin-top: 3rem;">
-            <a href="/campaigns" class="btn btn-primary btn-lg">Explora las Campañas</a>
+        <div class="text-center" style="margin-top: 4rem; margin-bottom: 2rem;">
+            <h3>¿Tienes una meta en mente?</h3>
+            <a href="/new-campaign" class="btn btn-primary btn-lg" style="margin-top: 1rem;">Empieza tu Campaña Hoy</a>
         </div>
     </div>
 </main>
+
 <%- include('partials/footer.html') %>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({ duration: 800, once: true });</script>
 </body>
 </html>

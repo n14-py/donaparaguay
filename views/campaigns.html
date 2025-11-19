@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <meta name="description" content="<%= pageDescription %>">
+    <link rel="icon" href="https://res.cloudinary.com/dmedd6w1q/image/upload/v1759278460/donaparaguay/assets/zwrjumqdqup5leopmz94.jpg" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- ESTILOS DEL BUSCADOR "CLEAN & STATIC" --- */
+        
+        body {
+            background-color: #f8f9fa; /* Fondo base muy suave */
+        }
+
+        /* NUEVA SECCIÓN DE TEXTO DE CABECERA */
+        .search-intro {
+            text-align: center;
+            padding-top: 3rem;
+            padding-bottom: 1.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .search-intro h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        .search-intro p {
+            font-size: 1.1rem;
+            color: var(--text-muted-color);
+            line-height: 1.5;
+        }
+
+        /* Sección del Buscador */
+        .search-section {
+            padding: 0 1rem 2rem; /* Quitamos padding superior porque ya tiene el texto */
+            background: transparent;
+        }
+
+        .search-card {
+            background: white;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0.8rem; /* Un poco más compacto */
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06); /* Sombra más difusa y elegante */
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .search-input-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background: white; /* Fondo blanco */
+            border-radius: 12px;
+            padding: 0 1rem;
+            height: 55px;
+            transition: all 0.3s ease;
+            /* Borde sutil por defecto */
+            border: 2px solid #f1f3f5; 
+        }
+
+        .search-input-container:focus-within {
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.05); /* Resplandor muy suave */
+        }
+
+        .search-icon {
+            color: var(--primary-color); /* Icono azul para dar vida */
+            font-size: 1.2rem;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            height: 100%;
+            font-size: 1.05rem;
+            color: var(--text-color);
+            outline: none;
+        }
+        .search-input::placeholder {
+            color: #adb5bd;
+        }
+
+        /* Botón de Filtros */
+        .btn-filter-toggle {
+            height: 55px;
+            padding: 0 1.5rem;
+            border-radius: 12px;
+            background: #f8f9fa; /* Fondo gris claro */
+            border: none; /* Sin borde para estilo moderno */
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-filter-toggle:hover, .btn-filter-toggle.active {
+            background: #e9ecef;
+            color: var(--primary-color);
+        }
+
+        /* Botón Buscar (Lupa) */
+        .btn-search-go {
+            height: 55px;
+            width: 55px;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Sombra de color */
+        }
+        .btn-search-go:hover {
+            background: var(--primary-color-dark);
+            transform: translateY(-2px);
+        }
+
+        /* PANEL DESPLEGABLE */
+        .filter-dropdown {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f0f0f0;
+            animation: fadeIn 0.3s ease;
+            width: 100%;
+            flex-basis: 100%;
+        }
+        .filter-dropdown.open { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-intro h1 { font-size: 1.8rem; }
+            .search-card { flex-wrap: wrap; padding: 1rem; gap: 0.8rem; }
+            .search-input-container { width: 100%; order: 1; border-color: #e9ecef; }
+            .btn-filter-toggle { flex-grow: 1; justify-content: center; order: 2; }
+            .btn-search-go { flex-grow: 0; width: auto; padding: 0 1.5rem; order: 2; }
+            .filter-row { grid-template-columns: 1fr; }
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #f1f3f5;
+            border-radius: 10px;
+            background: #f8f9fa;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .custom-select:focus {
+            border-color: var(--primary-color);
+            background: white;
+            outline: none;
+        }
+        
+        .filter-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted-color);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Resultados y Chips */
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem 4rem;
+        }
+        
+        .chips-bar {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+        .chip {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .chip:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .chip strong { color: var(--primary-color); }
+        .chip a { color: #ccc; cursor: pointer; display: flex; align-items: center; }
+        .chip a:hover { color: var(--danger-color); }
+
+        .results-heading {
+            text-align: left;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .results-heading h2 { font-size: 1.5rem; color: var(--text-color); margin: 0; font-weight: 700; }
+        .results-heading span { color: var(--text-muted-color); font-size: 0.95rem; }
+
+        .no-results-clean {
+            text-align: center;
+            padding: 5rem 1rem;
+            color: var(--text-muted-color);
+        }
+    </style>
+</head>
+<body>
+
+<%- include('partials/header.html') %>
+
+<main>
+    <section class="search-intro">
+        <h1>Encuentra a quién ayudar hoy</h1>
+        <p>Explora entre cientos de historias y encuentra la causa que conecte contigo.</p>
+    </section>
+
+    <section class="search-section">
+        <form action="/campaigns" method="GET" id="searchForm">
+            <div class="search-card">
+                <div class="search-input-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="q" class="search-input" placeholder="Busca por nombre, ciudad o necesidad..." value="<%= query.q || '' %>">
+                </div>
+
+                <button type="button" class="btn-filter-toggle" id="toggleFilters">
+                    <i class="fas fa-sliders-h"></i> <span>Filtros</span>
+                </button>
+
+                <button type="submit" class="btn-search-go">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="filter-dropdown" id="filterPanel">
+                    <div class="filter-row">
+                        <div>
+                            <label class="filter-label">Categoría</label>
+                            <select name="category" class="custom-select" onchange="this.form.submit()">
+                                <option value="">Todas las categorías</option>
+                                <% if (locals.CATEGORY_GROUPS) { %>
+                                    <% Object.keys(CATEGORY_GROUPS).forEach(group => { %>
+                                        <optgroup label="<%= group %>">
+                                            <option value="<%= group %>" <%= query.category === group ? 'selected' : '' %> style="font-weight: bold; color: var(--primary-color);">
+                                                🔹 Ver todo en <%= group.replace(/^[^\s]+\s/, '') %>
+                                            </option>
+                                            <% CATEGORY_GROUPS[group].forEach(cat => { %>
+                                                <option value="<%= cat %>" <%= query.category === cat ? 'selected' : '' %>><%= cat %></option>
+                                            <% }); %>
+                                        </optgroup>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="filter-label">Ubicación</label>
+                            <select name="location" class="custom-select" onchange="this.form.submit()">
+                                <option value="">Todo Paraguay</option>
+                                <% locals.CITIES.forEach(city => { %>
+                                    <option value="<%= city %>" <%= query.location === city ? 'selected' : '' %>><%= city %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="text-align: right; margin-top: 1rem;">
+                         <% if (query.q || query.category || query.location) { %>
+                            <a href="/campaigns" style="color: var(--text-muted-color); font-size: 0.85rem; margin-right: 1rem; text-decoration: underline;">Borrar filtros</a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div class="results-container">
+        
+        <% if (query.q || query.category || query.location) { %>
+            <div class="chips-bar">
+                <% if (query.q) { %>
+                    <div class="chip">Búsqueda: <strong><%= query.q %></strong> <a href="/campaigns?category=<%= query.category || '' %>&location=<%= query.location || '' %>"><i class="fas fa-times-circle"></i></a></div>
+                <% } %>
+                <% if (query.category) { %>
+                    <div class="chip">Categoría: <strong><%= query.category %></strong> <a href="/campaigns?q=<%= query.q || '' %>&location=<%= query.location || '' %>"><i class="fas fa-times-circle"></i></a></div>
+                <% } %>
+                <% if (query.location) { %>
+                    <div class="chip">Ubicación: <strong><%= query.location %></strong> <a href="/campaigns?q=<%= query.q || '' %>&category=<%= query.category || '' %>"><i class="fas fa-times-circle"></i></a></div>
+                <% } %>
+                <a href="/campaigns" style="font-size: 0.85rem; margin-left: 5px; text-decoration: underline; color: var(--text-muted-color); align-self: center;">Limpiar todo</a>
+            </div>
+        <% } %>
+
+        <div class="results-heading">
+            <h2>Resultados</h2>
+            <span><%= results.length %> campañas encontradas</span>
+        </div>
+
+        <div class="post-grid">
+            <% if (results && results.length > 0) { %>
+                <% results.forEach(campaign => { %>
+                    <%- include('partials/campaign-card.html', { campaign: campaign }) %>
+                <% }); %>
+            <% } else { %>
+                <div class="no-results-clean" style="grid-column: 1/-1;">
+                    <i class="far fa-folder-open fa-3x" style="color: #e0e0e0; margin-bottom: 1.5rem;"></i>
+                    <h3 style="color: var(--text-muted-color); font-weight: 600;">Sin resultados</h3>
+                    <p style="color: #999;">No encontramos campañas con esos criterios.</p>
+                    <a href="/campaigns" class="btn btn-primary mt-3" style="padding: 0.8rem 2rem;">Ver todas las campañas</a>
+                </div>
+            <% } %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+            <nav class="pagination-container">
+                <ul class="pagination">
+                    <% const urlParams = new URLSearchParams(query); %>
+                    <% if (currentPage > 1) { %>
+                        <% urlParams.set('page', currentPage - 1); %>
+                        <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><i class="fas fa-chevron-left"></i></a></li>
+                    <% } %>
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <% urlParams.set('page', i); %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><%= i %></a></li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <% urlParams.set('page', currentPage + 1); %>
+                        <li class="page-item"><a class="page-link" href="/campaigns?<%= urlParams.toString() %>"><i class="fas fa-chevron-right"></i></a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        <% } %>
+    </div>
+</main>
+
+<% if (currentUser) { %>
+    <a href="/new-campaign" class="site-fab" title="Crear Campaña"><i class="fas fa-plus"></i></a>
+<% } %>
+
+<%- include('partials/footer.html') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('toggleFilters');
+    const filterPanel = document.getElementById('filterPanel');
+    
+    if(toggleBtn && filterPanel) {
+        toggleBtn.addEventListener('click', () => {
+            filterPanel.classList.toggle('open');
+            toggleBtn.classList.toggle('active');
+        });
+    }
+});
+</script>
+
+</body>
+</html>
