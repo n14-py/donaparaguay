@@ -88,6 +88,7 @@ const getPublicId = (url) => {
 };
 
 // Configuración para las imágenes (campañas, perfiles, comprobantes)
+// Configuración para las imágenes (campañas, perfiles, comprobantes)
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -96,10 +97,10 @@ const storage = new CloudinaryStorage({
             if (file.fieldname === 'proof') return 'donaparaguay/proofs';
             return 'donaparaguay/assets';
         },
-        resource_type: 'auto',
-        allowed_formats: ['jpeg', 'png', 'jpg', 'mp4', 'mov', 'avi'],
-         transformation: [
-            { quality: "auto:good", fetch_format: "auto" }
+        resource_type: 'image', // FORZAR SOLO IMÁGENES (Antes estaba 'auto')
+        allowed_formats: ['jpeg', 'png', 'jpg', 'webp'], // Eliminamos mp4, mov, avi
+        transformation: [
+            { quality: "auto:good", fetch_format: "auto" } // Optimización automática
         ]
     }
 });
@@ -1696,6 +1697,8 @@ app.get('/settings/payouts', requireAuth, async (req, res, next) => {
     }
 });
 
+// donaparaguay/server.js: (Ruta /settings/payouts)
+
 app.post('/settings/payouts', requireAuth, async (req, res, next) => {
     const dbSession = await mongoose.startSession();
     try {
@@ -1714,11 +1717,12 @@ app.post('/settings/payouts', requireAuth, async (req, res, next) => {
             else if (method === 'giro') details = { fullName, ci, phone };
             else throw new Error("Método de retiro no válido.");
 
-            // Descontar el monto de la campaña
-            campaign.amountRaised -= amountNum;
-            await campaign.save({ session });
+            // FIX: Se elimina la deducción de fondos en la solicitud.
+            // Los fondos se descontarán correctamente al ser aprobados por el administrador.
+            // REMOVED: campaign.amountRaised -= amountNum;
+            // REMOVED: await campaign.save({ session });
 
-            // Crear el registro de retiro
+            // Crear el registro de retiro (aún en estado 'Pendiente')
             await new Withdrawal({
                 userId: user._id,
                 campaignId: campaign._id,
@@ -2099,6 +2103,8 @@ app.get('/admin/withdrawals', requireAdmin, async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
+// donaparaguay/server.js: (Ruta /admin/withdrawal/:id/update)
+
 app.post('/admin/withdrawal/:id/update', requireAdmin, async (req, res, next) => {
     const dbSession = await mongoose.startSession();
     try {
@@ -2106,16 +2112,60 @@ app.post('/admin/withdrawal/:id/update', requireAdmin, async (req, res, next) =>
             const { status } = req.body;
             const withdrawal = await Withdrawal.findById(req.params.id).session(session);
             if (!withdrawal) throw new Error('Solicitud no encontrada');
+            if (withdrawal.status !== 'Pendiente') throw new Error('El estado de retiro ya fue actualizado.');
 
-            // Si se rechaza, devolver los fondos a la campaña
-            if (withdrawal.status === 'Pendiente' && status === 'Rechazado') {
-                await Campaign.findByIdAndUpdate(withdrawal.campaignId, { $inc: { amountRaised: withdrawal.amount } }, { session });
+            if (status === 'Procesado') {
+                const config = await SiteConfig.findOne({ configKey: 'main_config' }).session(session);
+                const feeRate = config.platformFeeRate || 0.10;
+                
+                const grossAmount = withdrawal.amount;
+                const feeAmount = Math.round(grossAmount * feeRate);
+                const netAmount = grossAmount - feeAmount; // El monto que recibe el organizador
+
+                // 1. DEDUCCIÓN FINAL: Descontar el monto total solicitado (bruto) de la campaña.
+                const campaign = await Campaign.findById(withdrawal.campaignId).populate('userId').session(session);
+                if (!campaign) throw new Error('Campaña asociada no encontrada.');
+                
+                campaign.amountRaised -= grossAmount; // Se resta el 100% que se procesó
+                await campaign.save({ session });
+
+                // 2. REGISTROS DE TRANSACCIÓN (Comisión y Retiro neto)
+                await new Transaction({ // Registro de la comisión
+                    type: 'platform_fee',
+                    organizerId: campaign.userId._id,
+                    campaignId: campaign._id,
+                    amount: feeAmount,
+                    status: 'COMPLETADO'
+                }).save({ session });
+                
+                await new Transaction({ // Registro del retiro neto
+                    type: 'withdrawal',
+                    organizerId: campaign.userId._id,
+                    campaignId: campaign._id,
+                    amount: netAmount,
+                    platformFee: feeAmount,
+                    status: 'COMPLETADO'
+                }).save({ session });
+                
+                // 3. Notificación al usuario
+                await new Notification({ 
+                    userId: withdrawal.userId, type: 'admin', 
+                    message: `Tu retiro de ${grossAmount.toLocaleString('es-PY')} Gs. (Comisión: ${feeAmount.toLocaleString('es-PY')} Gs., Neto: ${netAmount.toLocaleString('es-PY')} Gs.) ha sido procesado.`
+                }).save({ session });
+
+            } else if (status === 'Rechazado') {
+                 // No hay reversión de fondos, ya que no se dedujeron en la solicitud.
+                await new Notification({ 
+                    userId: withdrawal.userId, type: 'admin', 
+                    message: `Tu solicitud de retiro de ${withdrawal.amount.toLocaleString('es-PY')} Gs. ha sido rechazada. Los fondos permanecen en tu campaña.`
+                }).save({ session });
             }
+
             withdrawal.status = status;
             await withdrawal.save({ session });
         });
         res.redirect('/admin/withdrawals');
-    } catch (err) { next(err); }
+    } catch (err) { next(err); } finally { await dbSession.endSession(); }
 });
 
 // --- GESTIÓN DE VERIFICACIONES DE IDENTIDAD ---
@@ -2298,307 +2348,6 @@ app.get('/admin/pending-campaigns', requireAdmin, async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-});
-
-// =============================================
-//               FIN DE LA PARTE 3
-// =============================================
-
-
-// =... (pegar debajo del código anterior)
-
-// =============================================
-//               SERVER.JS - PARTE 3 DE 4
-//          (ADAPTADO PARA DONA PARAGUAY)
-// =============================================
-
-// =============================================
-// RUTAS DEL PANEL DE ADMINISTRACIÓN
-// =============================================
-app.get('/admin', requireAdmin, (req, res) => res.redirect('/admin/dashboard'));
-
-app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
-    try {
-        const [totalUsers, totalCampaigns, pendingWithdrawals, pendingDonations, pendingVerifications] = await Promise.all([
-            User.countDocuments(),
-            Campaign.countDocuments(),
-            Withdrawal.countDocuments({ status: 'Pendiente' }),
-            ManualDonation.countDocuments({ status: 'Pendiente' }),
-            Verification.countDocuments({ status: 'pending' })
-        ]);
-        const stats = { totalUsers, totalCampaigns, pendingWithdrawals, pendingDonations, pendingVerifications };
-        res.render('admin/dashboard.html', { stats: stats, path: req.path });
-    } catch (err) { next(err); }
-});
-
-// --- GESTIÓN DE USUARIOS ---
-app.get('/admin/users', requireAdmin, async (req, res, next) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const itemsPerPage = 15;
-        let query = {};
-        if (req.query.search) {
-            const regex = { $regex: req.query.search, $options: 'i' };
-            query = { $or: [{ username: regex }, { email: regex }] };
-        }
-        const totalUsers = await User.countDocuments(query);
-        const totalPages = Math.ceil(totalUsers / itemsPerPage);
-        const users = await User.find(query).sort({ createdAt: -1 }).skip((page - 1) * itemsPerPage).limit(itemsPerPage);
-        res.render('admin/users.html', { users, totalPages, currentPage: page, path: req.path, query: req.query });
-    } catch (err) { next(err); }
-});
-
-app.get('/admin/user/:id', requireAdmin, async (req, res, next) => {
-    try {
-        const userId = req.params.id;
-        const user = await User.findById(userId);
-        if (!user) return res.redirect('/admin/users');
-
-        const campaigns = await Campaign.find({ userId: userId }).sort({ createdAt: -1 });
-        const withdrawals = await Withdrawal.find({ userId: userId }).sort({ createdAt: -1 });
-        const donationsMade = await ManualDonation.find({ userId: userId }).populate('campaignId', 'title').sort({ createdAt: -1 });
-        const verification = await Verification.findOne({ userId: userId });
-
-        res.render('admin/user-detail.html', {
-            user, campaigns, withdrawals, donationsMade, verification, path: req.path
-        });
-    } catch (err) {
-        next(err);
-    }
-});
-
-app.post('/admin/user/:id/toggle-ban', requireAdmin, async (req, res, next) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (user && user.role !== 'Admin') {
-            user.isBanned = !user.isBanned;
-            await user.save();
-            await new AuditLog({
-                adminId: req.user._id, action: user.isBanned ? 'baneo_usuario' : 'desbaneo_usuario',
-                targetUserId: user._id, details: `El usuario ${user.username} fue ${user.isBanned ? 'baneado' : 'desbaneado'}.`
-            }).save();
-        }
-        res.redirect(`/admin/user/${req.params.id}`);
-    } catch (err) { next(err); }
-});
-
-app.post('/admin/user/:id/toggle-verify', requireAdmin, async (req, res, next) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (user) {
-            user.isVerified = !user.isVerified;
-            await user.save();
-        }
-        res.redirect(`/admin/user/${req.params.id}`);
-    } catch (err) { next(err); }
-});
-
-// --- GESTIÓN DE CAMPAÑAS ---
-app.get('/admin/campaigns', requireAdmin, async (req, res, next) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const itemsPerPage = 15;
-        let query = {};
-        if (req.query.search) {
-            query.title = { $regex: req.query.search, $options: 'i' };
-        }
-        const totalCampaigns = await Campaign.countDocuments(query);
-        const totalPages = Math.ceil(totalCampaigns / itemsPerPage);
-        const campaigns = await Campaign.find(query).populate('userId', 'username').sort({ createdAt: -1 }).skip((page - 1) * itemsPerPage).limit(itemsPerPage);
-        res.render('admin/campaigns.html', { campaigns, totalPages, currentPage: page, path: req.path, query: req.query });
-    } catch (err) { next(err); }
-});
-
-
-app.post('/admin/campaign/:id/update-status', requireAdmin, async (req, res, next) => {
-    try {
-        const { status } = req.body;
-        const validStatuses = ['approved', 'rejected', 'hidden'];
-        if (validStatuses.includes(status)) {
-            const campaign = await Campaign.findByIdAndUpdate(req.params.id, { status }, { new: true })
-                .populate('userId', 'email username');
-
-            if (campaign && campaign.userId) {
-                let message = `El estado de tu campaña "${campaign.title}" ha sido actualizado a: ${status}.`;
-                
-                await new Notification({
-                    userId: campaign.userId._id,
-                    type: 'admin',
-                    message: message
-                }).save();
-
-                // --- NUEVO: Enviar correo de aprobación de campaña con plantilla HTML ---
-                if (status === 'approved') {
-                     try {
-                        const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'campaign-approved.html'), {
-                            username: campaign.userId.username,
-                            campaignTitle: campaign.title,
-                            campaignUrl: `${process.env.BASE_URL}/campaign/${campaign._id}`
-                        });
-
-                        await transporter.sendMail({
-                            from: `"Soporte Dona Paraguay" <${process.env.EMAIL_USER}>`,
-                            to: campaign.userId.email,
-                            subject: `🚀 ¡Tu campaña "${campaign.title}" fue aprobada!`,
-                            html: emailHtml
-                        });
-                    } catch (emailError) {
-                        console.error('❌ Error al enviar el correo de aprobación de campaña:', emailError);
-                    }
-                }
-                // --- FIN DEL NUEVO CÓDIGO ---
-            }
-        }
-        if (req.query.redirect === 'pending') {
-            res.redirect('/admin/pending-campaigns');
-        } else {
-            res.redirect('/admin/campaigns');
-        }
-    } catch (err) {
-        next(err);
-    }
-});
-
-// --- GESTIÓN DE DONACIONES MANUALES (NUEVA SECCIÓN CRÍTICA) ---
-app.get('/admin/donations', requireAdmin, async (req, res, next) => {
-    try {
-        const donations = await ManualDonation.find({ status: 'Pendiente' })
-            .populate('userId', 'username email')
-            .populate('campaignId', 'title')
-            .sort({ createdAt: 'desc' });
-        res.render('admin/donations.html', { donations, path: req.path });
-    } catch (err) {
-        next(err);
-    }
-});
-
-app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
-    const dbSession = await mongoose.startSession();
-    try {
-        await dbSession.withTransaction(async (session) => {
-            const { status } = req.body;
-            const donation = await ManualDonation.findById(req.params.id).session(session);
-            if (!donation || donation.status !== 'Pendiente') {
-                throw new Error('Donación no encontrada o ya procesada.');
-            }
-
-            const campaign = await Campaign.findById(donation.campaignId).session(session);
-            if (!campaign) {
-                // Si la campaña fue eliminada, rechazar la donación para evitar errores
-                donation.status = 'Rechazado';
-                await donation.save({ session });
-                throw new Error('La campaña asociada a esta donación ya no existe.');
-            }
-
-            if (status === 'Aprobado') {
-                const amountGs = donation.amount;
-                
-                campaign.amountRaised += amountGs;
-                await campaign.save({ session });
-                
-                donation.status = 'Aprobado';
-                await donation.save({ session });
-
-                await new Transaction({
-                    type: 'donation', donatorId: donation.userId, organizerId: campaign.userId,
-                    campaignId: campaign._id, amount: amountGs,
-                }).save({ session });
-
-                await new Notification({
-                    userId: campaign.userId, actorId: donation.userId, type: 'donation',
-                    campaignId: campaign._id,
-                    message: `recibió una donación de ${amountGs.toLocaleString('es-PY')} Gs. para tu campaña "${campaign.title}".`
-                }).save({ session });
-
-                 await new Notification({
-                    userId: donation.userId, type: 'admin',
-                    message: `Tu donación de ${amountGs.toLocaleString('es-PY')} Gs. para "${campaign.title}" fue aprobada. ¡Gracias!`
-                }).save({ session });
-
-            } else if (status === 'Rechazado') {
-                donation.status = 'Rechazado';
-                await donation.save({ session });
-
-                await new Notification({
-                    userId: donation.userId, type: 'admin',
-                    message: `Tu donación para la campaña "${campaign.title}" fue rechazada. Contacta a soporte si crees que es un error.`
-                }).save({ session });
-            }
-        });
-        res.redirect('/admin/donations');
-    } catch (err) {
-        next(err);
-    } finally {
-        await dbSession.endSession();
-    }
-});
-
-
-// --- GESTIÓN DE RETIROS ---
-app.get('/admin/withdrawals', requireAdmin, async (req, res, next) => {
-    try {
-        const withdrawals = await Withdrawal.find()
-            .populate('userId', 'username email')
-            .populate('campaignId', 'title')
-            .sort({ createdAt: -1 });
-        res.render('admin/withdrawals.html', { withdrawals, path: req.path });
-    } catch (err) { next(err); }
-});
-
-app.post('/admin/withdrawal/:id/update', requireAdmin, async (req, res, next) => {
-    const dbSession = await mongoose.startSession();
-    try {
-        await dbSession.withTransaction(async (session) => {
-            const { status } = req.body;
-            const withdrawal = await Withdrawal.findById(req.params.id).session(session);
-            if (!withdrawal) throw new Error('Solicitud no encontrada');
-
-            // Si se rechaza, devolver los fondos a la campaña
-            if (withdrawal.status === 'Pendiente' && status === 'Rechazado') {
-                await Campaign.findByIdAndUpdate(withdrawal.campaignId, { $inc: { amountRaised: withdrawal.amount } }, { session });
-            }
-            withdrawal.status = status;
-            await withdrawal.save({ session });
-        });
-        res.redirect('/admin/withdrawals');
-    } catch (err) { next(err); }
-});
-
-// --- GESTIÓN DE VERIFICACIONES DE IDENTIDAD ---
-app.get('/admin/verifications', requireAdmin, async (req, res, next) => {
-    try {
-        const pendingVerifications = await Verification.find({ status: 'pending' }).populate('userId', 'username');
-        res.render('admin/verifications.html', { verifications: pendingVerifications, path: req.path });
-    } catch (err) { next(err); }
-});
-
-app.post('/admin/verification/:id/approve', requireAdmin, async (req, res, next) => {
-    try {
-        const verification = await Verification.findById(req.params.id);
-        if (!verification) throw new Error('Solicitud no encontrada.');
-
-        await User.findByIdAndUpdate(verification.userId, { isVerified: true });
-        verification.status = 'approved';
-        await verification.save();
-
-        await new Notification({ userId: verification.userId, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
-        res.redirect('/admin/verifications');
-    } catch (err) { next(err); }
-});
-
-app.post('/admin/verification/:id/reject', requireAdmin, async (req, res, next) => {
-    try {
-        const { reason } = req.body;
-        const verification = await Verification.findById(req.params.id);
-        if (verification) {
-            verification.status = 'rejected';
-            verification.rejectionReason = reason || 'Los documentos no son claros o no cumplen los requisitos.';
-            await verification.save();
-            await User.findByIdAndUpdate(verification.userId, { isVerified: false });
-            await new Notification({ userId: verification.userId, type: 'admin', message: `Tu solicitud de verificación fue rechazada. Motivo: ${verification.rejectionReason}` }).save();
-        }
-        res.redirect('/admin/verifications');
-    } catch (err) { next(err); }
 });
 
 

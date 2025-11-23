@@ -37,7 +37,35 @@
     </script>
 
     <style>
-        /* Estilos extra para el detalle */
+        /* --- ESTILO CORREGIDO PARA PESTAÑAS (SIN DESLIZAR) --- */
+        .campaign-tabs {
+            display: flex;
+            width: 100%;
+            border-bottom: 2px solid var(--border-color);
+            overflow: visible; /* Quitamos el scroll */
+        }
+        
+        .campaign-tabs .tab-link {
+            flex: 1; /* Esto hace que ocupen el mismo espacio y llenen la pantalla */
+            text-align: center;
+            padding: 1rem 0.2rem; /* Menos padding lateral para que entren */
+            font-size: 0.9rem; /* Letra un poco más chica para asegurar ajuste */
+            white-space: normal; /* Permite que el texto baje si es muy largo */
+            display: flex;
+            flex-direction: column; /* Icono/Badge arriba o abajo si falta espacio */
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 100%;
+        }
+
+        /* Ajuste visual para el badge dentro de la pestaña */
+        .campaign-tabs .tab-link .badge {
+            margin-left: 0;
+            font-size: 0.75rem;
+        }
+
+        /* Ocultar anuncios en móviles muy pequeños */
         .ad-sidebar-slot {
             margin-top: 2rem;
             padding: 1rem;
@@ -46,14 +74,6 @@
             border-radius: var(--border-radius);
             text-align: center;
         }
-        .ad-sidebar-slot small {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #999;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-        }
-        /* Ocultar anuncios en móviles muy pequeños si es necesario */
         @media (max-width: 400px) {
             .ad-sidebar-slot { display: none; }
         }
@@ -75,11 +95,7 @@
                     <div class="image-slider-container">
                         <% campaign.files.forEach((file, index) => { %>
                             <div class="slide <%= index === 0 ? 'active' : '' %>">
-                                <% if (file.includes('.mp4') || file.includes('.mov')) { %>
-                                    <video src="<%= file %>" controls style="width: 100%; border-radius: var(--border-radius);"></video>
-                                <% } else { %>
-                                    <img src="<%= file %>" alt="Imagen de la campaña <%= index + 1 %>">
-                                <% } %>
+                                <img src="<%= file %>" alt="Imagen de la campaña <%= index + 1 %>">
                             </div>
                         <% }); %>
                         <% if (campaign.files.length > 1) { %>
@@ -149,9 +165,15 @@
 
         <div class="campaign-tabs-container">
             <div class="campaign-tabs">
-                <a href="#" class="tab-link active" data-tab="donations">Donantes <span class="badge"><%= totalDonations %></span></a>
-                <a href="#" class="tab-link" data-tab="updates">Actualizaciones <span class="badge"><%= totalUpdates %></span></a>
-                <a href="#" class="tab-link" data-tab="comments">Comentarios <span class="badge"><%= totalComments %></span></a>
+                <a href="#" class="tab-link active" data-tab="donations">
+                    Donantes <span class="badge"><%= totalDonations %></span>
+                </a>
+                <a href="#" class="tab-link" data-tab="updates">
+                    Actualiz. <span class="badge"><%= totalUpdates %></span>
+                </a>
+                <a href="#" class="tab-link" data-tab="comments">
+                    Comentarios <span class="badge"><%= totalComments %></span>
+                </a>
             </div>
 
             <div id="donations-content" class="tab-content active">
@@ -186,6 +208,9 @@
                     <% updates.forEach(update => { %>
                         <%- include('partials/update-partial.html', { update: update }) %>
                     <% }); %>
+                    <% if (updates.length === 0) { %>
+                        <p class="text-muted text-center mt-3">Aún no hay actualizaciones.</p>
+                    <% } %>
                 </div>
             </div>
 
@@ -197,13 +222,16 @@
                         <button type="submit" class="btn btn-primary">Comentar</button>
                     </form>
                 <% } else { %>
-                    <p><a href="/login">Inicia sesión</a> para dejar un comentario.</p>
+                    <p class="text-center"><a href="/login">Inicia sesión</a> para dejar un comentario.</p>
                 <% } %>
                 
                 <div class="comments-list" id="comments-list-container">
                     <% comments.forEach(comment => { %>
                         <%- include('partials/reply-partial.html', { comment: comment, campaign: campaign }) %>
                     <% }); %>
+                    <% if (comments.length === 0) { %>
+                        <p class="text-muted text-center mt-3">Sé el primero en comentar.</p>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -231,20 +259,43 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- LÓGICA DE PESTAÑAS (TABS) - RESTAURADA ---
+    const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita salto de página
+            
+            // 1. Quitar clase active de todas las pestañas
+            tabs.forEach(t => t.classList.remove('active'));
+            // 2. Poner active a la clicada
+            tab.classList.add('active');
+
+            // 3. Ocultar todos los contenidos
+            tabContents.forEach(c => c.style.display = 'none');
+            
+            // 4. Mostrar el contenido correspondiente
+            const targetId = tab.getAttribute('data-tab');
+            const targetContent = document.getElementById(targetId + '-content');
+            if(targetContent) {
+                targetContent.style.display = 'block';
+            }
+        });
+    });
+
     // --- 1. LÓGICA DE NUEVA CAMPAÑA (CELEBRACIÓN) ---
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('new') === 'true') {
         const shareModal = document.getElementById('shareModal');
         
         if (shareModal) {
-            // Personalizar el título para la celebración
             const modalTitle = document.getElementById('shareModalTitle');
             const modalMsg = document.querySelector('#shareModal p');
             
             if(modalTitle) modalTitle.innerText = "🎉 ¡Campaña Publicada con Éxito!";
             if(modalMsg) modalMsg.innerText = "Tu campaña ya está en línea. ¡Ahora compártela para empezar a recibir donaciones!";
             
-            // Abrir Modal
             shareModal.style.display = 'flex';
 
             // Lanzar Confeti
@@ -263,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 250);
         }
     }
-    // ------------------------------------------------
 
     // --- SLIDER DE IMÁGENES ---
     const slider = document.querySelector('.image-slider-container');
@@ -298,27 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- PESTAÑAS (TABS) ---
-    const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', e => {
-            e.preventDefault(); 
-            const target = tab.getAttribute('data-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            tabContents.forEach(c => {
-                c.style.display = 'none';
-                c.classList.remove('active');
-            });
-            const activeContent = document.getElementById(`${target}-content`);
-            if(activeContent) {
-                activeContent.style.display = 'block';
-                activeContent.classList.add('active');
-            }
-        });
-    });
-
     // --- INTERACCIÓN COMENTARIOS (RESPONDER) ---
     const commentsContent = document.getElementById('comments-content');
     if (commentsContent) {
@@ -329,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
                 
                 if (replyFormContainer) {
-                    // Cerrar otros formularios abiertos para limpieza visual
                     document.querySelectorAll('.reply-form-container').forEach(form => {
                         if (form !== replyFormContainer) form.style.display = 'none';
                     });
@@ -345,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- MODAL DE COMPARTIR (MANUAL) ---
+    // --- MODAL DE COMPARTIR ---
     const shareModal = document.getElementById('shareModal');
     const openShareBtn = document.getElementById('open-share-modal-btn');
     const closeShareBtn = document.getElementById('shareModalCloseBtn');
@@ -353,12 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (openShareBtn && shareModal) {
         openShareBtn.addEventListener('click', () => {
-            // Restaurar textos por defecto si venían de "Celebración"
             const modalTitle = document.getElementById('shareModalTitle');
             const modalMsg = document.querySelector('#shareModal p');
             if(modalTitle) modalTitle.innerText = "Compartir esta causa";
             if(modalMsg) modalMsg.innerText = "¡Gracias por ayudar a difundir la palabra!";
-            
             setupShareLinks();
             shareModal.style.display = 'flex';
         });
@@ -367,7 +393,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(closeShareBtn) {
         closeShareBtn.addEventListener('click', () => {
             shareModal.style.display = 'none';
-            // Limpiar parámetros URL si veníamos de nueva campaña para no reabrir al refrescar
             if (window.history.replaceState && urlParams.get('new') === 'true') {
                  const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                  window.history.replaceState({path:newUrl},'',newUrl);
@@ -376,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupShareLinks() {
-        const campaignUrl = window.location.href.split('?')[0]; // Limpia parámetros
+        const campaignUrl = window.location.href.split('?')[0];
         const campaignTitle = `<%= campaign.title.replace(/'/g, "\\'") %>`;
         const shareText = `¡Apoya la campaña "${campaignTitle}" en Dona Paraguay!`;
         const fullEncodedText = encodeURIComponent(`${shareText} ${campaignUrl}`);
@@ -385,8 +410,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}`;
         document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(campaignUrl)}&text=${encodeURIComponent(shareText)}`;
     }
-
-    // Inicializar links al cargar por si se abre automático
     setupShareLinks();
 
     if (copyLinkBtn) {

@@ -306,12 +306,57 @@ body.auth-page main.container {
 /* --- PÁGINAS DE AJUSTES (SETTINGS) --- */
 /* ============================================= */
 
+/* ============================================= */
+/* --- PÁGINAS DE AJUSTES (SETTINGS) - MEJORADO --- */
+/* ============================================= */
+
 .settings-layout { display: flex; flex-direction: column; gap: 1.5rem; }
-.settings-sidebar nav { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch;}
-.settings-sidebar nav::-webkit-scrollbar { display: none; }
-.settings-sidebar a { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: var(--border-radius-soft); white-space: nowrap; color: var(--text-muted-color); font-weight: 500; }
-.settings-sidebar a.active, .settings-sidebar a:hover { background-color: var(--primary-color-light); color: var(--primary-color-dark); }
-.settings-content { flex: 1; }
+
+/* Navegación Móvil: Estilo Pestañas Fijas (Sin Scroll) */
+.settings-sidebar nav {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0;
+    gap: 0; /* Sin espacio entre elementos para que entren bien */
+    overflow: visible; /* Eliminamos el scroll */
+}
+
+/* Estilo de cada botón en móvil */
+.settings-sidebar a {
+    flex: 1; /* Ocupan el mismo ancho exacto */
+    display: flex;
+    flex-direction: column; /* Icono arriba, texto abajo */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.8rem 0.2rem;
+    font-size: 0.8rem; /* Texto ajustado */
+    color: var(--text-muted-color);
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    white-space: normal; /* Permite que "Editar Perfil" use dos líneas si hace falta */
+    line-height: 1.2;
+    background-color: transparent;
+}
+
+.settings-sidebar a i {
+    font-size: 1.2rem;
+    margin-bottom: 5px; /* Separación entre icono y texto */
+    width: auto;
+}
+
+.settings-sidebar a.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background-color: transparent;
+    font-weight: 600;
+}
+
+.settings-sidebar a:hover {
+    color: var(--primary-color);
+}.settings-content { flex: 1; }
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .dashboard-table { width: 100%; border-collapse: collapse; background: var(--surface-color); border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-sm); }
 .dashboard-table th, .dashboard-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
