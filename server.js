@@ -259,6 +259,8 @@ const sponsorSchema = new mongoose.Schema({
 
 const Sponsor = mongoose.model('Sponsor', sponsorSchema);
 
+// donaparaguay/server.js
+
 const campaignSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // El organizador
     title: { type: String, required: true },
@@ -267,11 +269,15 @@ const campaignSchema = new mongoose.Schema({
     category: { type: String, enum: CATEGORIES },
     location: { type: String, enum: CITIES },
     goalAmount: { type: Number, default: 0 }, // Meta en Guaraníes
-    amountRaised: { type: Number, default: 0 }, // Recaudado en Guaraníes
+    
+    // --- CAMBIO IMPORTANTE ---
+    amountRaised: { type: Number, default: 0 }, // ESTE ES EL SALDO DISPONIBLE (Billetera)
+    totalRaised: { type: Number, default: 0 },  // ESTE ES EL HISTÓRICO (Barra de progreso, nunca baja)
+    // -------------------------
+
     views: { type: Number, default: 0 },
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden', 'pending_verification'], default: 'pending' },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    // --- LÍNEA NUEVA A AÑADIR ---
     milestonesNotified: { type: Map, of: Boolean, default: {} }
 }, { timestamps: true });
 
@@ -1868,6 +1874,8 @@ app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
     }
 });
 
+
+
 // --- GESTIÓN DE USUARIOS ---
 app.get('/admin/users', requireAdmin, async (req, res, next) => {
     try {
@@ -1960,6 +1968,8 @@ app.get('/admin/donations', requireAdmin, async (req, res, next) => {
     }
 });
 
+// donaparaguay/server.js
+
 app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
     const dbSession = await mongoose.startSession();
     try {
@@ -1978,9 +1988,19 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
             }
 
             if (status === 'Aprobado') {
-                const oldAmountRaised = campaign.amountRaised;
+                // --- LÓGICA DE CONTADORES ---
+                // 1. Sumar a la billetera (saldo disponible para retiro)
                 campaign.amountRaised += donation.campaignAmount;
-                const newAmountRaised = campaign.amountRaised;
+                
+                // 2. Sumar al histórico (lo que se muestra al público)
+                // Si totalRaised no existe (campañas viejas), usamos amountRaised como base inicial
+                const currentTotal = campaign.totalRaised || campaign.amountRaised; 
+                campaign.totalRaised = currentTotal + donation.campaignAmount; 
+                // ----------------------------
+
+                // Variables para el cálculo de hitos (usamos el histórico totalRaised)
+                const oldAmountRaised = campaign.totalRaised - donation.campaignAmount;
+                const newAmountRaised = campaign.totalRaised;
                 const goalAmount = campaign.goalAmount;
 
                 donation.status = 'Aprobado';
@@ -2010,8 +2030,7 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                     message: `Tu donación de ${donation.amount.toLocaleString('es-PY')} Gs. para la campaña "${campaign.title}" fue aprobada. ¡Gracias por tu generosidad!`
                 }).save({ session });
 
-
-                // --- NUEVO: Lógica de notificación por hitos con plantillas HTML ---
+                // --- Lógica de notificación por hitos ---
                 const totalDonationsCount = await ManualDonation.countDocuments({ campaignId: campaign._id, status: 'Aprobado' }).session(session);
                 
                 const sendMilestoneEmail = async (data) => {
@@ -2028,7 +2047,6 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                     }
                 };
 
-                // Hito 1: Primera donación
                 if (totalDonationsCount === 1 && !campaign.milestonesNotified.get('firstDonation')) {
                     await sendMilestoneEmail({
                         subject: '🎉 ¡Recibiste tu primera donación!',
@@ -2040,7 +2058,6 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                     campaign.milestonesNotified.set('firstDonation', true);
                 }
 
-                // Hitos por porcentaje
                 if (goalAmount > 0) {
                     const oldProgress = (oldAmountRaised / goalAmount) * 100;
                     const newProgress = (newAmountRaised / goalAmount) * 100;
@@ -2069,7 +2086,6 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                         }
                     }
                 }
-                // --- FIN DEL NUEVO CÓDIGO ---
 
                 await campaign.save({ session });
 

@@ -131,9 +131,14 @@
                     </div>
 
                     <div class="donation-summary">
-                        <div class="progress-bar-container"><div class="progress-bar" style="width: <%= Math.min((campaign.amountRaised / campaign.goalAmount) * 100, 100) %>%"></div></div>
+                        <% 
+                           // Lógica para usar totalRaised visualmente
+                           const displayAmount = (typeof campaign.totalRaised !== 'undefined') ? campaign.totalRaised : campaign.amountRaised;
+                           const progress = campaign.goalAmount > 0 ? (displayAmount / campaign.goalAmount) * 100 : 0;
+                        %>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: <%= Math.min(progress, 100) %>%"></div></div>
                         <div class="donation-stats">
-                            <span class="amount-raised"><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</span>
+                            <span class="amount-raised"><%= new Intl.NumberFormat('es-PY').format(displayAmount) %> Gs.</span>
                             <span class="goal-amount">recaudados de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.</span>
                         </div>
                     </div>

@@ -61,12 +61,16 @@
 
         <div class="progress-stats">
             <div class="progress-bar-container">
-                <% const progress = campaign.goalAmount > 0 ? (campaign.amountRaised / campaign.goalAmount) * 100 : 0; %>
+                <% 
+                   // Usamos totalRaised si existe, sino amountRaised
+                   const displayAmount = (typeof campaign.totalRaised !== 'undefined') ? campaign.totalRaised : campaign.amountRaised;
+                   const progress = campaign.goalAmount > 0 ? (displayAmount / campaign.goalAmount) * 100 : 0; 
+                %>
                 <div class="progress-bar" style="width: <%= Math.min(progress, 100) %>%"></div>
             </div>
             <div class="stats-text">
                 <span class="amount-raised" style="font-size: 1rem;">
-                    <strong style="color: var(--text-color);"><%= new Intl.NumberFormat('es-PY').format(campaign.amountRaised) %> Gs.</strong>
+                    <strong style="color: var(--text-color);"><%= new Intl.NumberFormat('es-PY').format(displayAmount) %> Gs.</strong>
                     <span style="color: var(--text-muted-color); font-size: 0.9em;">de <%= new Intl.NumberFormat('es-PY').format(campaign.goalAmount) %> Gs.</span>
                 </span>
                 <span class="card-likes"><i class="fas fa-heart"></i> <%= campaign.likes.length %></span>
