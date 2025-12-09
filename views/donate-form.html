@@ -363,6 +363,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// --- EVITAR DOBLE CLIC EN DONACIÓN ---
+    const donationForm = document.querySelector('form[action*="/donate"]');
+    if (donationForm) {
+        donationForm.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Verificamos si el formulario es válido antes de desactivar
+            // (esto depende de si usas validación HTML5 nativa, si el input file está vacío no debería desactivarse)
+            if (document.getElementById('proof-input').value === "") {
+                // Dejamos que el navegador muestre el error de "campo requerido"
+                return; 
+            }
+
+            // Cambiar texto y desactivar para evitar duplicados
+            const originalText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            
+            // Nota: Si el usuario cancela la subida o hay un error de red que no recarga la página,
+            // el botón se quedará desactivado. Es un compromiso aceptable para evitar duplicados.
+        });
+    }
+
 </script>
 
 </body>

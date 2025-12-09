@@ -1912,6 +1912,69 @@ app.get('/admin/user/:id', requireAdmin, async (req, res, next) => {
     }
 });
 
+
+// RUTA FALTANTE: Actualizar estado de campaña (Aprobar/Rechazar desde Admin)
+app.post('/admin/campaign/:id/update-status', requireAdmin, async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const redirect = req.query.redirect || 'campaigns'; // Para saber a dónde volver
+        const campaign = await Campaign.findById(req.params.id).populate('userId', 'email username');
+
+        if (!campaign) throw new Error('Campaña no encontrada.');
+
+        // Actualizamos el estado
+        campaign.status = status;
+        
+        // Si se aprueba, establecemos la fecha de creación "real" a ahora para que salga primera
+        if (status === 'approved') {
+            campaign.createdAt = new Date(); 
+        }
+        
+        await campaign.save();
+
+        // Enviar notificación al usuario
+        const message = status === 'approved' 
+            ? `¡Tu campaña "${campaign.title}" ha sido aprobada y ya es pública!`
+            : `Tu campaña "${campaign.title}" ha sido rechazada. Revisa las normas de la comunidad.`;
+
+        await new Notification({
+            userId: campaign.userId._id,
+            type: 'admin',
+            message: message,
+            campaignId: campaign._id
+        }).save();
+
+        // Enviar correo electrónico si se aprueba
+        if (status === 'approved') {
+            try {
+                const emailHtml = await ejs.renderFile(path.join(__dirname, 'views', 'emails', 'campaign-approved.html'), {
+                    username: campaign.userId.username,
+                    campaignTitle: campaign.title,
+                    campaignUrl: `${process.env.BASE_URL}/campaign/${campaign._id}`
+                });
+                await transporter.sendMail({
+                    from: `"Equipo Dona Paraguay" <${process.env.EMAIL_USER}>`,
+                    to: campaign.userId.email,
+                    subject: '🎉 ¡Tu campaña está en línea!',
+                    html: emailHtml
+                });
+            } catch (emailErr) {
+                console.error("Error enviando email de aprobación:", emailErr);
+            }
+        }
+
+        // Redirección inteligente
+        if (redirect === 'pending') {
+            res.redirect('/admin/pending-campaigns');
+        } else {
+            res.redirect('/admin/campaigns');
+        }
+
+    } catch (err) {
+        next(err);
+    }
+});
+
 app.post('/admin/user/:id/toggle-ban', requireAdmin, async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id);
@@ -2204,8 +2267,7 @@ app.post('/admin/verification/:id/approve', requireAdmin, async (req, res, next)
 
 // --- AÑADE ESTA LÍNEA ---
         // Busca todas las campañas del usuario que estaban esperando verificación y pásalas a "pendiente".
-        await Campaign.updateMany({ userId: verification.userId._id, status: 'pending_verification' }, { $set: { status: 'pending' } });
-
+        await Campaign.updateMany({ userId: verification.userId._id, status: 'pending_verification' }, { $set: { status: 'approved', createdAt: new Date() } });
         await new Notification({ userId: verification.userId._id, type: 'admin', message: '¡Felicidades! Tu cuenta ha sido verificada y ahora puedes crear campañas.' }).save();
         // --- NUEVO: Enviar correo de bienvenida con plantilla HTML ---
         try {

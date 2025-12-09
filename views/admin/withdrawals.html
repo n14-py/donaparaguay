@@ -68,8 +68,13 @@
                                         <% withdrawals.forEach(w => { %>
                                             <tr>
                                                 <td data-label="Organizador"><a href="/admin/user/<%= w.userId._id %>"><%= w.userId.username %></a></td>
-                                                <td data-label="Campaña"><a href="/campaign/<%= w.campaignId._id %>" target="_blank"><%= w.campaignId.title %></a></td>
-                                                <td data-label="Monto (Gs.)"><strong><%= new Intl.NumberFormat('es-PY').format(w.amount) %></strong></td>
+<td data-label="Campaña">
+    <% if (w.campaignId) { %>
+        <a href="/campaign/<%= w.campaignId._id %>" target="_blank"><%= w.campaignId.title %></a>
+    <% } else { %>
+        <span class="text-danger"><i class="fas fa-exclamation-circle"></i> Campaña Eliminada</span>
+    <% } %>
+</td>                                                <td data-label="Monto (Gs.)"><strong><%= new Intl.NumberFormat('es-PY').format(w.amount) %></strong></td>
                                                 <td data-label="Método"><%= w.method %></td>
                                                 <td data-label="Detalles">
                                                     <ul class="list-unstyled mb-0 small text-end text-md-start">
