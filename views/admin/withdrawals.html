@@ -74,8 +74,21 @@
     <% } else { %>
         <span class="text-danger"><i class="fas fa-exclamation-circle"></i> Campaña Eliminada</span>
     <% } %>
-</td>                                                <td data-label="Monto (Gs.)"><strong><%= new Intl.NumberFormat('es-PY').format(w.amount) %></strong></td>
-                                                <td data-label="Método"><%= w.method %></td>
+<td data-label="Monto (Gs.)">
+    <div class="text-muted" style="font-size: 0.85em;">
+        Solicitado: <%= new Intl.NumberFormat('es-PY').format(w.amount) %> Gs.
+    </div>
+    
+    <% 
+       // Asumiendo comisión del 10% (0.10)
+       const comision = w.amount * 0.10;
+       const neto = w.amount - comision;
+    %>
+    <div class="text-success fw-bold">
+        A Transferir: <%= new Intl.NumberFormat('es-PY').format(neto) %> Gs.
+    </div>
+    <small class="text-danger" style="font-size: 0.75em;">(Comisión: <%= new Intl.NumberFormat('es-PY').format(comision) %>)</small>
+</td>                                                <td data-label="Método"><%= w.method %></td>
                                                 <td data-label="Detalles">
                                                     <ul class="list-unstyled mb-0 small text-end text-md-start">
                                                         <li><strong>Nombre:</strong> <%= w.details.fullName %></li>
