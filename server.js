@@ -1831,13 +1831,15 @@ app.get('/admin', requireAdmin, (req, res) => res.redirect('/admin/dashboard'));
 
 // donaparaguay/server.js
 
+// donaparaguay/server.js
+
 app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
     try {
-        // --- INICIO DE LA MODIFICACIÓN ---
-        // Calcula el umbral de tiempo para "activos en el último minuto"
-        const sessionTTL_in_ms = 10 * 24 * 60 * 60 * 1000; // TTL de 10 días en milisegundos
-        const activeThreshold = new Date(Date.now() + sessionTTL_in_ms - 60000); // now + TTL - 1 minuto
+        // 1. Definir el rango de tiempo (Este mes)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+        // 2. Ejecutar consultas en paralelo para máxima velocidad
         const [
             totalUsers,
             activeUsers,
@@ -1845,7 +1847,12 @@ app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
             pendingWithdrawals,
             pendingDonations,
             pendingVerifications,
-            activeNowUsers // <-- NUEVA VARIABLE
+            activeNowUsers,
+            // --- NUEVAS MÉTRICAS DEL MES ---
+            monthlyNewUsers,
+            monthlyNewCampaigns,
+            monthlyDonationsData, // Para obtener monto total y propinas
+            monthlyFeesData       // Para obtener comisiones de retiros procesados
         ] = await Promise.all([
             User.countDocuments(),
             User.countDocuments({ isBanned: false }),
@@ -1853,9 +1860,33 @@ app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
             Withdrawal.countDocuments({ status: 'Pendiente' }),
             ManualDonation.countDocuments({ status: 'Pendiente' }),
             Verification.countDocuments({ status: 'pending' }),
-            // Nueva consulta a la colección de sesiones de MongoDB
-            mongoose.connection.db.collection('sessions').countDocuments({ expires: { $gt: activeThreshold } })
+            // Usuarios activos (sesiones)
+            mongoose.connection.db.collection('sessions').countDocuments({ expires: { $gt: new Date() } }),
+            
+            // --- NUEVAS CONSULTAS ---
+            User.countDocuments({ createdAt: { $gte: startOfMonth } }),
+            Campaign.countDocuments({ createdAt: { $gte: startOfMonth } }),
+            
+            // Agregación para Donaciones del Mes (Monto Total + Propinas)
+            ManualDonation.aggregate([
+                { $match: { status: 'Aprobado', createdAt: { $gte: startOfMonth } } },
+                { $group: { _id: null, totalAmount: { $sum: '$amount' }, totalTips: { $sum: '$platformTip' } } }
+            ]),
+
+            // Agregación para Comisiones del Mes (Transacciones tipo 'platform_fee')
+            Transaction.aggregate([
+                { $match: { type: 'platform_fee', createdAt: { $gte: startOfMonth } } },
+                { $group: { _id: null, totalFees: { $sum: '$amount' } } }
+            ])
         ]);
+
+        // 3. Procesar resultados de agregaciones (Manejar si vienen vacíos)
+        const monthlyDonationsTotal = monthlyDonationsData[0]?.totalAmount || 0;
+        const monthlyTips = monthlyDonationsData[0]?.totalTips || 0;
+        const monthlyFees = monthlyFeesData[0]?.totalFees || 0;
+        
+        // Ganancia Total = Propinas (de donaciones) + Comisiones (de retiros)
+        const monthlyRevenue = monthlyTips + monthlyFees;
 
         const stats = {
             totalUsers,
@@ -1864,9 +1895,13 @@ app.get('/admin/dashboard', requireAdmin, async (req, res, next) => {
             pendingWithdrawals,
             pendingDonations,
             pendingVerifications,
-            activeNowUsers // <-- NUEVO DATO AÑADIDO
+            activeNowUsers,
+            // Datos del Mes
+            monthlyNewUsers,
+            monthlyNewCampaigns,
+            monthlyDonationsTotal,
+            monthlyRevenue
         };
-        // --- FIN DE LA MODIFICACIÓN ---
         
         res.render('admin/dashboard.html', { stats: stats, path: req.path });
     } catch (err) {

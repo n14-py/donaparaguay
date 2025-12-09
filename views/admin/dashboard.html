@@ -53,6 +53,83 @@
                     <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
                 </div>
 
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h6 class="text-primary font-weight-bold mb-3"><i class="fas fa-chart-line"></i> Rendimiento de Este Mes</h6>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Ganancia Plataforma (Mes)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= new Intl.NumberFormat('es-PY').format(stats.monthlyRevenue) %> Gs.</div>
+                        <small class="text-muted">Comisiones y Propinas</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Donado (Mes)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= new Intl.NumberFormat('es-PY').format(stats.monthlyDonationsTotal) %> Gs.</div>
+                        <small class="text-muted">Volumen procesado</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-hand-holding-heart fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Usuarios Nuevos</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.monthlyNewUsers %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row g-0 align-items-center">
+                    <div class="col">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Campañas Nuevas</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= stats.monthlyNewCampaigns %></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr class="mb-4">
+
                 <div class="row">
                     <div class="col-xl-3 col-md-6 mb-4">
                         <div class="card border-left-danger shadow h-100 py-2">
