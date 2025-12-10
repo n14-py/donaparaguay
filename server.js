@@ -2084,24 +2084,31 @@ app.post('/admin/donation/:id/update', requireAdmin, async (req, res, next) => {
                 await donation.save({ session });
                 throw new Error('La campaña asociada a esta donación ya no existe.');
             }
+if (status === 'Aprobado') {
+                // --- LÓGICA DE CONTADORES CORREGIDA ---
+                
+                // 1. Inicializar totalRaised si no existe (para compatibilidad con campañas viejas)
+                if (typeof campaign.totalRaised === 'undefined' || campaign.totalRaised === null) {
+                    // Si es nuevo, igualamos al amountRaised actual ANTES de sumar la nueva
+                    campaign.totalRaised = campaign.amountRaised; 
+                }
 
-            if (status === 'Aprobado') {
-                // --- LÓGICA DE CONTADORES ---
-                // 1. Sumar a la billetera (saldo disponible para retiro)
+                // 2. Sumar a la billetera (Saldo disponible real)
                 campaign.amountRaised += donation.campaignAmount;
                 
-                // 2. Sumar al histórico (lo que se muestra al público)
-                // Si totalRaised no existe (campañas viejas), usamos amountRaised como base inicial
-                const currentTotal = campaign.totalRaised || campaign.amountRaised; 
-                campaign.totalRaised = currentTotal + donation.campaignAmount; 
+                // 3. Sumar al histórico (Visual público)
+                // Ahora sumamos directamente al total existente, sin usar amountRaised como base errónea
+                campaign.totalRaised += donation.campaignAmount;
                 // ----------------------------
 
-                // Variables para el cálculo de hitos (usamos el histórico totalRaised)
-                const oldAmountRaised = campaign.totalRaised - donation.campaignAmount;
-                const newAmountRaised = campaign.totalRaised;
+                // Variables para el cálculo de hitos
                 const goalAmount = campaign.goalAmount;
+                // Usamos los valores previos y nuevos para detectar el cruce de hitos
+                const newAmountRaised = campaign.totalRaised;
+                const oldAmountRaised = newAmountRaised - donation.campaignAmount;
 
                 donation.status = 'Aprobado';
+                // ... (el resto del código sigue igual: insignias, logs, notificaciones)
                 await awardBadges(donation.userId, donation);
                 await donation.save({ session });
                 
