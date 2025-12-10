@@ -276,8 +276,7 @@ const campaignSchema = new mongoose.Schema({
     // -------------------------
 
     views: { type: Number, default: 0 },
-    status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden', 'pending_verification'], default: 'pending' },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed', 'hidden', 'pending_verification', 'deleted'], default: 'pending' },    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     milestonesNotified: { type: Map, of: Boolean, default: {} }
 }, { timestamps: true });
 
@@ -1317,12 +1316,26 @@ app.post('/campaign/:id/delete', requireAuth, async (req, res, next) => {
             return res.status(403).json({ success: false, message: "No tienes permiso para eliminar esto." });
         }
 
-        // --- CORRECCIÓN DE CLOUDINARY ---
+        // --- LÓGICA DE PROTECCIÓN DE FONDOS (SOFT DELETE) ---
+        // Si la campaña tiene fondos recaudados (billetera o histórico), NO la borramos.
+        // La marcamos como 'deleted' para que el usuario conserve su historial y saldo.
+        if (campaign.amountRaised > 0 || campaign.totalRaised > 0) {
+            campaign.status = 'deleted';
+            await campaign.save();
+            
+            const redirectUrl = isAdmin ? '/admin/campaigns' : '/settings/dashboard';
+            return res.json({ 
+                success: true, 
+                message: "Campaña archivada correctamente. Al tener fondos, no se elimina el registro para proteger tu historial.", 
+                redirectUrl 
+            });
+        }
+
+        // --- SI NO TIENE FONDOS (0 Gs), BORRADO TOTAL ---
+        // Solo borramos imágenes y registro si no hay dinero involucrado.
         for (const fileUrl of campaign.files) {
             const publicId = getPublicId(fileUrl);
             if (publicId) {
-                // Determinamos si es video o imagen antes de borrar
-                // Buscamos extensiones de video o la palabra '/video/' en la URL de Cloudinary
                 const isVideo = fileUrl.match(/\.(mp4|mov|avi|mkv|webm)$/i) || fileUrl.includes('/video/');
                 const resourceType = isVideo ? 'video' : 'image';
 
@@ -1330,13 +1343,12 @@ app.post('/campaign/:id/delete', requireAuth, async (req, res, next) => {
                     .catch(err => console.error("Fallo al eliminar de Cloudinary:", err));
             }
         }
-        // -------------------------------
 
         await Campaign.findByIdAndDelete(req.params.id);
 
-        // Redirigir al panel de control
         const redirectUrl = isAdmin ? '/admin/campaigns' : '/settings/dashboard'; 
         res.json({ success: true, redirectUrl });
+
     } catch (err) { 
         console.error("Error al eliminar campaña:", err);
         next(err); 
