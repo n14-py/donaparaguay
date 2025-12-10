@@ -3,83 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Campaña - Dona Paraguay</title>
+    <title>Crear Nueva Campaña - Dona Paraguay</title>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- ESTILOS ESPECÍFICOS PARA EL CREADOR DE CAMPAÑAS --- */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .creator-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .creator-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .creator-header h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .creator-header p {
+            color: var(--text-muted-color);
+            font-size: 1.1rem;
+        }
+
+        /* Campos del Formulario */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.8rem;
+            display: block;
+            font-size: 1rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        textarea.form-control {
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        /* Área de Subida de Archivos (Drag & Drop) */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+            position: relative;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+        .upload-icon {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+        .upload-area:hover .upload-icon {
+            color: var(--primary-color);
+        }
+        .upload-text {
+            color: var(--text-muted-color);
+            font-size: 1rem;
+        }
+        .upload-text strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Previsualización de Imágenes */
+        .image-previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .preview-item {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; /* Aspecto cuadrado 1:1 */
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        .preview-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .remove-img-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .remove-img-btn:hover {
+            background: #ef4444;
+        }
+
+        /* Botón de Envío */
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1.2rem;
+            border-radius: 50px;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .creator-container { padding: 1.5rem; margin: 1rem; }
+            .creator-header h2 { font-size: 1.8rem; }
+        }
+    </style>
 </head>
 <body>
 
 <%- include('partials/header.html') %>
 
 <main class="container">
-    <div class="form-container auth-form">
-        <h2>Crear Nueva Campaña</h2>
-        <p>Describe tu causa, establece una meta y sube imágenes o videos para inspirar a los donantes.</p>
-        <hr>
+    <div class="creator-container">
+        <div class="creator-header">
+            <h2>Empieza algo increíble</h2>
+            <p>Cuéntanos tu historia. Miles de personas están listas para ayudar.</p>
+        </div>
 
-        <form action="/new-campaign" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="title">Título de la Campaña</label>
-                <input type="text" id="title" name="title" class="form-control" required placeholder="Ej: Ayuda para el tratamiento de [Nombre]">
-            </div>
-
-            <div class="form-group">
-                <label for="description">Descripción / Historia</label>
-                <textarea id="description" name="description" rows="6" class="form-control" required placeholder="Cuenta la historia detrás de tu causa. Sé claro y transparente."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="goalAmountDisplay">Meta de Recaudación (en Guaraníes)</label>
-                <input type="text" id="goalAmountDisplay" class="form-control" required placeholder="Ej: 5.000.000" min="100000" inputmode="numeric">
-                <input type="hidden" id="goalAmount" name="goalAmount">
-            </div>
+        <form action="/new-campaign" method="POST" enctype="multipart/form-data" id="createCampaignForm">
             
-            <div id="fee-info" class="alert alert-info" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 1.5rem; display: none;">
-                <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Para el mantenimiento de la plataforma, se aplica una comisión del 10% sobre el monto que el organizador retira.
-            </div>
             <div class="form-group">
-                <label for="category">Categoría</label>
-                <select id="category" name="category" class="form-control" required>
-                    <option value="">Selecciona una opción...</option>
-                    <% if (locals.CATEGORY_GROUPS) { %>
-                        <% Object.keys(CATEGORY_GROUPS).forEach(group => { %>
-                            <optgroup label="<%= group %>">
-                                <% CATEGORY_GROUPS[group].forEach(cat => { %>
+                <label for="title" class="form-label">Título de la Campaña</label>
+                <input type="text" id="title" name="title" class="form-control" required placeholder="Ej: Ayuda para la operación de Juan" maxlength="80">
+                <small class="text-muted" style="display: block; margin-top: 5px; text-align: right;">Sea breve y claro.</small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="category" class="form-label">Categoría</label>
+                    <div style="position: relative;">
+                        <select id="category" name="category" class="form-control" required style="appearance: none;">
+                            <option value="">Selecciona...</option>
+                            <% if (locals.CATEGORY_GROUPS) { %>
+                                <% Object.keys(CATEGORY_GROUPS).forEach(group => { %>
+                                    <optgroup label="<%= group %>">
+                                        <% CATEGORY_GROUPS[group].forEach(cat => { %>
+                                            <option value="<%= cat %>"><%= cat %></option>
+                                        <% }); %>
+                                    </optgroup>
+                                <% }); %>
+                            <% } else { %>
+                                <% CATEGORIES.forEach(cat => { %>
                                     <option value="<%= cat %>"><%= cat %></option>
                                 <% }); %>
-                            </optgroup>
-                        <% }); %>
-                    <% } else { %>
-                        <% /* Fallback por si algo falla */ %>
-                        <% CATEGORIES.forEach(cat => { %>
-                            <option value="<%= cat %>"><%= cat %></option>
-                        <% }); %>
-                    <% } %>
-                </select>
+                            <% } %>
+                        </select>
+                        <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none;"></i>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="location" class="form-label">Ubicación</label>
+                    <div style="position: relative;">
+                        <select id="location" name="location" class="form-control" required style="appearance: none;">
+                            <% CITIES.forEach(city => { %>
+                                <option value="<%= city %>" <%= currentUser.location === city ? 'selected' : '' %>><%= city %></option>
+                            <% }); %>
+                        </select>
+                        <i class="fas fa-map-marker-alt" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none;"></i>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="location">Ubicación de la Causa</label>
-                <select id="location" name="location" class="form-control" required>
-                    <% CITIES.forEach(city => { %>
-                        <option value="<%= city %>" <%= currentUser.location === city ? 'selected' : '' %>><%= city %></option>
-                    <% }); %>
-                </select>
+                <label for="goalAmountDisplay" class="form-label">Meta de Recaudación (Guaraníes)</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-weight: bold; color: var(--primary-color);">Gs.</span>
+                    <input type="text" id="goalAmountDisplay" class="form-control" required placeholder="5.000.000" style="padding-left: 3rem; font-weight: 700; color: var(--primary-color); font-size: 1.1rem;" inputmode="numeric">
+                    <input type="hidden" id="goalAmount" name="goalAmount">
+                </div>
+                
+                <div id="fee-info" style="background: #e0f2fe; color: #0369a1; padding: 10px 15px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; display: none; align-items: center; gap: 8px;">
+                    <i class="fas fa-info-circle"></i> 
+                    <span>La plataforma aplica una comisión del 10% <strong>solo al retirar</strong> los fondos.</span>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="files">Imágenes de Portada</label>
-                <input type="file" id="files" name="files" class="file-input-hidden" multiple required accept="image/*">
-                <label for="files" class="btn btn-secondary file-input-label">
-                    <i class="fas fa-camera"></i> Seleccionar Fotos...
-                </label>
-                <small class="form-text text-muted">
-                    <i class="fas fa-info-circle"></i> Solo aceptamos fotos (JPG, PNG). Puedes subir varias; la primera será la portada.
-                </small>
+                <label for="description" class="form-label">Tu Historia</label>
+                <textarea id="description" name="description" rows="8" class="form-control" required placeholder="Cuéntanos con detalle: ¿Quién eres? ¿Para qué necesitas los fondos? ¿Cómo se utilizarán? Una buena historia conecta corazones."></textarea>
             </div>
 
-            <hr>
-            <button type="submit" class="btn btn-primary btn-block">Enviar para Aprobación</button>
+<div class="form-group">
+                <label class="form-label">Fotos de la Campaña (La primera será la portada)</label>
+                
+                <div class="upload-area" id="drop-area" style="position: relative;">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <p class="upload-text"><strong>Haz clic para subir</strong> o arrastra tus fotos aquí</p>
+                    <p style="font-size: 0.85rem; color: #aaa; margin-top: 0.5rem;">JPG, PNG, WEBP (Máx 5MB)</p>
+                    
+                    <input type="file" id="files" name="files" multiple required accept="image/*" 
+                           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                </div>
+
+                <div class="image-previews" id="preview-gallery"></div>
+            </div>
+
+            <hr style="margin: 2rem 0; border-top: 1px solid #eee;">
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span>Publicar Campaña</span> <i class="fas fa-arrow-right"></i>
+            </button>
+            
+            <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #999;">
+                Al publicar, aceptas nuestros <a href="/terms">Términos y Condiciones</a>.
+            </p>
+
         </form>
     </div>
 </main>
@@ -88,31 +285,76 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. FORMATO DE MONEDA ---
     const goalAmountDisplay = document.getElementById('goalAmountDisplay');
     const goalAmountHidden = document.getElementById('goalAmount');
     const feeInfoBox = document.getElementById('fee-info');
-    
     const formatter = new Intl.NumberFormat('es-PY');
 
     goalAmountDisplay.addEventListener('input', (e) => {
-        // 1. Limpia el valor y lo guarda en el campo oculto
-        let rawValue = e.target.value.replace(/[^0-9]/g, '');
-        goalAmountHidden.value = rawValue;
+        let rawValue = e.target.value.replace(/[^0-9]/g, ''); // Solo números
+        goalAmountHidden.value = rawValue; // Guardar valor limpio
 
-        // 2. Formatea el valor para mostrarlo
         const numberValue = parseInt(rawValue, 10);
         if (!isNaN(numberValue)) {
-            e.target.value = formatter.format(numberValue);
+            e.target.value = formatter.format(numberValue); // Mostrar con puntos
+            
+            // Mostrar info de comisión si el monto es razonable (> 100.000)
+            if(numberValue >= 100000) feeInfoBox.style.display = 'flex';
+            else feeInfoBox.style.display = 'none';
         } else {
             e.target.value = '';
-        }
-
-        // 3. Muestra u oculta el aviso de la comisión
-        if (!isNaN(numberValue) && numberValue >= 100000) {
-            feeInfoBox.style.display = 'block';
-        } else {
             feeInfoBox.style.display = 'none';
         }
+    });
+
+    // --- 2. PREVIEW DE IMÁGENES ---
+    const fileInput = document.getElementById('files');
+    const previewGallery = document.getElementById('preview-gallery');
+    const dropArea = document.getElementById('drop-area');
+    
+    // Efectos Drag & Drop visuales
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+    });
+
+    fileInput.addEventListener('change', handleFiles);
+
+    function handleFiles() {
+        const files = this.files;
+        previewGallery.innerHTML = ''; // Limpiar anteriores para evitar confusión (input simple)
+        
+        if (files.length > 0) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    previewGallery.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    // --- 3. ANIMACIÓN DE ENVÍO ---
+    const form = document.getElementById('createCampaignForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', () => {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.pointerEvents = 'none';
     });
 });
 </script>

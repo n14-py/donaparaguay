@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-14PSV7R8YT"></script>
     <script>
@@ -37,50 +39,117 @@
     </script>
 
     <style>
-        /* --- ESTILO CORREGIDO PARA PESTAÑAS (SIN DESLIZAR) --- */
+        /* --- ESTILOS DE PESTAÑAS --- */
         .campaign-tabs {
             display: flex;
             width: 100%;
             border-bottom: 2px solid var(--border-color);
-            overflow: visible; /* Quitamos el scroll */
+            overflow: visible; 
         }
         
         .campaign-tabs .tab-link {
-            flex: 1; /* Esto hace que ocupen el mismo espacio y llenen la pantalla */
+            flex: 1; 
             text-align: center;
-            padding: 1rem 0.2rem; /* Menos padding lateral para que entren */
-            font-size: 0.9rem; /* Letra un poco más chica para asegurar ajuste */
-            white-space: normal; /* Permite que el texto baje si es muy largo */
+            padding: 1rem 0.2rem; 
+            font-size: 0.9rem; 
+            white-space: normal; 
             display: flex;
-            flex-direction: column; /* Icono/Badge arriba o abajo si falta espacio */
+            flex-direction: column; 
             align-items: center;
             justify-content: center;
             gap: 5px;
             height: 100%;
         }
 
-        /* Ajuste visual para el badge dentro de la pestaña */
         .campaign-tabs .tab-link .badge {
             margin-left: 0;
             font-size: 0.75rem;
         }
 
-        /* Ocultar anuncios en móviles muy pequeños */
-        .ad-sidebar-slot {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border: 1px dashed #ccc;
-            border-radius: var(--border-radius);
-            text-align: center;
+        /* --- ESTILOS PREVIEW Y MODALES (NUEVO) --- */
+        #preview-container {
+            position: relative;
+            width: 100%;
+            display: block;
+            margin: 0 auto;
+            background-color: white;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: height 0.3s ease;
         }
-        @media (max-width: 400px) {
-            .ad-sidebar-slot { display: none; }
+        .preview-clone {
+            position: absolute; top: 0; left: 0;
+            transform-origin: 0 0; 
         }
+
+        /* Contenedor de preview en "No tengo dinero" */
+        .mini-preview-wrapper {
+            background: #f0f2f5;
+            border-radius: 16px;
+            padding: 15px;
+            margin: 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            border: 1px solid #e1e4e8;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        #no-money-preview-box {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            background: white;
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes pulse-heart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .animate-pulse { animation: pulse-heart 2s infinite; }
+
+        /* Botón brillante */
+        .btn-shine {
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white; border: none;
+        }
+        .btn-shine::after {
+            content: ""; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+
+        /* Estilos Guía de Éxito */
+        .success-guide-content { text-align: center; padding: 1rem; }
+        .success-icon-header { font-size: 4rem; margin-bottom: 0.5rem; display: block; animation: popIn 0.8s; }
+        .success-title { color: var(--primary-color); font-weight: 800; margin-bottom: 0.5rem; }
+        .success-lead { font-size: 1.1rem; color: #555; margin-bottom: 1.5rem; }
+        .success-steps { text-align: left; background: #f8f9fa; padding: 1.5rem; border-radius: 16px; margin: 1.5rem 0; border: 1px solid #e9ecef; }
+        .success-step-item { display: flex; gap: 1rem; margin-bottom: 1.2rem; }
+        .step-number { background: var(--primary-color); color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; flex-shrink: 0; }
+        
+        .generated-asset-preview {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            padding: 1.5rem; border-radius: 16px; margin-top: 1.5rem; color: white;
+        }
+        
+        /* Publicidad sidebar */
+        .ad-sidebar-slot { margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border: 1px dashed #ccc; border-radius: var(--border-radius); text-align: center; }
+        @media (max-width: 400px) { .ad-sidebar-slot { display: none; } }
     </style>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5461370198299696"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5461370198299696" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -132,7 +201,6 @@
 
                     <div class="donation-summary">
                         <% 
-                           // Lógica para usar totalRaised visualmente
                            const displayAmount = (typeof campaign.totalRaised !== 'undefined') ? campaign.totalRaised : campaign.amountRaised;
                            const progress = campaign.goalAmount > 0 ? (displayAmount / campaign.goalAmount) * 100 : 0;
                         %>
@@ -146,12 +214,20 @@
                     <% if (campaign.status === 'completed') { %>
                         <div class="alert alert-success"><i class="fas fa-check-circle"></i> ¡Meta alcanzada! Gracias a todos por su apoyo.</div>
                     <% } else { %>
-                        <a href="/campaign/<%= campaign._id %>/donate" class="btn btn-primary btn-block btn-donate"><i class="fas fa-heart"></i> Donar Ahora</a>
+                        <a href="/campaign/<%= campaign._id %>/donate" class="btn btn-primary btn-block btn-donate" style="margin-bottom: 10px;">
+                            <i class="fas fa-heart"></i> Donar Ahora
+                        </a>
+                        <button id="no-money-help-btn" class="btn btn-outline-primary btn-block" style="border: 2px dashed var(--primary-color); font-weight: 600;">
+                            <i class="fas fa-bullhorn"></i> No tengo dinero, pero quiero ayudar
+                        </button>
                     <% } %>
 
                     <div class="campaign-actions">
                         <button id="open-share-modal-btn" class="btn btn-secondary">
                             <i class="fas fa-share-alt"></i> Compartir
+                        </button>
+                        <button id="open-flyer-modal-btn" class="btn btn-info" style="color: white; background-color: #17a2b8; border-color: #17a2b8;">
+                            <i class="fas fa-image"></i> Crear Poster
                         </button>
                         <button id="like-button" class="btn <%= userHasLiked ? 'btn-danger' : 'btn-secondary' %>">
                             <i class="fas fa-heart"></i> <span id="like-count"><%= campaign.likes.length %></span>
@@ -258,205 +334,551 @@
     <% } %>
 </main>
 
+<div id="flyerModal" class="modal-background" style="display: none; z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px); background-color: rgba(0,0,0,0.7); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+    <div class="modal-content" style="max-width: 95%; width: 500px; padding: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; max-height: 90vh; background: #fff;">
+        <div style="padding: 20px; background: white; border-bottom: 1px solid #eee; text-align: center; position: relative;">
+            <button class="close-button" id="closeFlyerBtn" style="position: absolute; right: 15px; top: 15px; background: #f3f4f6; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">&times;</button>
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #111;">📢 Kit de Difusión</h3>
+            <p style="margin: 5px 0 0; color: #666; font-size: 0.9rem;">Comparte tu campaña profesionalmente</p>
+        </div>
+        <div style="background: #f9fafb; padding: 12px; display: flex; justify-content: center; gap: 8px; border-bottom: 1px solid #eee;">
+            <button class="preview-tab active" onclick="window.previewDesign('post')" id="tab-post" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: #2563eb; color: white; cursor: pointer; font-weight: 600;">Post (1:1)</button>
+            <button class="preview-tab" onclick="window.previewDesign('story')" id="tab-story" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: white; color: #4b5563; cursor: pointer; font-weight: 600;">Historia</button>
+            <button class="preview-tab" onclick="window.previewDesign('tiktok')" id="tab-tiktok" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: white; color: #4b5563; cursor: pointer; font-weight: 600;">TikTok</button>
+        </div>
+        <div style="background: #e5e7eb; flex-grow: 1; overflow: hidden; padding: 20px; display: flex; justify-content: center; align-items: flex-start; position: relative; min-height: 300px;">
+            <div id="preview-container"></div>
+            <div id="preview-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #6b7280; font-weight: 500; display: none;">Generando vista previa...</div>
+        </div>
+        <div style="padding: 20px; background: white; border-top: 1px solid #eee;">
+            <button id="downloadKitBtn" class="btn btn-primary btn-lg btn-shine" style="width: 100%; border-radius: 12px; font-weight: 700; padding: 14px;">
+                <i class="fas fa-download"></i> Descargar Imagen
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="shareModal" class="modal-background" style="display: none; z-index: 10001; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.6);">
+    <div class="modal-content" style="max-width: 600px; width: 95%; border-radius: 20px; overflow: hidden; position: relative; max-height: 90vh; overflow-y: auto;">
+        <button class="close-button" id="shareModalCloseBtn" style="position: absolute; right: 15px; top: 15px; z-index: 100; background: #f3f4f6; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">&times;</button>
+        
+        <div id="shareModalContent"></div>
+
+        <template id="successTemplate">
+            <div class="success-guide-content animate-pop" style="padding: 2rem 1.5rem; text-align: center;">
+                <span class="success-icon-header" style="font-size: 3.5rem; display: block; margin-bottom: 0.5rem;">🚀</span>
+                
+                <h2 style="color: var(--primary-color); font-weight: 800; margin-bottom: 0.5rem; line-height: 1.2;">¡Hagamos que esto suceda!</h2>
+                <p style="font-size: 1.05rem; color: #555; margin-bottom: 1.5rem; line-height: 1.5;">
+                    Con tu difusión y nuestra plataforma, <strong>vamos a llegar a la meta muy pronto</strong>. La clave está en compartir.
+                </p>
+                
+                <div class="success-steps" style="text-align: left; background: #f8f9fa; padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #eee;">
+                    <div class="success-step-item" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div class="step-number">1</div>
+                        <div class="step-text"><h5 style="margin:0; font-size:0.95rem;">Estados y Grupos</h5><p style="margin:0; font-size:0.85rem; color:#666;">Sube la imagen oficial a tu Estado de WhatsApp e Instagram Stories.</p></div>
+                    </div>
+                    <div class="success-step-item" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div class="step-number">2</div>
+                        <div class="step-text"><h5 style="margin:0; font-size:0.95rem;">Video Personal</h5><p style="margin:0; font-size:0.85rem; color:#666;">Grábate en TikTok o Reels contando tu historia y pidiendo apoyo. ¡Son virales!</p></div>
+                    </div>
+                    <div class="success-step-item" style="display: flex; gap: 10px;">
+                        <div class="step-number">3</div>
+                        <div class="step-text"><h5 style="margin:0; font-size:0.95rem;">Comparte el Enlace</h5><p style="margin:0; font-size:0.85rem; color:#666;">Pega el enlace en todos tus perfiles y grupos de Facebook.</p></div>
+                    </div>
+                </div>
+
+                <div class="generated-asset-preview" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 1.5rem; border-radius: 16px; color: white;">
+                    <h5 style="color: white; margin-bottom: 0.5rem; font-weight: 700;"><i class="fas fa-camera"></i> Tu Imagen Oficial</h5>
+                    <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem;">Lista para subir a tus Estados</p>
+                    
+                    <div class="mini-preview-wrapper" style="background: rgba(255,255,255,0.1); border: none; padding: 10px; border-radius: 10px;">
+                        <div id="quick-story-preview" style="position: relative; overflow: hidden; border-radius: 8px; margin: 0 auto;">
+                            <div style="color:white; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Creando...</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-light btn-sm mt-3" style="font-weight: 700; color: #2563eb; width: 100%; padding: 12px; border-radius: 50px;" onclick="window.downloadSingleDesign('design-story', 'Historia-DonaPY.png')">
+                        <i class="fas fa-download"></i> Descargar Imagen Ahora
+                    </button>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 10px;">
+                    <button id="copy-link-success" class="btn btn-secondary" style="border-radius: 50px; width: 100%;"><i class="fas fa-copy"></i> Copiar Enlace de Campaña</button>
+                    <div style="display: flex; gap: 10px;">
+                        <a id="success-whatsapp-btn" href="#" class="btn btn-success" style="flex: 1; border-radius: 50px;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        <a id="success-facebook-btn" href="#" class="btn btn-primary" style="flex: 1; border-radius: 50px;"><i class="fab fa-facebook"></i> Facebook</a>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<div id="marketing-factory" style="position: fixed; left: -20000px; top: 0; width: 5000px; height: 5000px; overflow: hidden;">
+
+    <% 
+        let factoryImg = '/img/placeholder.png';
+        if (campaign.files && campaign.files.length > 0) {
+            factoryImg = campaign.files[0].replace('/upload/', '/upload/w_1000,h_1000,c_fill,g_auto,q_auto/');
+        }
+        let factoryImgStory = factoryImg.replace('w_1000,h_1000', 'w_1200,h_1200'); 
+    %>
+
+    <div id="design-post" style="width: 1080px; height: 1080px; background: white; position: relative; font-family: 'Poppins', sans-serif; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="background: #2563eb; padding: 50px 60px 120px 60px; border-radius: 0 0 60px 60px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 0;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <h3 style="margin: 0; color: white; font-size: 32px; font-weight: 900; letter-spacing: 1px;">DONAPARAGUAY</h3>
+                <div style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; height: 45px; padding: 0 30px; border-radius: 50px; font-size: 18px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; justify-content: center;">
+                    <%= campaign.category %>
+                </div>
+            </div>
+            <h1 style="font-size: 55px; line-height: 1.1; color: white; margin: 0; font-weight: 900; max-width: 950px; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <%= campaign.title %>
+            </h1>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding-bottom: 50px; position: relative; z-index: 10;">
+            <div style="margin-top: -80px; width: 480px; height: 480px; border-radius: 50px; overflow: hidden; box-shadow: 0 30px 60px -15px rgba(37, 99, 235, 0.4); border: 15px solid white; background: white;">
+                <img src="<%= factoryImg %>" crossOrigin="anonymous" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="width: calc(100% - 120px); background: #eff6ff; border: 4px dashed #2563eb; border-radius: 40px; padding: 25px 40px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 22px; color: #64748b; font-weight: 600;">Tu ayuda hace la diferencia</span>
+                    <div style="font-size: 28px; font-weight: 900; color: #2563eb; line-height: 1.2; margin-top: 5px;">
+                        Escanea o visita <br>
+                        <span style="color: #1e293b;">donaparaguay.com</span>
+                    </div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 20px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.1);">
+                    <img class="qr-target-img" src="" style="width: 120px; height: 120px; display: block; border-radius: 12px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="design-story" style="width: 1080px; height: 1920px; background: white; position: relative; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; overflow: hidden;">
+        <div style="height: 600px; background: #2563eb; border-radius: 0 0 100% 100% / 100px; width: 100%; position: absolute; top: 0; left: 0; z-index: 0;"></div>
+        <div style="position: relative; z-index: 10; padding: 120px 80px 80px 80px; height: 100%; display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box;">
+            <div style="margin-bottom: 60px;">
+                <div style="color: white; font-size: 45px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    Dona Paraguay
+                </div>
+            </div>
+            <div style="width: 750px; height: 750px; border-radius: 50%; border: 25px solid white; overflow: hidden; margin-bottom: 50px; box-shadow: 0 30px 70px -10px rgba(37, 99, 235, 0.5); background: white;">
+                <img src="<%= factoryImgStory %>" crossOrigin="anonymous" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h2 style="font-size: 60px; font-weight: 900; color: #111827; margin: 0 0 30px 0; line-height: 1.15; text-align: center;">
+                <%= campaign.title %>
+            </h2>
+            <p style="font-size: 32px; color: #64748b; text-align: center; margin: 0 0 40px 0; max-width: 850px;">
+                Tu aporte transforma vidas. ¡Ayúdanos hoy!
+            </p>
+            <div style="width: 100%; margin-top: auto; background: #f8fafc; border: 6px dashed #2563eb; border-radius: 60px; padding: 50px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="text-align: left;">
+                     <div style="font-size: 38px; font-weight: 900; color: #2563eb; text-transform: uppercase;">Escanea o visita</div>
+                    <div style="margin-top: 15px; font-size: 42px; color: #111827; font-weight: 800; letter-spacing: -1px;">donaparaguay.com</div>
+                     <div style="font-size: 26px; color: #64748b; font-weight: 600; margin-top: 10px;">¡Es rápido y seguro!</div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 35px; box-shadow: 0 15px 40px rgba(37, 99, 235, 0.15);">
+                     <img class="qr-target-img" src="" style="width: 220px; height: 220px; display: block; border-radius: 15px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="design-tiktok" style="width: 1080px; height: 1920px; background: white; position: relative; font-family: 'Poppins', sans-serif; text-align: center; color: #111827; display: flex; flex-direction: column; box-sizing: border-box;">
+        <div style="height: 400px; background: #2563eb; border-radius: 0 0 100% 100% / 100px; width: 100%; position: absolute; top: 0; left: 0;"></div>
+        <div style="position: relative; z-index: 10; padding: 150px 80px 0 80px; flex-grow: 1; display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 600px; height: 600px; border-radius: 50%; border: 30px solid white; overflow: hidden; margin: 0 auto 60px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                <img src="<%= factoryImg %>" crossOrigin="anonymous" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h2 style="font-size: 65px; font-weight: 900; color: #111827; margin: 0 0 30px 0; line-height: 1.1;">
+                Causa Solidaria ❤️
+            </h2>
+            <p style="font-size: 34px; color: #4b5563; margin: 0 0 80px 0; line-height: 1.4; max-width: 800px;">
+                Apoya esta campaña en <br><strong style="color: #2563eb;">Dona Paraguay</strong>
+            </p>
+            <div style="background: #eff6ff; border: 6px dashed #2563eb; border-radius: 50px; padding: 60px 80px; display: inline-block;">
+                <img class="qr-target-img" src="" style="width: 300px; height: 300px; display: block; margin: 0 auto 30px;">
+                <div style="font-size: 45px; font-weight: 900; color: #2563eb; text-transform: uppercase;">Toma Captura</div>
+                <div style="font-size: 30px; color: #6b7280; font-weight: 600; margin-top: 10px;">y escanea el código</div>
+            </div>
+            <div style="margin-top: auto; padding-bottom: 300px;">
+                <p style="font-size: 30px; color: #9ca3af; font-weight: 600;">donaparaguay.com</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="qr-generator-source" style="display: none;"></div>
+</div>
+
 <%- include('partials/sponsors.html') %>
 <%- include('partials/footer.html') %>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- LÓGICA DE PESTAÑAS (TABS) - RESTAURADA ---
-    const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            e.preventDefault(); // Evita salto de página
-            
-            // 1. Quitar clase active de todas las pestañas
-            tabs.forEach(t => t.classList.remove('active'));
-            // 2. Poner active a la clicada
-            tab.classList.add('active');
-
-            // 3. Ocultar todos los contenidos
-            tabContents.forEach(c => c.style.display = 'none');
-            
-            // 4. Mostrar el contenido correspondiente
-            const targetId = tab.getAttribute('data-tab');
-            const targetContent = document.getElementById(targetId + '-content');
-            if(targetContent) {
-                targetContent.style.display = 'block';
-            }
-        });
-    });
-
-    // --- 1. LÓGICA DE NUEVA CAMPAÑA (CELEBRACIÓN) ---
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('new') === 'true') {
-        const shareModal = document.getElementById('shareModal');
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- VARIABLES GLOBALES ---
+        const isOwner = <%= isOwner ? 'true' : 'false' %>; // Capturamos si es el dueño desde el servidor
         
-        if (shareModal) {
-            const modalTitle = document.getElementById('shareModalTitle');
-            const modalMsg = document.querySelector('#shareModal p');
-            
-            if(modalTitle) modalTitle.innerText = "🎉 ¡Campaña Publicada con Éxito!";
-            if(modalMsg) modalMsg.innerText = "Tu campaña ya está en línea. ¡Ahora compártela para empezar a recibir donaciones!";
-            
-            shareModal.style.display = 'flex';
+        // Elementos del DOM
+        const modalFlyer = document.getElementById('flyerModal');
+        const modalShare = document.getElementById('shareModal');
+        const openFlyerBtn = document.getElementById('open-flyer-modal-btn');
+        const closeFlyerBtn = document.getElementById('closeFlyerBtn');
+        const closeShareBtn = document.getElementById('shareModalCloseBtn');
+        const downloadBtn = document.getElementById('downloadKitBtn');
+        const previewContainer = document.getElementById('preview-container');
+        const previewLoading = document.getElementById('preview-loading');
+        
+        // Botones de acción
+        const noMoneyBtn = document.getElementById('no-money-help-btn');
+        const openShareBtn = document.getElementById('open-share-modal-btn');
+        
+        let qrDataUrl = null;
+        let activePreviewType = 'post';
 
-            // Lanzar Confeti
-            var duration = 3 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 3000 };
-
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
-        }
-    }
-
-    // --- SLIDER DE IMÁGENES ---
-    const slider = document.querySelector('.image-slider-container');
-    if (slider) {
-        let currentSlideIndex = 0;
-        const slides = slider.querySelectorAll('.slide');
-        if (slides.length > 1) {
-            const showSlide = i => slides.forEach((s, idx) => s.style.display = i === idx ? 'block' : 'none');
-            slider.querySelector('.prev').addEventListener('click', () => { currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length; showSlide(currentSlideIndex); });
-            slider.querySelector('.next').addEventListener('click', () => { currentSlideIndex = (currentSlideIndex + 1) % slides.length; showSlide(currentSlideIndex); });
-            showSlide(0);
-        }
-    }
-
-    // --- BOTÓN ME GUSTA ---
-    const likeButton = document.getElementById('like-button');
-    if(likeButton) {
-        likeButton.addEventListener('click', async () => {
-            <% if (currentUser) { %>
-                try {
-                    const response = await fetch('/campaign/<%= campaign._id %>/like', { method: 'POST' });
-                    if (response.ok) {
-                        const data = await response.json();
-                        document.getElementById('like-count').textContent = data.likes;
-                        likeButton.classList.toggle('btn-danger', data.liked);
-                        likeButton.classList.toggle('btn-secondary', !data.liked);
-                    }
-                } catch (e) { console.error("Error giving like", e); }
-            <% } else { %>
-                window.location.href = '/login';
-            <% } %>
-        });
-    }
-
-    // --- INTERACCIÓN COMENTARIOS (RESPONDER) ---
-    const commentsContent = document.getElementById('comments-content');
-    if (commentsContent) {
-        commentsContent.addEventListener('click', (event) => {
-            if (event.target.matches('.reply-btn')) {
-                event.preventDefault();
-                const commentId = event.target.dataset.commentId;
-                const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
+        // 1. GENERAR QR (Solo una vez)
+        const generateGlobalQR = () => {
+            return new Promise((resolve) => {
+                if(qrDataUrl) return resolve(qrDataUrl);
                 
-                if (replyFormContainer) {
-                    document.querySelectorAll('.reply-form-container').forEach(form => {
-                        if (form !== replyFormContainer) form.style.display = 'none';
-                    });
-                    
-                    const isVisible = replyFormContainer.style.display === 'block';
-                    replyFormContainer.style.display = isVisible ? 'none' : 'block';
-                    if (!isVisible) {
-                        const textarea = replyFormContainer.querySelector('textarea');
-                        if(textarea) textarea.focus();
+                const container = document.getElementById('qr-generator-source');
+                if(!container) return resolve(null);
+                
+                container.innerHTML = '';
+                new QRCode(container, {
+                    text: window.location.href.split('?')[0],
+                    width: 500, height: 500,
+                    colorDark : "#000000", colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                const checkInterval = setInterval(() => {
+                    const canvas = container.querySelector('canvas');
+                    if (canvas) {
+                        clearInterval(checkInterval);
+                        qrDataUrl = canvas.toDataURL("image/png");
+                        document.querySelectorAll('.qr-target-img').forEach(img => img.src = qrDataUrl);
+                        resolve(qrDataUrl);
                     }
+                }, 100);
+            });
+        };
+
+        // 2. FUNCIÓN DE PREVIEW (ESCALADO PERFECTO)
+        window.previewDesign = async (type) => {
+            activePreviewType = type;
+            if(previewContainer) previewContainer.innerHTML = '';
+            
+            document.querySelectorAll('.preview-tab').forEach(btn => {
+                btn.style.background = 'white'; btn.style.color = '#4b5563'; btn.style.border = '1px solid #ddd';
+            });
+            const activeTab = document.getElementById(`tab-${type}`);
+            if(activeTab) { activeTab.style.background = '#2563eb'; activeTab.style.color = 'white'; activeTab.style.border = 'none'; }
+
+            const source = document.getElementById(`design-${type}`);
+            if(!source || !modalFlyer) return;
+
+            const clone = source.cloneNode(true);
+            clone.id = `preview-clone-${type}`;
+            clone.classList.add('preview-clone');
+            
+            const modalWidth = modalFlyer.querySelector('.modal-content').offsetWidth;
+            const availableWidth = modalWidth - 40; 
+            const designWidth = source.offsetWidth; 
+            
+            let scale = availableWidth / designWidth;
+            if(scale > 0.45) scale = 0.45; 
+
+            clone.style.transform = `scale(${scale})`;
+            
+            if(previewContainer) {
+                previewContainer.style.width = (designWidth * scale) + 'px'; 
+                previewContainer.style.height = (source.offsetHeight * scale) + 'px';
+                previewContainer.appendChild(clone);
+            }
+        };
+
+        // 3. DESCARGAR
+        window.downloadSingleDesign = async (elementId, filename) => {
+            if(!qrDataUrl) await generateGlobalQR();
+            const element = document.getElementById(elementId);
+            try {
+                const canvas = await html2canvas(element, { scale: 1, useCORS: true, allowTaint: true, backgroundColor: "#ffffff", scrollY: -window.scrollY });
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (err) { console.error(err); alert("Error al generar imagen."); }
+        };
+
+        // --- FUNCIÓN HELPER: ABRIR GUÍA DE ÉXITO (PARA ORGANIZADOR O ?NEW=TRUE) ---
+        const openSuccessGuide = async () => {
+            const modalContent = document.getElementById('shareModalContent');
+            const template = document.getElementById('successTemplate');
+            
+            if (modalContent && template) {
+                modalContent.innerHTML = template.innerHTML;
+                modalShare.style.display = 'flex';
+                
+                await generateGlobalQR(); // Asegurar QR
+
+                // Generar Miniatura Historia
+                setTimeout(() => {
+                    const source = document.getElementById('design-story');
+                    const targetBox = document.getElementById('quick-story-preview');
+                    if(source && targetBox) {
+                        targetBox.innerHTML = ''; 
+                        const clone = source.cloneNode(true);
+                        clone.style.position = 'absolute'; clone.style.top = '0'; clone.style.left = '0'; clone.style.transformOrigin = '0 0';
+                        
+                        // Escalar a un ancho fijo de 180px
+                        const targetWidth = 180; 
+                        const scale = targetWidth / source.offsetWidth;
+                        
+                        targetBox.style.width = targetWidth + 'px';
+                        targetBox.style.height = (source.offsetHeight * scale) + 'px';
+                        clone.style.transform = `scale(${scale})`;
+                        
+                        targetBox.appendChild(clone);
+                    }
+                }, 50);
+
+                // Configurar enlaces
+                const campaignUrl = window.location.href.split('?')[0];
+                const shareText = `¡Hola! Te invito a apoyar mi campaña *<%= campaign.title %>*. Juntos podemos lograrlo. Mira los detalles aquí: ${campaignUrl}`;
+                
+                const waBtn = document.getElementById('success-whatsapp-btn');
+                const fbBtn = document.getElementById('success-facebook-btn');
+                const copyBtn = document.getElementById('copy-link-success');
+
+                if(waBtn) waBtn.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                if(fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}`;
+                
+                if(copyBtn) {
+                    copyBtn.onclick = function() {
+                        navigator.clipboard.writeText(campaignUrl).then(() => {
+                            this.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                            setTimeout(() => this.innerHTML = '<i class="fas fa-copy"></i> Copiar Enlace de Campaña', 2000);
+                        });
+                    };
                 }
             }
-        });
-    }
+        };
 
-    // --- MODAL DE COMPARTIR ---
-    const shareModal = document.getElementById('shareModal');
-    const openShareBtn = document.getElementById('open-share-modal-btn');
-    const closeShareBtn = document.getElementById('shareModalCloseBtn');
-    const copyLinkBtn = document.getElementById('copy-link-btn');
+        // --- LÓGICA DE BOTONES ---
 
-    if (openShareBtn && shareModal) {
-        openShareBtn.addEventListener('click', () => {
-            const modalTitle = document.getElementById('shareModalTitle');
-            const modalMsg = document.querySelector('#shareModal p');
-            if(modalTitle) modalTitle.innerText = "Compartir esta causa";
-            if(modalMsg) modalMsg.innerText = "¡Gracias por ayudar a difundir la palabra!";
-            setupShareLinks();
-            shareModal.style.display = 'flex';
-        });
-    }
+        // A. Botón "Compartir" (INTELIGENTE)
+        if(openShareBtn) {
+            openShareBtn.addEventListener('click', () => {
+                if (isOwner) {
+                    // Si es el dueño, mostramos SIEMPRE la guía completa motivadora
+                    openSuccessGuide();
+                } else {
+                    // Si es visitante, mostramos compartir simple
+                    const shareContent = document.getElementById('shareModalContent');
+                    const campaignUrl = window.location.href.split('?')[0];
+                    shareContent.innerHTML = `
+                        <div style="padding: 2rem; text-align: center;">
+                            <h3 style="margin-bottom: 0.5rem; font-weight: 700;">Compartir Campaña</h3>
+                            <p style="color: #666; margin-bottom: 2rem;">Ayuda a difundir esta causa.</p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(campaignUrl)}" target="_blank" class="btn btn-success" style="border-radius: 50px; padding: 12px;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}" target="_blank" class="btn btn-primary" style="border-radius: 50px; padding: 12px;"><i class="fab fa-facebook"></i> Facebook</a>
+                                <button id="copy-link-simple" class="btn btn-secondary" style="border-radius: 50px; padding: 12px;"><i class="fas fa-copy"></i> Copiar Enlace</button>
+                            </div>
+                        </div>
+                    `;
+                    modalShare.style.display = 'flex';
+                    document.getElementById('copy-link-simple').onclick = function() {
+                        navigator.clipboard.writeText(campaignUrl).then(() => {
+                            this.innerHTML = '<i class="fas fa-check"></i> Copiado'; setTimeout(() => this.innerHTML = '<i class="fas fa-copy"></i> Copiar Enlace', 2000);
+                        });
+                    };
+                }
+            });
+        }
 
-    if(closeShareBtn) {
-        closeShareBtn.addEventListener('click', () => {
-            shareModal.style.display = 'none';
-            if (window.history.replaceState && urlParams.get('new') === 'true') {
-                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                 window.history.replaceState({path:newUrl},'',newUrl);
-            }
-        });
-    }
+        // B. Botón "Crear Poster"
+        if(openFlyerBtn) {
+            openFlyerBtn.addEventListener('click', async () => {
+                modalFlyer.style.display = 'flex';
+                if(!qrDataUrl) {
+                    if(previewLoading) previewLoading.style.display = 'block';
+                    await generateGlobalQR();
+                    if(previewLoading) previewLoading.style.display = 'none';
+                }
+                setTimeout(() => window.previewDesign('post'), 50);
+            });
+        }
 
-    function setupShareLinks() {
-        const campaignUrl = window.location.href.split('?')[0];
-        const campaignTitle = `<%= campaign.title.replace(/'/g, "\\'") %>`;
-        const shareText = `¡Apoya la campaña "${campaignTitle}" en Dona Paraguay!`;
-        const fullEncodedText = encodeURIComponent(`${shareText} ${campaignUrl}`);
+        // C. Descarga Manual
+        if(downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+                downloadBtn.disabled = true;
+                const mapNames = { 'post': 'Post', 'story': 'Historia', 'tiktok': 'TikTok' };
+                window.downloadSingleDesign(`design-${activePreviewType}`, `${mapNames[activePreviewType] || 'Imagen'}-DonaPY.png`)
+                    .then(() => { 
+                        downloadBtn.innerHTML = '<i class="fas fa-check"></i> ¡Listo!'; 
+                        setTimeout(() => { downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar Imagen'; downloadBtn.disabled = false; }, 2000); 
+                    });
+            });
+        }
 
-        document.getElementById('share-whatsapp').href = `https://api.whatsapp.com/send?text=${fullEncodedText}`;
-        document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}`;
-        document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(campaignUrl)}&text=${encodeURIComponent(shareText)}`;
-    }
-    setupShareLinks();
-
-    if (copyLinkBtn) {
-        copyLinkBtn.addEventListener('click', () => {
-            const campaignUrl = window.location.href.split('?')[0];
-            navigator.clipboard.writeText(campaignUrl).then(() => {
-                const originalText = copyLinkBtn.innerHTML;
-                copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
-                copyLinkBtn.classList.add('btn-success');
+        // D. Botón "No tengo dinero" (Para visitantes)
+        if(noMoneyBtn) {
+            noMoneyBtn.addEventListener('click', async () => {
+                if(!qrDataUrl) await generateGlobalQR();
+                const shareContent = document.getElementById('shareModalContent');
+                const campaignUrl = window.location.href.split('?')[0];
+                const shareText = `¡Hola! Te pido ayuda para que *<%= campaign.title %>* llegue a su meta. Mira: ${campaignUrl}`;
+                
+                shareContent.innerHTML = `
+                    <div class="animate-pop" style="padding: 2rem 1.5rem; text-align: center;">
+                        <i class="fas fa-heart animate-pulse" style="font-size: 3.5rem; color: #dc3545; margin-bottom: 1rem; display:block;"></i>
+                        <h3 style="margin-bottom: 0.5rem; font-weight: 800; color: #111;">¡Tu ayuda vale ORO!</h3>
+                        <p style="color: #666; font-size: 1.05rem; margin-bottom: 1.5rem;">
+                            No necesitas dinero para hacer una gran diferencia.<br><strong>Sube esta imagen a tu Estado</strong> y comparte.
+                        </p>
+                        <div class="mini-preview-wrapper"><div id="no-money-preview-box" style="position:relative; overflow:hidden;"></div></div>
+                        <button id="download-story-nm-btn" class="btn btn-primary btn-block btn-shine" style="width:100%; margin-bottom:1.5rem; padding: 14px; border-radius: 12px; font-weight:700;">
+                            <i class="fas fa-download"></i> Descargar Imagen para Estado
+                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" class="btn btn-success" style="border-radius: 50px; padding: 12px; font-weight:600;"><i class="fab fa-whatsapp"></i> Compartir en WhatsApp</a>
+                            <button id="copy-link-nm" class="btn btn-light" style="border-radius: 50px; padding: 12px; border:1px solid #ddd;"><i class="fas fa-copy"></i> Copiar Enlace</button>
+                        </div>
+                    </div>
+                `;
+                modalShare.style.display = 'flex';
+                
+                // Generar Miniatura
                 setTimeout(() => {
-                    copyLinkBtn.innerHTML = originalText;
-                    copyLinkBtn.classList.remove('btn-success');
-                }, 2000);
-            }).catch(err => alert('No se pudo copiar el enlace.'));
-        });
-    }
+                    const source = document.getElementById('design-story');
+                    const targetBox = document.getElementById('no-money-preview-box');
+                    if(source && targetBox) {
+                        targetBox.innerHTML = ''; 
+                        const clone = source.cloneNode(true);
+                        clone.style.position = 'absolute'; clone.style.top = '0'; clone.style.left = '0'; clone.style.transformOrigin = '0 0';
+                        const targetWidth = 180; const scale = targetWidth / source.offsetWidth;
+                        targetBox.style.width = targetWidth + 'px'; targetBox.style.height = (source.offsetHeight * scale) + 'px';
+                        clone.style.transform = `scale(${scale})`; targetBox.appendChild(clone);
+                    }
+                }, 50);
 
-    window.addEventListener('click', (event) => {
-        if (event.target == shareModal) {
-            shareModal.style.display = "none";
+                document.getElementById('download-story-nm-btn').addEventListener('click', function() {
+                    const btn = this; const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+                    window.downloadSingleDesign('design-story', 'Mi-Estado-DonaPY.png').then(() => {
+                        btn.innerHTML = '<i class="fas fa-check"></i> ¡Listo!'; setTimeout(() => btn.innerHTML = originalHTML, 2000);
+                    });
+                });
+                document.getElementById('copy-link-nm').addEventListener('click', function() {
+                    navigator.clipboard.writeText(campaignUrl).then(() => { this.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!'; setTimeout(() => this.innerHTML = '<i class="fas fa-copy"></i> Copiar Enlace', 2000); });
+                });
+            });
+        }
+
+        // CERRAR
+        if(closeFlyerBtn) closeFlyerBtn.onclick = () => modalFlyer.style.display = 'none';
+        if(closeShareBtn) closeShareBtn.onclick = () => modalShare.style.display = 'none';
+        window.onclick = (e) => {
+            if(e.target == modalFlyer) modalFlyer.style.display = 'none';
+            if(e.target == modalShare) modalShare.style.display = 'none';
+        };
+
+        // --- LÓGICA DE NUEVA CAMPAÑA (?new=true) ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('new') === 'true') {
+            openSuccessGuide(); // Reutilizamos la función de la guía
+            if(typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+
+        // --- OTRAS LÓGICAS (Pestañas, Like, etc.) ---
+        const tabs = document.querySelectorAll('.campaign-tabs .tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                tabContents.forEach(c => c.style.display = 'none');
+                const targetId = tab.getAttribute('data-tab');
+                const targetContent = document.getElementById(targetId + '-content');
+                if(targetContent) targetContent.style.display = 'block';
+            });
+        });
+
+        const likeButton = document.getElementById('like-button');
+        if(likeButton) {
+            likeButton.addEventListener('click', async () => {
+                <% if (currentUser) { %>
+                    try {
+                        const response = await fetch('/campaign/<%= campaign._id %>/like', { method: 'POST' });
+                        if (response.ok) {
+                            const data = await response.json();
+                            document.getElementById('like-count').textContent = data.likes;
+                            likeButton.classList.toggle('btn-danger', data.liked);
+                            likeButton.classList.toggle('btn-secondary', !data.liked);
+                        }
+                    } catch (e) { console.error("Error giving like", e); }
+                <% } else { %>
+                    window.location.href = '/login';
+                <% } %>
+            });
+        }
+        
+        const commentsContent = document.getElementById('comments-content');
+        if (commentsContent) {
+            commentsContent.addEventListener('click', (event) => {
+                if (event.target.matches('.reply-btn')) {
+                    event.preventDefault();
+                    const commentId = event.target.dataset.commentId;
+                    const replyFormContainer = document.getElementById(`reply-form-${commentId}`);
+                    if (replyFormContainer) {
+                        document.querySelectorAll('.reply-form-container').forEach(form => { if (form !== replyFormContainer) form.style.display = 'none'; });
+                        const isVisible = replyFormContainer.style.display === 'block';
+                        replyFormContainer.style.display = isVisible ? 'none' : 'block';
+                        if (!isVisible) { const textarea = replyFormContainer.querySelector('textarea'); if(textarea) textarea.focus(); }
+                    }
+                }
+            });
+        }
+
+        // Eliminar Actualizaciones
+        const updatesContainer = document.getElementById('updates-list-container');
+        if (updatesContainer) {
+            updatesContainer.addEventListener('click', async (e) => {
+                const deleteButton = e.target.closest('.delete-update-btn');
+                if (!deleteButton) return;
+                if (confirm('¿Eliminar actualización?')) {
+                    try {
+                        const response = await fetch(`/campaign/${deleteButton.dataset.campaignId}/update/${deleteButton.dataset.updateId}/delete`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (data.success) document.getElementById(`update-${deleteButton.dataset.updateId}`).remove();
+                        else alert(data.message);
+                    } catch (error) { alert('Error de red.'); }
+                }
+            });
+        }
+        
+        // Copiar enlace (Botón general de la UI si existe fuera de modales)
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+        if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href.split('?')[0]).then(() => {
+                    const originalText = copyLinkBtn.innerHTML;
+                    copyLinkBtn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                    setTimeout(() => copyLinkBtn.innerHTML = originalText, 2000);
+                });
+            });
         }
     });
-    
-    // --- ELIMINAR ACTUALIZACIONES ---
-    const updatesContainer = document.getElementById('updates-list-container');
-    if (updatesContainer) {
-        updatesContainer.addEventListener('click', async (e) => {
-            const deleteButton = e.target.closest('.delete-update-btn');
-            if (!deleteButton) return;
-            if (confirm('¿Eliminar actualización?')) {
-                try {
-                    const response = await fetch(`/campaign/${deleteButton.dataset.campaignId}/update/${deleteButton.dataset.updateId}/delete`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }
-                    });
-                    const data = await response.json();
-                    if (data.success) document.getElementById(`update-${deleteButton.dataset.updateId}`).remove();
-                    else alert(data.message);
-                } catch (error) { alert('Error de red.'); }
-            }
-        });
-    }
-});
 </script>
 
 </body>
